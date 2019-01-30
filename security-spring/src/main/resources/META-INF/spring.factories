@@ -1,0 +1,1 @@
+org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer = net.cofcool.chaos.server.security.spring.config.JsonLoginConfigure
