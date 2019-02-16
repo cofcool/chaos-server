@@ -37,6 +37,7 @@
         <module>data-mybatis</module>
         <module>data-redis</module>
         <module>actuator</module>
+        <module>component-processor</module>
     </modules>
 
     <profiles>

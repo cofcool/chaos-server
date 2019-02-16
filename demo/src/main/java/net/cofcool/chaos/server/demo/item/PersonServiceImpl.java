@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class PersonServiceImpl extends SimpleJpaService<Person, Long> implements PersonService {
 
     @Resource
-    private PersonDao personDao;
+    private PersonRepository personRepository;
 
     @Override
     protected Long getEntityId(Person entity) {
@@ -21,6 +21,6 @@ public class PersonServiceImpl extends SimpleJpaService<Person, Long> implements
     @Override
     public void afterPropertiesSet() throws Exception {
         super.afterPropertiesSet();
-        setJpaRepository(personDao);
+        setJpaRepository(personRepository);
     }
 }
