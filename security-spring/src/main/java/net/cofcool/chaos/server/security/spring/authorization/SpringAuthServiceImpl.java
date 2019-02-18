@@ -99,7 +99,9 @@ public class SpringAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable
         User<T, D, ID> user = authUserService.queryUser(new DefaultLogin(username, ""));
 
         if (user == null) {
-            throw new UsernameNotFoundException(username);
+            UsernameNotFoundException e = new UsernameNotFoundException(username);
+            authUserService.reportAuthenticationExceptionInfo(username, e);
+            throw e;
         }
 
         return UserDetail.of(user);

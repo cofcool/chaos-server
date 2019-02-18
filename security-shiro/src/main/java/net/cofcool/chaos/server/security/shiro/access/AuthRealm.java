@@ -60,11 +60,15 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
         User user = authUserService.queryUser(token.getLogin());
 
         if (user == null) {
-            throw new UserNotExistException(ExceptionCodeInfo.userNotExists());
+            UserNotExistException e = new UserNotExistException(ExceptionCodeInfo.userNotExists());
+            authUserService.reportAuthenticationExceptionInfo(token, e);
+            throw e;
         }
 
         if (user.getUserStatuses().contains(UserStatus.LOCKED) || user.getUserStatuses().contains(UserStatus.CANCEL)) {
-            throw new LoginException(ExceptionCodeInfo.denialAuth());
+            LoginException e =  new LoginException(ExceptionCodeInfo.denialAuth());
+            authUserService.reportAuthenticationExceptionInfo(token, e);
+            throw e;
         }
 
         return new SimpleAuthenticationInfo(user, token, this.getName());
@@ -76,7 +80,9 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
             String captcha = token.getLogin().getCode();
 
             if (StringUtils.isNullOrEmpty(captcha) || !captcha.equalsIgnoreCase(realCaptcha)) {
-                throw new CaptchaException(ExceptionCodeInfo.captchaError());
+                CaptchaException e = new CaptchaException(ExceptionCodeInfo.captchaError());
+                authUserService.reportAuthenticationExceptionInfo(token, e);
+                throw e;
             }
         }
     }

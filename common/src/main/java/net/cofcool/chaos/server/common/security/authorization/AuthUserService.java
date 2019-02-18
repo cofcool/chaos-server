@@ -71,6 +71,16 @@ public interface AuthUserService<T extends Auth<D, ID>, D extends Serializable, 
 
     }
 
+    /**
+     * 报告授权验证异常信息
+     * @param authenticationInfo 授权信息
+     * @param authenticationException 异常信息
+     * @throws RuntimeException 处理时可抛出相关异常
+     */
+    default void reportAuthenticationExceptionInfo(Object authenticationInfo, Exception authenticationException) throws RuntimeException {
+
+    }
+
     @Nullable
     @Override
     default User<T, D, ID> readCurrentUser() {
