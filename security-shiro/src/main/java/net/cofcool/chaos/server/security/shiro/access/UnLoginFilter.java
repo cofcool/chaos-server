@@ -5,15 +5,18 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.cofcool.chaos.server.common.util.WebUtils;
+import net.cofcool.chaos.server.core.config.WebApplicationContext;
 import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
 
 /**
+ * 处理未登录情况，name 为 "unlogin"
+ *
  * @author CofCool
  */
 @Slf4j
-public class AuthFilter extends FormAuthenticationFilter {
+public class UnLoginFilter extends FormAuthenticationFilter {
 
-    public static final String AUTH_FILTER_KEY = "auth";
+    public static final String FILTER_KEY = "unlogin";
 
     @Override
     protected boolean onAccessDenied(ServletRequest request, ServletResponse response)
@@ -36,7 +39,7 @@ public class AuthFilter extends FormAuthenticationFilter {
                 log.trace("Attempting to access a path which requires authentication.  Forwarding to the " +
                         "Authentication url [" + getLoginUrl() + "]");
             }
-            request.getRequestDispatcher("/auth/unlogin").forward(request, response);
+            request.getRequestDispatcher(WebApplicationContext.getConfiguration().getAuth().getUnLoginUrl()).forward(request, response);
 
             return false;
         }

@@ -2,8 +2,6 @@ package net.cofcool.chaos.server.security.spring.authorization;
 
 import java.io.Serializable;
 import javax.annotation.Nullable;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +12,7 @@ import net.cofcool.chaos.server.common.security.Auth;
 import net.cofcool.chaos.server.common.security.AuthConstant;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.authorization.AuthService;
-import net.cofcool.chaos.server.common.security.authorization.AuthUserService;
+import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
 import net.cofcool.chaos.server.common.util.WebUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,16 +28,16 @@ import org.springframework.util.Assert;
 public class SpringAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable, ID extends Serializable> implements AuthService<T, D, ID>, UserDetailsManager,
     InitializingBean {
 
-    private AuthUserService<T, D, ID> authUserService;
+    private UserAuthorizationService<T, D, ID> userAuthorizationService;
 
-    public AuthUserService<T, D, ID> getAuthUserService() {
-        return authUserService;
+    public UserAuthorizationService<T, D, ID> getUserAuthorizationService() {
+        return userAuthorizationService;
     }
 
     @SuppressWarnings("unchecked")
-    public void setAuthUserService(AuthUserService authUserService) {
-        this.authUserService = authUserService;
-        this.authUserService.setUserProcessor(this::storageUser);
+    public void setUserAuthorizationService(UserAuthorizationService authUserService) {
+        this.userAuthorizationService = authUserService;
+        this.userAuthorizationService.setUserProcessor(this::storageUser);
     }
 
     protected void storageUser(User currentUser) {
@@ -48,18 +46,13 @@ public class SpringAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable
 
     @Override
     public Message<User<T, D, ID>> login(AbstractLogin loginUser) {
-        return Message.successful( "Ok", authUserService.queryUser(loginUser));
+        return Message.successful( "Ok", userAuthorizationService.queryUser(loginUser));
     }
 
     @Override
     public void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         new SecurityContextLogoutHandler()
                 .logout(httpServletRequest, httpServletResponse, null);
-    }
-
-    @Override
-    public boolean checkPermission(ServletRequest servletRequest, ServletResponse servletResponse) {
-        return authUserService.checkPermission(servletRequest, servletResponse);
     }
 
     @SuppressWarnings("unchecked")
@@ -91,16 +84,16 @@ public class SpringAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable
 
     @Override
     public boolean userExists(String username) {
-        return authUserService.queryUser(new DefaultLogin(username, "")) != null;
+        return userAuthorizationService.queryUser(new DefaultLogin(username, "")) != null;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User<T, D, ID> user = authUserService.queryUser(new DefaultLogin(username, ""));
+        User<T, D, ID> user = userAuthorizationService.queryUser(new DefaultLogin(username, ""));
 
         if (user == null) {
             UsernameNotFoundException e = new UsernameNotFoundException(username);
-            authUserService.reportAuthenticationExceptionInfo(username, e);
+            userAuthorizationService.reportAuthenticationExceptionInfo(username, e);
             throw e;
         }
 
@@ -109,6 +102,6 @@ public class SpringAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(getAuthUserService(), "authUserService - this argument is required; it must not be null");
+        Assert.notNull(getUserAuthorizationService(), "userAuthorizationService - this argument is required; it must not be null");
     }
 }

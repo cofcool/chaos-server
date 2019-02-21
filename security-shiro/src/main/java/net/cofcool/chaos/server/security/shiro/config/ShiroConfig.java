@@ -1,39 +1,34 @@
 package net.cofcool.chaos.server.security.shiro.config;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.Filter;
 import net.cofcool.chaos.server.common.security.PasswordProcessor;
 import net.cofcool.chaos.server.common.security.authorization.AuthService;
-import net.cofcool.chaos.server.common.security.authorization.AuthUserService;
+import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
 import net.cofcool.chaos.server.core.config.WebApplicationContext;
 import net.cofcool.chaos.server.security.shiro.access.AccountCredentialsMatcher;
-import net.cofcool.chaos.server.security.shiro.access.AuthFilter;
 import net.cofcool.chaos.server.security.shiro.access.AuthRealm;
 import net.cofcool.chaos.server.security.shiro.access.ExceptionAuthenticationStrategy;
-import net.cofcool.chaos.server.security.shiro.access.ValidateFilter;
+import net.cofcool.chaos.server.security.shiro.access.PermissionFilter;
+import net.cofcool.chaos.server.security.shiro.access.UnLoginFilter;
 import net.cofcool.chaos.server.security.shiro.authorization.ShiroAuthServiceImpl;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.Authenticator;
-import org.apache.shiro.authc.pam.AuthenticationStrategy;
 import org.apache.shiro.authc.pam.ModularRealmAuthenticator;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
-import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
-import org.apache.shiro.web.servlet.Cookie;
-import org.apache.shiro.web.servlet.ShiroHttpSession;
-import org.apache.shiro.web.servlet.SimpleCookie;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -45,17 +40,30 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ShiroConfig {
 
-    public static final String DEFAULT_SESSION_ID_NAME = ShiroHttpSession.DEFAULT_SESSION_ID_NAME;
+    /**
+     * 创建 <code>shiroFilter</code>
+     * @param userAuthorizationService 授权相关服务
+     * @param sessionManager session 管理器
+     * @param shiroCacheManager  缓存管理器
+     * @param authenticator 授权处理
+     * @param customFilters 自定义过滤器
+     * @return shiroFilter
+     */
+    @Bean
+    public ShiroFilterFactoryBean shiroFilter(UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, Authenticator authenticator, List<Filter> customFilters) {
+        PermissionFilter permissionFilter = new PermissionFilter();
+        permissionFilter.setAuthorizationService(userAuthorizationService);
 
-    @Bean()
-    public ShiroFilterFactoryBean shiroFilter(SecurityManager securityManager, ValidateFilter validateFilter) {
         Map<String, Filter> filters = new HashMap<>();
-        filters.put("check", validateFilter);
-        filters.put("authc", new AuthFilter());
+        filters.put(PermissionFilter.FILTER_KEY, permissionFilter);
+        filters.put(UnLoginFilter.FILTER_KEY, new UnLoginFilter());
+        for (Filter filter : customFilters) {
+            filters.put(filter.getClass().getName(), filter);
+        }
 
         ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
         factoryBean.setFilters(filters);
-        factoryBean.setSecurityManager(securityManager);
+        factoryBean.setSecurityManager(createSecurityManager(sessionManager, authenticator, shiroCacheManager));
         factoryBean.setLoginUrl(WebApplicationContext.getConfiguration().getAuth().getLoginUrl());
         factoryBean.setUnauthorizedUrl(WebApplicationContext.getConfiguration().getAuth().getExpiredUrl());
         factoryBean.setFilterChainDefinitions(WebApplicationContext.getConfiguration().getAuth().getUrls());
@@ -63,8 +71,7 @@ public class ShiroConfig {
         return factoryBean;
     }
 
-    @Bean
-    public SecurityManager securityManager(SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, Authenticator authenticator) {
+    private SecurityManager createSecurityManager(SessionManager sessionManager, Authenticator authenticator, CacheManager shiroCacheManager) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         if (shiroCacheManager != null) {
             securityManager.setCacheManager(shiroCacheManager);
@@ -77,76 +84,55 @@ public class ShiroConfig {
         return securityManager;
     }
 
+    /**
+     * 创建 authenticator
+     * @param realms 自定义 realm
+     * @param userAuthorizationService 授权相关服务
+     * @param passwordProcessor 密码处理
+     * @return authenticator
+     */
     @Bean
-    public AuthenticationStrategy authenticationStrategy() {
-        return new ExceptionAuthenticationStrategy();
-    }
-
-    @Bean
-    public ValidateFilter validateFilter(AuthService authService) {
-        ValidateFilter validateFilter = new ValidateFilter();
-        validateFilter.setAuthService(authService);
-
-        return validateFilter;
-    }
-
-    @Bean
-    public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager) {
-        AuthorizationAttributeSourceAdvisor advisor = new AuthorizationAttributeSourceAdvisor();
-        advisor.setSecurityManager(securityManager);
-
-        return advisor;
-    }
-
-    @Bean
-    public ModularRealmAuthenticator authenticator(AuthenticationStrategy authenticationStrategy, Realm authRealm) {
-        List<Realm> realms = new ArrayList<>();
-        Collections.addAll(realms, authRealm);
+    public ModularRealmAuthenticator authenticator(List<Realm> realms, UserAuthorizationService userAuthorizationService, PasswordProcessor passwordProcessor) {
+        List<Realm> shiroRealms = new ArrayList<>();
+        shiroRealms.add(createDefaultAuthRealm(userAuthorizationService, passwordProcessor));
+        shiroRealms.addAll(realms);
 
         ModularRealmAuthenticator realmAuthenticator = new ModularRealmAuthenticator();
-        realmAuthenticator.setAuthenticationStrategy(authenticationStrategy);
-        realmAuthenticator.setRealms(realms);
+        realmAuthenticator.setAuthenticationStrategy(new ExceptionAuthenticationStrategy());
+        realmAuthenticator.setRealms(shiroRealms);
 
         return realmAuthenticator;
     }
 
-    @Bean
-    public Realm authRealm(AuthUserService authUserService, PasswordProcessor passwordProcessor) {
+    private Realm createDefaultAuthRealm(UserAuthorizationService userAuthorizationService, PasswordProcessor passwordProcessor) {
         AccountCredentialsMatcher matcher = new AccountCredentialsMatcher();
         matcher.setPasswordProcessor(passwordProcessor);
 
         AuthRealm realm = new AuthRealm();
         realm.setCredentialsMatcher(matcher);
-        realm.setAuthUserService(authUserService);
+        realm.setUserAuthorizationService(userAuthorizationService);
 
         return realm;
     }
 
+    /**
+     * 创建 {@code AuthService}
+     * @param userAuthorizationService 授权相关服务
+     * @return authService
+     */
     @Bean
     @SuppressWarnings("unchecked")
-    public AuthService authService(AuthUserService authUserService) {
+    public AuthService authService(UserAuthorizationService userAuthorizationService) {
         ShiroAuthServiceImpl authService = new ShiroAuthServiceImpl();
-        authService.setAuthUserService(authUserService);
+        authService.setUserAuthorizationService(userAuthorizationService);
 
         return authService;
     }
 
     @Bean
-    public SessionManager sessionManager(Cookie rootCookie) {
-        DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
-        sessionManager.setGlobalSessionTimeout(43200000);
-        sessionManager.setSessionIdCookie(rootCookie);
-
-        return sessionManager;
-    }
-
-    @Bean
-    public Cookie rootCookie() {
-        Cookie cookie = new SimpleCookie(DEFAULT_SESSION_ID_NAME);
-        cookie.setHttpOnly(true);
-        cookie.setPath(Cookie.ROOT_PATH);
-
-        return cookie;
+    @ConditionalOnMissingBean
+    public SessionManager sessionManager() {
+        return new DefaultWebSessionManager();
     }
 
     @Bean

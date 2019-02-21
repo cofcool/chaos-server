@@ -103,6 +103,16 @@ public final class ChaosProperties {
          */
         private String expiredUrl;
 
+        /**
+         * 没有访问权限
+         */
+        private String unauthUrl = "/auth/unauth";
+
+        /**
+         * 未登录时跳转路径
+         */
+        private String unLoginUrl = "/auth/unlogin";
+
         public String getCheckedKeys() {
             return checkedKeys;
         }
@@ -176,6 +186,22 @@ public final class ChaosProperties {
 
         public void setExpiredUrl(String expiredUrl) {
             this.expiredUrl = expiredUrl;
+        }
+
+        public String getUnauthUrl() {
+            return unauthUrl;
+        }
+
+        public void setUnauthUrl(String unauthUrl) {
+            this.unauthUrl = unauthUrl;
+        }
+
+        public String getUnLoginUrl() {
+            return unLoginUrl;
+        }
+
+        public void setUnLoginUrl(String unLoginUrl) {
+            this.unLoginUrl = unLoginUrl;
         }
     }
 

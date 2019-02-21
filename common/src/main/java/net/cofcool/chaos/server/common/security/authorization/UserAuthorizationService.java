@@ -1,9 +1,8 @@
 package net.cofcool.chaos.server.common.security.authorization;
 
 import java.io.Serializable;
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import net.cofcool.chaos.server.common.core.ExecuteResult;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
@@ -11,9 +10,11 @@ import net.cofcool.chaos.server.common.security.Auth;
 import net.cofcool.chaos.server.common.security.User;
 
 /**
+ * 授权相关方法定义，用户需实现该类处理相关逻辑
+ *
  * @author CofCool
  */
-public interface AuthUserService<T extends Auth<D, ID>, D extends Serializable, ID extends Serializable> extends AuthService<T, D, ID> {
+public interface UserAuthorizationService<T extends Auth<D, ID>, D extends Serializable, ID extends Serializable> {
 
     /**
      * 查询登陆用户
@@ -34,6 +35,14 @@ public interface AuthUserService<T extends Auth<D, ID>, D extends Serializable, 
      * @param currentUser 当前用户
      */
     void setupUserData(User<T, D, ID> currentUser);
+
+    /**
+     * 检查权限
+     * @param servletRequest 请求
+     * @param servletResponse 响应
+     * @return 是否通过验证
+     */
+    boolean checkPermission(ServletRequest servletRequest, ServletResponse servletResponse);
 
     /**
      * 注册
@@ -75,26 +84,9 @@ public interface AuthUserService<T extends Auth<D, ID>, D extends Serializable, 
      * 报告授权验证异常信息
      * @param authenticationInfo 授权信息
      * @param authenticationException 异常信息
-     * @throws RuntimeException 处理时可抛出相关异常
      */
-    default void reportAuthenticationExceptionInfo(Object authenticationInfo, Exception authenticationException) throws RuntimeException {
+    default void reportAuthenticationExceptionInfo(Object authenticationInfo, Throwable authenticationException) {
 
-    }
-
-    @Nullable
-    @Override
-    default User<T, D, ID> readCurrentUser() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    default Message<User<T, D, ID>> login(AbstractLogin loginUser) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    default void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-        throw new UnsupportedOperationException();
     }
 
 }

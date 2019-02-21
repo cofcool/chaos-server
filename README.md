@@ -70,6 +70,7 @@ fi
 6. security-shiro
 7. security-spring
 8. actuator
+9. component-processor
 
 ### 配置 
 
@@ -79,7 +80,7 @@ fi
 
 必需组件:
 
-* AuthUserService (chaos-server-security-*): 授权相关
+* UserAuthorizationService (chaos-server-security-*): 授权相关
 * JpaConfig (chaos-server-data-jpa): JPA配置，DataSource等
 * PasswordProcessor (chaos-server-security-*): 密码处理，加密解密
 

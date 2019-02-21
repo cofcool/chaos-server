@@ -76,7 +76,7 @@ public abstract class SimpleJpaService<T, ID> extends SimpleService<T> implement
     }
 
     /**
-     * 读取 id
+     * 读取实体主键
      */
     protected abstract ID getEntityId(T entity);
 

@@ -3,32 +3,35 @@ package net.cofcool.chaos.server.security.shiro.access;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
-import net.cofcool.chaos.server.common.security.authorization.AuthService;
+import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
 import net.cofcool.chaos.server.common.util.WebUtils;
+import net.cofcool.chaos.server.core.config.WebApplicationContext;
 import org.apache.shiro.web.filter.AccessControlFilter;
 
 /**
+ * 权限处理，name 为 "check"
+ *
  * @author CofCool
  */
-public class ValidateFilter extends AccessControlFilter {
+public class PermissionFilter extends AccessControlFilter {
 
-    public static final String VALIDATE_FILTER_KEY = "validate";
+    public static final String FILTER_KEY = "check";
 
-    private AuthService authService;
+    private UserAuthorizationService authorizationService;
 
-    public AuthService getAuthService() {
-        return authService;
+    public UserAuthorizationService getAuthorizationService() {
+        return authorizationService;
     }
 
-    public void setAuthService(AuthService authService) {
-        this.authService = authService;
+    public void setAuthorizationService(UserAuthorizationService authorizationService) {
+        this.authorizationService = authorizationService;
     }
 
     @Override
     protected boolean isAccessAllowed(javax.servlet.ServletRequest servletRequest,
                                       javax.servlet.ServletResponse servletResponse, Object o) throws Exception {
-        if (!authService.checkPermission(servletRequest, servletResponse)) {
-            servletRequest.getRequestDispatcher("/auth/unauth").forward(servletRequest, servletResponse);
+        if (!getAuthorizationService().checkPermission(servletRequest, servletResponse)) {
+            servletRequest.getRequestDispatcher(WebApplicationContext.getConfiguration().getAuth().getUnauthUrl()).forward(servletRequest, servletResponse);
             return false;
         }
 

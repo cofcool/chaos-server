@@ -2,13 +2,12 @@ package net.cofcool.chaos.server.demo.config;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nullable;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.security.User;
-import net.cofcool.chaos.server.common.security.authorization.AuthUserService;
+import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
 import net.cofcool.chaos.server.core.support.UserConfiguration;
 import net.cofcool.chaos.server.demo.item.UserData;
 import org.springframework.beans.factory.InitializingBean;
@@ -18,7 +17,7 @@ import org.springframework.stereotype.Service;
  * @author CofCool
  */
 @Service
-public class AuthUserServiceImpl implements AuthUserService, InitializingBean {
+public class UserAuthorizationServiceImpl implements UserAuthorizationService, InitializingBean {
 
     private Map<String, User> userMap = new HashMap<>();
 
@@ -50,9 +49,4 @@ public class AuthUserServiceImpl implements AuthUserService, InitializingBean {
         userMap.put(user.getUserName(), user);
     }
 
-    @Nullable
-    @Override
-    public User readCurrentUser() {
-        return null;
-    }
 }

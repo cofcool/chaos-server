@@ -3,7 +3,7 @@ package net.cofcool.chaos.server.security.spring.config;
 import javax.servlet.Filter;
 import net.cofcool.chaos.server.common.security.PasswordProcessor;
 import net.cofcool.chaos.server.common.security.authorization.AuthService;
-import net.cofcool.chaos.server.common.security.authorization.AuthUserService;
+import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
 import net.cofcool.chaos.server.core.config.WebApplicationContext;
 import net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter;
 import net.cofcool.chaos.server.security.spring.authorization.SpringAuthServiceImpl;
@@ -76,9 +76,9 @@ public class ChaosWebSecurityConfiguration extends WebSecurityConfigurerAdapter 
     }
 
     @Bean
-    public AuthService authService(AuthUserService authUserService) {
+    public AuthService authService(UserAuthorizationService userAuthorizationService) {
         SpringAuthServiceImpl authService = new SpringAuthServiceImpl();
-        authService.setAuthUserService(authUserService);
+        authService.setUserAuthorizationService(userAuthorizationService);
 
         return authService;
     }

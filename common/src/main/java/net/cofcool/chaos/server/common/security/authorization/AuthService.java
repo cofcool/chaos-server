@@ -3,8 +3,6 @@ package net.cofcool.chaos.server.common.security.authorization;
 
 import java.io.Serializable;
 import javax.annotation.Nullable;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.Message;
@@ -34,14 +32,6 @@ public interface AuthService<T extends Auth<D, ID>, D extends Serializable, ID e
      * 退出登陆
      */
     void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
-
-    /**
-     * 检查权限
-     * @param servletRequest 请求
-     * @param servletResponse 响应
-     * @return 是否通过验证
-     */
-    boolean checkPermission(ServletRequest servletRequest, ServletResponse servletResponse);
 
     /**
      * 读取当前登陆用户数据

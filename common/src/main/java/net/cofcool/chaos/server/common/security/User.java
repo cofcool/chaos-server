@@ -21,7 +21,7 @@ public class User <T extends Auth<D, ID>, D extends Serializable, ID extends Ser
 
     private ID userId;
 
-    private Long mobile;
+    private String mobile;
 
     private String userName;
 
@@ -110,11 +110,11 @@ public class User <T extends Auth<D, ID>, D extends Serializable, ID extends Ser
         this.userId = userId;
     }
 
-    public Long getMobile() {
+    public String getMobile() {
         return mobile;
     }
 
-    public void setMobile(Long mobile) {
+    public void setMobile(String mobile) {
         this.mobile = mobile;
     }
 

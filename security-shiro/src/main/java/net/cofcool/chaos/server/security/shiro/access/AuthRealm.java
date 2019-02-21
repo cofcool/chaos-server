@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.cofcool.chaos.server.common.security.AuthConstant;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.UserStatus;
-import net.cofcool.chaos.server.common.security.authorization.AuthUserService;
+import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
 import net.cofcool.chaos.server.common.security.authorization.exception.CaptchaException;
 import net.cofcool.chaos.server.common.security.authorization.exception.LoginException;
 import net.cofcool.chaos.server.common.security.authorization.exception.UserNotExistException;
@@ -27,14 +27,15 @@ import org.springframework.util.Assert;
 @Slf4j
 public class AuthRealm extends AuthorizingRealm implements InitializingBean {
 
-    private AuthUserService authUserService;
+    private UserAuthorizationService userAuthorizationService;
 
-    public AuthUserService getAuthUserService() {
-        return authUserService;
+    public UserAuthorizationService getUserAuthorizationService() {
+        return userAuthorizationService;
     }
 
-    public void setAuthUserService(AuthUserService authUserService) {
-        this.authUserService = authUserService;
+    public void setUserAuthorizationService(
+        UserAuthorizationService userAuthorizationService) {
+        this.userAuthorizationService = userAuthorizationService;
     }
 
     /**
@@ -57,18 +58,14 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
             checkCaptcha(token);
         }
 
-        User user = authUserService.queryUser(token.getLogin());
+        User user = getUserAuthorizationService().queryUser(token.getLogin());
 
         if (user == null) {
-            UserNotExistException e = new UserNotExistException(ExceptionCodeInfo.userNotExists());
-            authUserService.reportAuthenticationExceptionInfo(token, e);
-            throw e;
+            throw new UserNotExistException(ExceptionCodeInfo.userNotExists());
         }
 
         if (user.getUserStatuses().contains(UserStatus.LOCKED) || user.getUserStatuses().contains(UserStatus.CANCEL)) {
-            LoginException e =  new LoginException(ExceptionCodeInfo.denialAuth());
-            authUserService.reportAuthenticationExceptionInfo(token, e);
-            throw e;
+            throw new LoginException(ExceptionCodeInfo.denialAuth());
         }
 
         return new SimpleAuthenticationInfo(user, token, this.getName());
@@ -80,16 +77,14 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
             String captcha = token.getLogin().getCode();
 
             if (StringUtils.isNullOrEmpty(captcha) || !captcha.equalsIgnoreCase(realCaptcha)) {
-                CaptchaException e = new CaptchaException(ExceptionCodeInfo.captchaError());
-                authUserService.reportAuthenticationExceptionInfo(token, e);
-                throw e;
+                throw new CaptchaException(ExceptionCodeInfo.captchaError());
             }
         }
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(getAuthUserService(), "authUserService - this argument is required; it must not be null");
+        Assert.notNull(getUserAuthorizationService(), "userAuthorizationService - this argument is required; it must not be null");
     }
 }
 

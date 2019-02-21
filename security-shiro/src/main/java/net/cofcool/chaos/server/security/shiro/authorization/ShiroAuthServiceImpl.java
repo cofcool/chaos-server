@@ -1,11 +1,8 @@
 package net.cofcool.chaos.server.security.shiro.authorization;
 
 import java.io.Serializable;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import net.cofcool.chaos.server.common.core.ExceptionCode;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.core.ServiceException;
@@ -14,7 +11,7 @@ import net.cofcool.chaos.server.common.security.Auth;
 import net.cofcool.chaos.server.common.security.AuthConstant;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.authorization.AuthService;
-import net.cofcool.chaos.server.common.security.authorization.AuthUserService;
+import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
 import net.cofcool.chaos.server.common.security.authorization.exception.CaptchaException;
 import net.cofcool.chaos.server.common.security.authorization.exception.LoginException;
 import net.cofcool.chaos.server.common.security.authorization.exception.UserNotExistException;
@@ -29,23 +26,21 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
- * 授权管理抽象类
+ * shiro 授权管理相关处理
  *
  * @author CofCool
  */
-
-@Slf4j
 public class ShiroAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable, ID extends Serializable> implements AuthService<T, D, ID>, InitializingBean {
 
-    private AuthUserService<T, D, ID> authUserService;
+    private UserAuthorizationService<T, D, ID> userAuthorizationService;
 
-    public AuthUserService<T, D, ID> getAuthUserService() {
-        return authUserService;
+    public UserAuthorizationService<T, D, ID> getUserAuthorizationService() {
+        return userAuthorizationService;
     }
 
-    public void setAuthUserService(AuthUserService<T, D, ID> authUserService) {
-        this.authUserService = authUserService;
-        this.authUserService.setUserProcessor(this::storageUser);
+    public void setUserAuthorizationService(UserAuthorizationService<T, D, ID> userAuthorizationService) {
+        this.userAuthorizationService = userAuthorizationService;
+        this.userAuthorizationService.setUserProcessor(this::storageUser);
     }
 
     @Override
@@ -70,9 +65,9 @@ public class ShiroAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable,
             if (currentUser != null) {
                 setupBaseDataOfUser(currentUser, loginUser);
 
-                Message<Boolean> checkedMessage = authUserService.checkUser(currentUser);
+                Message<Boolean> checkedMessage = getUserAuthorizationService().checkUser(currentUser);
                 if (checkedMessage.getData()) {
-                    authUserService.setupUserData(currentUser);
+                    getUserAuthorizationService().setupUserData(currentUser);
                 } else {
                     user.logout();
                     return Message.error(checkedMessage.getCode(), checkedMessage.getMessage());
@@ -85,10 +80,16 @@ public class ShiroAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable,
 
             return Message.error(ExceptionCode.SERVER_ERR, ExceptionCodeInfo.serverError());
         } catch (UnknownAccountException e) {
+            reportException(loginUser, e);
+
             return Message.error(ExceptionCode.DENIAL_AUTH, ExceptionCodeInfo.usernameError());
         } catch (IncorrectCredentialsException e) {
+            reportException(loginUser, e);
+
             return Message.error(ExceptionCode.DENIAL_AUTH, ExceptionCodeInfo.userPasswordError());
         } catch (AuthenticationException e) {
+            reportException(loginUser, e);
+
             Throwable ex = e.getCause();
             if (ex instanceof CaptchaException || ex instanceof UserNotExistException
                 || ex instanceof LoginException) {
@@ -98,15 +99,18 @@ public class ShiroAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable,
             } else {
                 return Message.error(ExceptionCode.NO_LOGIN, ExceptionCodeInfo.noLogin());
             }
-        }
-        catch (Exception e) {
-            log.error("auth: other exception", e.getMessage());
+        } catch (Exception e) {
+            reportException(loginUser, e);
             return Message.error(ExceptionCode.SERVER_ERR, ExceptionCodeInfo.serverError());
         } finally {
             if (!isOk) {
                 user.logout();
             }
         }
+    }
+
+    private void reportException(AbstractLogin loginUser, Exception e) {
+        getUserAuthorizationService().reportAuthenticationExceptionInfo(loginUser ,e);
     }
 
     @Override
@@ -141,17 +145,12 @@ public class ShiroAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable,
     }
 
     @Override
-    public boolean checkPermission(ServletRequest servletRequest, ServletResponse servletResponse) {
-        return authUserService.checkPermission(servletRequest, servletResponse);
-    }
-
-    @Override
     public User<T, D, ID> readCurrentUser() {
         return getCachedUser();
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(getAuthUserService(), "authUserService - this argument is required; it must not be null");
+        Assert.notNull(getUserAuthorizationService(), "userAuthorizationService - this argument is required; it must not be null");
     }
 }

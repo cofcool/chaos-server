@@ -16,6 +16,11 @@
         </dependency>
         <dependency>
             <groupId>net.cofcool.chaos</groupId>
+            <artifactId>chaos-server-security-shiro</artifactId>
+            <version>0.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.cofcool.chaos</groupId>
             <artifactId>chaos-server-data-jpa</artifactId>
             <version>0.3.0</version>
         </dependency>
@@ -40,6 +45,21 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>jdk-1.8</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <jdk>1.8</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.source>1.8</maven.compiler.source>
+                <maven.compiler.target>1.8</maven.compiler.target>
+                <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <finalName>chaos-server-demo</finalName>
