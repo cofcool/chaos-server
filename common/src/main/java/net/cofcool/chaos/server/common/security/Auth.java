@@ -16,7 +16,7 @@ public interface Auth<D extends Serializable, ID extends Serializable> extends S
     ID getId();
 
     /**
-     * 读取用户相关数据，如商户数据等
+     * 读取用户相关数据
      * @return D 用户相关数据
      */
     D getData();

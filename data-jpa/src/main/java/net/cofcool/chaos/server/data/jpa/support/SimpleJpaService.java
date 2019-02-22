@@ -9,6 +9,7 @@ import net.cofcool.chaos.server.common.core.SimpleExecuteResult;
 import net.cofcool.chaos.server.common.core.SimpleService;
 import net.cofcool.chaos.server.common.util.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
@@ -62,7 +63,7 @@ public abstract class SimpleJpaService<T, ID> extends SimpleService<T> implement
 
     @Override
     public ExecuteResult<List<T>> queryAll(T entity) {
-        return new SimpleExecuteResult<>(jpaRepository.findAll(), Result.EXECUTE_STATE_SUCCESSFUL);
+        return new SimpleExecuteResult<>(jpaRepository.findAll(Example.of(entity)), Result.EXECUTE_STATE_SUCCESSFUL);
     }
 
     @Override
