@@ -1,6 +1,7 @@
 package net.cofcool.chaos.server.common.core;
 
 import java.util.List;
+import net.cofcool.chaos.server.common.core.Result.ResultState;
 
 /**
  * 常用 <b>DAO</b> 方法
@@ -23,9 +24,9 @@ public interface DataAccess<T> {
      *
      * @param entity 实体
      *
-     * @return 影响数据数目
+     * @return 执行状态
      */
-    Integer delete(T entity);
+    ResultState delete(T entity);
 
     /**
      * 修改

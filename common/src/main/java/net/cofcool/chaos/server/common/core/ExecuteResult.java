@@ -1,7 +1,7 @@
 package net.cofcool.chaos.server.common.core;
 
 import java.util.function.Function;
-import jdk.internal.jline.internal.Nullable;
+import javax.annotation.Nullable;
 
 /**
  * 执行结果
@@ -16,9 +16,9 @@ public interface ExecuteResult<T> extends Result<T> {
     T getEntity();
 
     /**
-     * 影响数据数量，参考 {@link Result#EXECUTE_STATE_SUCCESSFUL}
+     * 执行状态，参考 {@link net.cofcool.chaos.server.common.core.Result.ResultState}
      */
-    int getState();
+    ResultState getState();
 
     /**
      * 描述信息
@@ -27,7 +27,7 @@ public interface ExecuteResult<T> extends Result<T> {
 
     @Override
     default boolean successful() {
-        return getState() >= EXECUTE_STATE_SUCCESSFUL;
+        return getState() == ResultState.SUCCESSFUL;
     }
 
     /**

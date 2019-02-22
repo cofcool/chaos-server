@@ -10,14 +10,26 @@ import java.io.Serializable;
 public interface Result<T> extends Serializable {
 
     /**
-     * 执行成功，只要大于或等于该值
+     * 执行状态
      */
-    int EXECUTE_STATE_SUCCESSFUL = 1;
-
-    /**
-     * 执行失败
-     */
-    int EXECUTE_STATE_FAILURE = 0;
+    enum ResultState {
+        /**
+         * 成功
+         */
+        SUCCESSFUL,
+        /**
+         * 失败
+         */
+        FAILURE,
+        /**
+         * 等待中
+         */
+        WAITING,
+        /**
+         * 未知
+         */
+        UNKNOW
+    }
 
 
     /**

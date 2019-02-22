@@ -9,6 +9,8 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 /**
+ * 处理响应数据(JSON)，{@link Result} 等
+ *
  * @author CofCool
  */
 public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConverter {

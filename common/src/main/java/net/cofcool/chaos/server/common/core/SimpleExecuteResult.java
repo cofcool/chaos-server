@@ -11,15 +11,15 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
 
     private T entity;
 
-    private int state;
+    private ResultState state;
 
     private Message<T> message;
 
-    public SimpleExecuteResult(T entity, int state) {
+    public SimpleExecuteResult(T entity, ResultState state) {
         this(entity, state, null);
     }
 
-    public SimpleExecuteResult(T entity, int state, Message<T> message) {
+    public SimpleExecuteResult(T entity, ResultState state, Message<T> message) {
         this.entity = entity;
         this.state = state;
         this.message = message;
@@ -35,11 +35,11 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
     }
 
     @Override
-    public int getState() {
+    public ResultState getState() {
         return state;
     }
 
-    public void setState(int state) {
+    public void setState(ResultState state) {
         this.state = state;
     }
 
