@@ -28,7 +28,7 @@ public interface Result<T> extends Serializable {
         /**
          * 未知
          */
-        UNKNOW
+        UNKNOWN
     }
 
 
