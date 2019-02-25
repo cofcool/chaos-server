@@ -25,6 +25,10 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
         this.message = message;
     }
 
+    public SimpleExecuteResult(ResultState state, Message<T> message) {
+        this(message.getData(), state, message);
+    }
+
     @Override
     public T getEntity() {
         return entity;
