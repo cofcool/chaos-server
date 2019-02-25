@@ -21,6 +21,13 @@ public interface ExcludeType {
      */
     String ALL = "ALL";
 
+    /**
+     * ExcludeType 的简单实现
+     */
+    class SimpleExcludeType implements ExcludeType {
+
+    }
+
 
     default Exclude getValue(String property) {
         return Exclude.valueOf(property);

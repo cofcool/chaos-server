@@ -36,8 +36,6 @@ public abstract class AbstractApiInterceptor extends AbstractScannedMethodInterc
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected ExcludeType authTypeInstance = null;
-
     private void checkApi(MethodInvocation invocation) {
         checkApi(invocation, getUser());
     }
@@ -120,9 +118,13 @@ public abstract class AbstractApiInterceptor extends AbstractScannedMethodInterc
 
                 // inject user properties
                 if (arg != null) {
-                    for (String name : methods) {
+                    for (String property : methods) {
+                        if (checkExclude(authExclude, ExcludeType.ALL) || checkExclude(authExclude, property)) {
+                            continue;
+                        }
+
                         try {
-                            setTheId(arg, authExclude, data, name);
+                            setTheId(arg, data, property);
                         } catch (Exception e) {
                             log.debug(e.getMessage());
                         }
@@ -132,11 +134,7 @@ public abstract class AbstractApiInterceptor extends AbstractScannedMethodInterc
         }
     }
 
-    private void setTheId(Object obj, DataAuthExclude authExclude, Auth authData, String property) throws IllegalAccessException, NullPointerException, InvocationTargetException {
-        if (checkExclude(authExclude, ExcludeType.ALL) || checkExclude(authExclude, property)) {
-            return;
-        }
-
+    private void setTheId(Object obj, Auth authData, String property) throws IllegalAccessException, NullPointerException, InvocationTargetException {
         Object value = BeanUtils.getPropertyDescriptor(authData.getClass(), property).getReadMethod().invoke(authData);
         if (BeanUtils.checkNullOrZero(value).isPresent()) {
             if (obj instanceof Page) {
@@ -149,21 +147,15 @@ public abstract class AbstractApiInterceptor extends AbstractScannedMethodInterc
 
     private boolean checkExclude(DataAuthExclude originExclude, String excludeProperty) {
         if (originExclude != null) {
-            Class<? extends ExcludeType> valueType = originExclude.type();
-            if (authTypeInstance == null) {
-                try {
-                    authTypeInstance = valueType.newInstance();
-                } catch (InstantiationException | IllegalAccessException e) {
-                    log.debug("checkExclude exception: ",e);
-
-                    return false;
+            try {
+                ExcludeType authTypeInstance = originExclude.type().getConstructor().newInstance();
+                for (String p : originExclude.value()) {
+                    if (authTypeInstance.getValue(p).compareTo(authTypeInstance.getValue(excludeProperty)) == 0) {
+                        return true;
+                    }
                 }
-            }
-
-            for (String p : originExclude.value()) {
-                if (authTypeInstance.getValue(p).compareTo(authTypeInstance.getValue(excludeProperty)) == 0) {
-                    return true;
-                }
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new IllegalStateException("can not create ExcludeType instance", e);
             }
         }
 
