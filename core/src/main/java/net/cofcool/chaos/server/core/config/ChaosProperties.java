@@ -91,17 +91,17 @@ public final class ChaosProperties {
         /**
          * 登陆
          */
-        private String loginUrl;
+        private String loginUrl = "/auth/login";
 
         /**
-         * 退出登陆(Spring Security)
+         * 退出登陆
          */
-        private String logoutUrl;
+        private String logoutUrl = "/auth/logout";
 
         /**
          * 登陆过期
          */
-        private String expiredUrl;
+        private String expiredUrl = "/auth/unlogin";
 
         /**
          * 没有访问权限
@@ -111,7 +111,7 @@ public final class ChaosProperties {
         /**
          * 未登录时跳转路径
          */
-        private String unLoginUrl = "/auth/unlogin";
+        private String unLoginUrl = expiredUrl;
 
         public String getCheckedKeys() {
             return checkedKeys;

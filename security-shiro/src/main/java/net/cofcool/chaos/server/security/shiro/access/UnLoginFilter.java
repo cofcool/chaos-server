@@ -5,18 +5,24 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.cofcool.chaos.server.common.util.WebUtils;
+import net.cofcool.chaos.server.core.config.ChaosProperties.Auth;
 import net.cofcool.chaos.server.core.config.WebApplicationContext;
+import net.cofcool.chaos.server.security.shiro.ShiroFilter;
 import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
 
 /**
- * 处理未登录情况，name 为 "unlogin"
+ * 处理未登录情况，未登录时跳转到 {@link Auth#getUnLoginUrl()}，重写"Shiro"默认的未登录处理方法。
  *
  * @author CofCool
  */
 @Slf4j
-public class UnLoginFilter extends FormAuthenticationFilter {
+public class UnLoginFilter extends FormAuthenticationFilter implements ShiroFilter {
 
-    public static final String FILTER_KEY = "unlogin";
+    public static final String FILTER_KEY = "authc";
+
+    public UnLoginFilter() {
+        setLoginUrl(WebApplicationContext.getConfiguration().getAuth().getLoginUrl());
+    }
 
     @Override
     protected boolean onAccessDenied(ServletRequest request, ServletResponse response)
@@ -48,5 +54,10 @@ public class UnLoginFilter extends FormAuthenticationFilter {
     @Override
     protected boolean preHandle(ServletRequest request, ServletResponse response) throws Exception {
         return super.preHandle(request, WebUtils.setupCorsHeader((HttpServletResponse) response));
+    }
+
+    @Override
+    public String getName() {
+        return FILTER_KEY;
     }
 }

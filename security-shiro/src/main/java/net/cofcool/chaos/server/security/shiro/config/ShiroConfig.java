@@ -9,6 +9,7 @@ import net.cofcool.chaos.server.common.security.PasswordProcessor;
 import net.cofcool.chaos.server.common.security.authorization.AuthService;
 import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
 import net.cofcool.chaos.server.core.config.WebApplicationContext;
+import net.cofcool.chaos.server.security.shiro.ShiroFilter;
 import net.cofcool.chaos.server.security.shiro.access.AccountCredentialsMatcher;
 import net.cofcool.chaos.server.security.shiro.access.AuthRealm;
 import net.cofcool.chaos.server.security.shiro.access.ExceptionAuthenticationStrategy;
@@ -50,22 +51,22 @@ public class ShiroConfig {
      * @return shiroFilter
      */
     @Bean
-    public ShiroFilterFactoryBean shiroFilter(UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, Authenticator authenticator, List<Filter> customFilters) {
-        PermissionFilter permissionFilter = new PermissionFilter();
-        permissionFilter.setAuthorizationService(userAuthorizationService);
+    public ShiroFilterFactoryBean shiroFilter(UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, Authenticator authenticator, List<ShiroFilter> customFilters) {
+        List<ShiroFilter> filters = new ArrayList<>();
+        filters.add(new PermissionFilter(userAuthorizationService));
+        filters.add(new UnLoginFilter());
+        filters.addAll(customFilters);
 
-        Map<String, Filter> filters = new HashMap<>();
-        filters.put(PermissionFilter.FILTER_KEY, permissionFilter);
-        filters.put(UnLoginFilter.FILTER_KEY, new UnLoginFilter());
-        for (Filter filter : customFilters) {
-            filters.put(filter.getClass().getName(), filter);
+        Map<String, Filter> filterMap = new HashMap<>();
+        for (ShiroFilter filter : filters) {
+            filterMap.put(filter.getName(), filter);
         }
 
         ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
-        factoryBean.setFilters(filters);
+        factoryBean.setFilters(filterMap);
         factoryBean.setSecurityManager(createSecurityManager(sessionManager, authenticator, shiroCacheManager));
         factoryBean.setLoginUrl(WebApplicationContext.getConfiguration().getAuth().getLoginUrl());
-        factoryBean.setUnauthorizedUrl(WebApplicationContext.getConfiguration().getAuth().getExpiredUrl());
+        factoryBean.setUnauthorizedUrl(WebApplicationContext.getConfiguration().getAuth().getUnauthUrl());
         factoryBean.setFilterChainDefinitions(WebApplicationContext.getConfiguration().getAuth().getUrls());
 
         return factoryBean;

@@ -5,19 +5,25 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
 import net.cofcool.chaos.server.common.util.WebUtils;
+import net.cofcool.chaos.server.core.config.ChaosProperties.Auth;
 import net.cofcool.chaos.server.core.config.WebApplicationContext;
+import net.cofcool.chaos.server.security.shiro.ShiroFilter;
 import org.apache.shiro.web.filter.AccessControlFilter;
 
 /**
- * 权限处理，name 为 "check"
+ * 权限处理，未授权时跳转到 {@link Auth#getUnauthUrl()}
  *
  * @author CofCool
  */
-public class PermissionFilter extends AccessControlFilter {
+public class PermissionFilter extends AccessControlFilter implements ShiroFilter {
 
     public static final String FILTER_KEY = "check";
 
     private UserAuthorizationService authorizationService;
+
+    public PermissionFilter(UserAuthorizationService authorizationService) {
+        this.authorizationService = authorizationService;
+    }
 
     public UserAuthorizationService getAuthorizationService() {
         return authorizationService;
@@ -47,5 +53,10 @@ public class PermissionFilter extends AccessControlFilter {
     @Override
     protected boolean preHandle(ServletRequest request, ServletResponse response) throws Exception {
         return super.preHandle(request, WebUtils.setupCorsHeader((HttpServletResponse) response));
+    }
+
+    @Override
+    public String getName() {
+        return FILTER_KEY;
     }
 }
