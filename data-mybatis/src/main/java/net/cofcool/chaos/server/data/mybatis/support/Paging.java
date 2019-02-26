@@ -55,6 +55,7 @@ public class Paging<T> extends Page<T> {
 
     private static final class MybatisPageProcessor<T> implements PageProcessor<T> {
 
+        @SuppressWarnings("unchecked")
         @Override
         public Page<T> process(Page<T> condition, Object pageSomething) {
             Objects.requireNonNull(condition);
@@ -66,6 +67,8 @@ public class Paging<T> extends Page<T> {
                         condition.getPageNumber(), condition.getPageSize()
                     ).doSelectPageInfo((ISelect) pageSomething)
                 );
+            } else if (pageSomething instanceof Page) {
+                return (Page<T>) pageSomething;
             }
 
             throw new IllegalArgumentException("must be ISelect instance");

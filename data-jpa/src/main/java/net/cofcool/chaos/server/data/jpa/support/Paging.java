@@ -179,6 +179,8 @@ public class Paging<T> extends Page<T> {
 
             if (pageSomething instanceof org.springframework.data.domain.Page) {
                 return of((org.springframework.data.domain.Page) pageSomething);
+            } else if (pageSomething instanceof Page) {
+                return (Page<T>) pageSomething;
             }
 
 

@@ -17,7 +17,7 @@ public class SpecificationUtils {
                     criteriaBuilder.greaterThanOrEqualTo(root.get(property), val));
     }
 
-    public static <T, Y extends Comparable<? super Y>> Specification<T> andELessOrEqualTo(Specification<T> sp, String property, Y val) {
+    public static <T, Y extends Comparable<? super Y>> Specification<T> andLessOrEqualTo(Specification<T> sp, String property, Y val) {
         return sp.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.lessThanOrEqualTo(root.get(property), val));
     }
