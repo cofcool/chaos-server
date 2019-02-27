@@ -1,6 +1,7 @@
 package net.cofcool.chaos.server.data.jpa.util;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -21,6 +22,7 @@ import org.hibernate.query.criteria.internal.compile.RenderingContext;
 import org.hibernate.query.criteria.internal.predicate.CompoundPredicate;
 import org.hibernate.type.Type;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -99,17 +101,21 @@ public class SpecificationUtils {
                         )
                     )
             );
-        if (sort != null) {
-            sort.stream()
-                .forEach(
-                    order ->
-                        sql.append(" order by ")
-                            .append(alias)
-                            .append(".")
-                            .append(order.getProperty())
-                            .append(" ")
-                            .append(order.getDirection().toString())
-                );
+        if (sort != null && sort.isSorted()) {
+            sql.append(" order by ");
+
+            Iterator<Order> sortIterator = sort.iterator();
+            while (sortIterator.hasNext()) {
+                Order order = sortIterator.next();
+                sql.append(alias)
+                    .append(".")
+                    .append(order.getProperty())
+                    .append(" ")
+                    .append(order.getDirection().toString());
+                if (sortIterator.hasNext()) {
+                    sql.append(", ");
+                }
+            }
         }
 
         return sql.toString();
