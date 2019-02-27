@@ -7,7 +7,6 @@ import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationS
 import net.cofcool.chaos.server.common.util.WebUtils;
 import net.cofcool.chaos.server.core.config.ChaosProperties.Auth;
 import net.cofcool.chaos.server.core.config.WebApplicationContext;
-import net.cofcool.chaos.server.security.shiro.ShiroFilter;
 import org.apache.shiro.web.filter.AccessControlFilter;
 
 /**
@@ -15,7 +14,7 @@ import org.apache.shiro.web.filter.AccessControlFilter;
  *
  * @author CofCool
  */
-public class PermissionFilter extends AccessControlFilter implements ShiroFilter {
+public class PermissionFilter extends AccessControlFilter {
 
     public static final String FILTER_KEY = "check";
 
@@ -55,8 +54,4 @@ public class PermissionFilter extends AccessControlFilter implements ShiroFilter
         return super.preHandle(request, WebUtils.setupCorsHeader((HttpServletResponse) response));
     }
 
-    @Override
-    public String getName() {
-        return FILTER_KEY;
-    }
 }

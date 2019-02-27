@@ -9,12 +9,11 @@ import net.cofcool.chaos.server.common.security.PasswordProcessor;
 import net.cofcool.chaos.server.common.security.authorization.AuthService;
 import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
 import net.cofcool.chaos.server.core.config.WebApplicationContext;
-import net.cofcool.chaos.server.security.shiro.ShiroFilter;
 import net.cofcool.chaos.server.security.shiro.access.AccountCredentialsMatcher;
 import net.cofcool.chaos.server.security.shiro.access.AuthRealm;
 import net.cofcool.chaos.server.security.shiro.access.ExceptionAuthenticationStrategy;
+import net.cofcool.chaos.server.security.shiro.access.JsonAuthenticationFilter;
 import net.cofcool.chaos.server.security.shiro.access.PermissionFilter;
-import net.cofcool.chaos.server.security.shiro.access.UnLoginFilter;
 import net.cofcool.chaos.server.security.shiro.authorization.ShiroAuthServiceImpl;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.Authenticator;
@@ -51,14 +50,9 @@ public class ShiroAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ShiroFilterFactoryBean shiroFilter(UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, PasswordProcessor passwordProcessor) {
-        List<ShiroFilter> filters = new ArrayList<>();
-        filters.add(new PermissionFilter(userAuthorizationService));
-        filters.add(new UnLoginFilter());
-
         Map<String, Filter> filterMap = new HashMap<>();
-        for (ShiroFilter filter : filters) {
-            filterMap.put(filter.getName(), filter);
-        }
+        filterMap.put(PermissionFilter.FILTER_KEY, new PermissionFilter(userAuthorizationService));
+        filterMap.put(JsonAuthenticationFilter.FILTER_KEY, new JsonAuthenticationFilter(WebApplicationContext.getConfiguration().getAuth().getLoginUrl()));
 
         ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
         factoryBean.setFilters(filterMap);

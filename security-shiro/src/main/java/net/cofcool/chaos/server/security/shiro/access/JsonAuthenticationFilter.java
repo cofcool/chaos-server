@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.cofcool.chaos.server.common.util.WebUtils;
 import net.cofcool.chaos.server.core.config.ChaosProperties.Auth;
 import net.cofcool.chaos.server.core.config.WebApplicationContext;
-import net.cofcool.chaos.server.security.shiro.ShiroFilter;
 import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
 
 /**
@@ -16,12 +15,15 @@ import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
  * @author CofCool
  */
 @Slf4j
-public class UnLoginFilter extends FormAuthenticationFilter implements ShiroFilter {
+public class JsonAuthenticationFilter extends FormAuthenticationFilter {
 
     public static final String FILTER_KEY = "authc";
 
-    public UnLoginFilter() {
-        setLoginUrl(WebApplicationContext.getConfiguration().getAuth().getLoginUrl());
+    public JsonAuthenticationFilter(String loginUrl) {
+        setLoginUrl(loginUrl);
+    }
+
+    public JsonAuthenticationFilter() {
     }
 
     @Override
@@ -56,8 +58,4 @@ public class UnLoginFilter extends FormAuthenticationFilter implements ShiroFilt
         return super.preHandle(request, WebUtils.setupCorsHeader((HttpServletResponse) response));
     }
 
-    @Override
-    public String getName() {
-        return FILTER_KEY;
-    }
 }
