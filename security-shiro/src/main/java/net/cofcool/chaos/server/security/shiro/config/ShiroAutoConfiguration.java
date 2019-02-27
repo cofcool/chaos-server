@@ -39,23 +39,21 @@ import org.springframework.context.annotation.Configuration;
  * @author CofCool
  */
 @Configuration
-public class ShiroConfig {
+public class ShiroAutoConfiguration {
 
     /**
      * 创建 <code>shiroFilter</code>
      * @param userAuthorizationService 授权相关服务
      * @param sessionManager session 管理器
      * @param shiroCacheManager  缓存管理器
-     * @param authenticator 授权处理
-     * @param customFilters 自定义过滤器
      * @return shiroFilter
      */
     @Bean
-    public ShiroFilterFactoryBean shiroFilter(UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, Authenticator authenticator, List<ShiroFilter> customFilters) {
+    @ConditionalOnMissingBean
+    public ShiroFilterFactoryBean shiroFilter(UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, PasswordProcessor passwordProcessor) {
         List<ShiroFilter> filters = new ArrayList<>();
         filters.add(new PermissionFilter(userAuthorizationService));
         filters.add(new UnLoginFilter());
-        filters.addAll(customFilters);
 
         Map<String, Filter> filterMap = new HashMap<>();
         for (ShiroFilter filter : filters) {
@@ -64,7 +62,7 @@ public class ShiroConfig {
 
         ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
         factoryBean.setFilters(filterMap);
-        factoryBean.setSecurityManager(createSecurityManager(sessionManager, authenticator, shiroCacheManager));
+        factoryBean.setSecurityManager(createSecurityManager(sessionManager, createDefaultAuthenticator(userAuthorizationService, passwordProcessor), shiroCacheManager));
         factoryBean.setLoginUrl(WebApplicationContext.getConfiguration().getAuth().getLoginUrl());
         factoryBean.setUnauthorizedUrl(WebApplicationContext.getConfiguration().getAuth().getUnauthUrl());
         factoryBean.setFilterChainDefinitions(WebApplicationContext.getConfiguration().getAuth().getUrls());
@@ -87,16 +85,13 @@ public class ShiroConfig {
 
     /**
      * 创建 authenticator
-     * @param realms 自定义 realm
      * @param userAuthorizationService 授权相关服务
      * @param passwordProcessor 密码处理
      * @return authenticator
      */
-    @Bean
-    public ModularRealmAuthenticator authenticator(List<Realm> realms, UserAuthorizationService userAuthorizationService, PasswordProcessor passwordProcessor) {
+    public ModularRealmAuthenticator createDefaultAuthenticator(UserAuthorizationService userAuthorizationService, PasswordProcessor passwordProcessor) {
         List<Realm> shiroRealms = new ArrayList<>();
         shiroRealms.add(createDefaultAuthRealm(userAuthorizationService, passwordProcessor));
-        shiroRealms.addAll(realms);
 
         ModularRealmAuthenticator realmAuthenticator = new ModularRealmAuthenticator();
         realmAuthenticator.setAuthenticationStrategy(new ExceptionAuthenticationStrategy());
