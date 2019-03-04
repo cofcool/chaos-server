@@ -87,7 +87,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
             OutputStream outputStream = new ByteArrayOutputStream();
             ex.printStackTrace(new PrintStream(outputStream));
 
-            logger.error("[" + handler.toString() + "]" + outputStream.toString());
+            logger.error("exception log: " + outputStream.toString());
         }
     }
 
