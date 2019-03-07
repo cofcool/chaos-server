@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -104,24 +105,59 @@ public class SpecificationUtils {
         if (sort != null && sort.isSorted()) {
             sql.append(" order by ");
 
-            Iterator<Order> sortIterator = sort.iterator();
-            while (sortIterator.hasNext()) {
-                Order order = sortIterator.next();
-                sql.append(alias)
-                    .append(".")
-                    .append(order.getProperty())
-                    .append(" ")
-                    .append(order.getDirection().toString());
-                if (sortIterator.hasNext()) {
-                    sql.append(", ");
-                }
-            }
+            renderSort(alias, sort, sql);
         }
 
         return sql.toString();
     }
 
-    private static final Map<String, RenderingContext> CACHED_RENDERING_CONTEXTS = new HashMap<>();
+
+    /**
+     * 根据 Sort 生成 SQL 语句（不包括"order by"）
+     * @param alias 别名
+     * @param sort 排序
+     * @return 排序语句
+     */
+    public static String renderSort(String alias, Sort sort) {
+        StringBuilder sql = new StringBuilder();
+        renderSort(alias, sort, sql);
+
+        return sql.toString();
+    }
+
+    /**
+     * 根据 Sort 生成 SQL 语句（不包括"order by"）
+     * @param alias 别名
+     * @param sort 排序
+     * @param sql SQL 字符串
+     */
+    public static void renderSort(String alias, Sort sort, StringBuilder sql) {
+        Iterator<Order> sortIterator = sort.iterator();
+        while (sortIterator.hasNext()) {
+            Order order = sortIterator.next();
+            sql.append(alias)
+                .append(".")
+                .append(order.getProperty())
+                .append(" ")
+                .append(order.getDirection().toString());
+            if (sortIterator.hasNext()) {
+                sql.append(", ");
+            }
+        }
+    }
+
+    /**
+     * <p>
+     * JDK 8 的 HashMap 在并发操作(如<code>computeIfAbsent</code>)时并不会抛出 <code>ConcurrentModificationException</code> 异常，
+     * 但是 JDK 11 会抛出异常，因此改为 <code>ConcurrentHashMap</code>。
+     * <pre>
+     *     int mc = modCount;
+     *     V v = mappingFunction.apply(key);
+     *     if (mc != modCount) { throw new ConcurrentModificationException(); }
+     * </pre>
+     * </p>
+     */
+    private static final Map<String, RenderingContext> CACHED_RENDERING_CONTEXTS = new ConcurrentHashMap<>();
 
 
     /**
