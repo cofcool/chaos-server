@@ -50,7 +50,7 @@ public interface UserRole extends Comparable<UserRole>, Serializable {
      */
     @Override
     default int compareTo(@Nonnull UserRole userRole) {
-        return getRoleId() - userRole.getRoleId();
+        return Integer.compare(getRoleId(), userRole.getRoleId());
     }
 
     /**
