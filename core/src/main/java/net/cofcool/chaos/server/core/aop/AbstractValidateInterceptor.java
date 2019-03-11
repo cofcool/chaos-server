@@ -22,6 +22,7 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
 /**
@@ -53,7 +54,13 @@ public abstract class AbstractValidateInterceptor extends AbstractScannedMethodI
 
                     if (!list.isEmpty()) {
                         ObjectError error = list.get(0);
-                        log.info("validate message: {}", error.getDefaultMessage());
+                        String field = "";
+                        if (error instanceof FieldError) {
+                            field = ((FieldError) error).getField();
+                        }
+                        if (log.isInfoEnabled()) {
+                            log.info("validate message: {} - {}", field, error.getDefaultMessage());
+                        }
 
                         throwErrorException(
                             method,
@@ -81,7 +88,10 @@ public abstract class AbstractValidateInterceptor extends AbstractScannedMethodI
                 int paramIndex = pathImpl.getLeafNode().getParameterIndex();
                 paramName = parameterNames[paramIndex];
             }
-            log.info("{} validate message: {}", paramName,validResult.iterator().next().getMessage());
+
+            if (log.isInfoEnabled()) {
+                log.info("{} validate message: {}", paramName,validResult.iterator().next().getMessage());
+            }
 
             throwErrorException(
                 method,
