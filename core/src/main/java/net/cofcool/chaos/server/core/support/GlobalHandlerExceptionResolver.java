@@ -12,11 +12,13 @@ import net.cofcool.chaos.server.common.core.ExceptionCode;
 import net.cofcool.chaos.server.common.core.ExceptionLevel;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.core.ServiceException;
+import net.cofcool.chaos.server.core.aop.AbstractValidateInterceptor;
 import net.cofcool.chaos.server.core.config.DevelopmentMode;
 import net.cofcool.chaos.server.core.config.WebApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
@@ -77,9 +79,23 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
             return handle4xxException(response, ex);
         } else if (ex instanceof UnsupportedOperationException) {
             return handle5xxException(response, ex);
+        } else if (ex instanceof MethodArgumentNotValidException) {
+            return resolveValidException(response, (MethodArgumentNotValidException) ex);
         } else {
             return resolveOthersException(request, response, handler, ex);
         }
+    }
+
+    private ModelAndView resolveValidException(HttpServletResponse response, MethodArgumentNotValidException ex) {
+        writeMessage(
+            response,
+            getMessage(ExceptionCode.PARAM_NULL,
+                AbstractValidateInterceptor.getFirstErrorString(ex.getBindingResult()),
+                null
+            )
+        );
+
+        return EMPTY_MODEL_AND_VIEW;
     }
 
     private void printExceptionLog(Object handler, Exception ex) {

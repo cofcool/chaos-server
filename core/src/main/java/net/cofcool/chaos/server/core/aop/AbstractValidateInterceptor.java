@@ -1,27 +1,18 @@
 package net.cofcool.chaos.server.core.aop;
 
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.ValidatorFactory;
-import javax.validation.executable.ExecutableValidator;
+import javax.annotation.Nullable;
 import net.cofcool.chaos.server.common.core.ExceptionCode;
 import net.cofcool.chaos.server.common.core.ExceptionLevel;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.core.ServiceException;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import net.cofcool.chaos.server.core.annotation.scanner.BeanResourceHolder;
-import net.cofcool.chaos.server.core.support.ExceptionCodeInfo;
 import org.aopalliance.intercept.MethodInvocation;
-import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
@@ -35,11 +26,11 @@ public abstract class AbstractValidateInterceptor extends AbstractScannedMethodI
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    private final ExecutableValidator validator = factory.getValidator().forExecutables();
-    private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
-    protected void validate(MethodInvocation invocation) throws Throwable {
+    /**
+     * 处理 BindingResult 携带的验证信息
+     */
+    protected void validate(MethodInvocation invocation) {
         Object[] objects = invocation.getArguments();
         Method method = invocation.getMethod();
         if (objects.length == 0) {
@@ -47,65 +38,46 @@ public abstract class AbstractValidateInterceptor extends AbstractScannedMethodI
         }
 
         for (Object object : objects) {
-            if (object instanceof BeanPropertyBindingResult) {
-                BeanPropertyBindingResult result = (BeanPropertyBindingResult) object;
-                if (result.hasErrors()) {
-                    List<ObjectError> list = result.getAllErrors();
+            if (object instanceof BindingResult) {
+                String errMsg = getFirstErrorString((BindingResult) object);
 
-                    if (!list.isEmpty()) {
-                        ObjectError error = list.get(0);
-                        String field = "";
-                        if (error instanceof FieldError) {
-                            field = ((FieldError) error).getField();
-                        }
-                        if (log.isInfoEnabled()) {
-                            log.info("validate message: {} - {}", field, error.getDefaultMessage());
-                        }
-
-                        throwErrorException(
-                            method,
-                            Message.error(
-                                ExceptionCode.PARAM_ERROR,
-                                error.getDefaultMessage() != null ? error.getDefaultMessage() : ExceptionCodeInfo
-                                    .paramError(),
-                                null
-                            )
-                        );
+                if (errMsg != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("validate message: {}", errMsg);
                     }
+
+                    throwErrorException(
+                        method,
+                        Message.error(
+                            ExceptionCode.PARAM_ERROR,
+                            errMsg,
+                            null
+                        )
+                    );
                 }
             }
         }
-
-        Object target = invocation.getThis();
-        Set<ConstraintViolation<Object>> validResult = validMethodParams(target, method, objects);
-
-        String paramName = "";
-        if (!validResult.isEmpty()) {
-            String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
-
-            for (ConstraintViolation<Object> constraintViolation : validResult) {
-                PathImpl pathImpl = (PathImpl) constraintViolation.getPropertyPath();
-                int paramIndex = pathImpl.getLeafNode().getParameterIndex();
-                paramName = parameterNames[paramIndex];
-            }
-
-            if (log.isInfoEnabled()) {
-                log.info("{} validate message: {}", paramName,validResult.iterator().next().getMessage());
-            }
-
-            throwErrorException(
-                method,
-                Message.error(
-                    ExceptionCode.PARAM_ERROR,
-                    validResult.iterator().next().getMessage(),
-                    null
-                )
-            );
-        }
     }
 
-    private <T> Set<ConstraintViolation<T>> validMethodParams(T obj, Method method, Object[] params) {
-        return validator.validateParameters(obj, method, params);
+    /**
+     * 从 <code>BindingResult</code> 中读取验证信息，如果没有，则返回 "NULL"
+     * @param result BindingResult 实例
+     * @return 验证信息
+     */
+    @Nullable
+    public static String getFirstErrorString(BindingResult result) {
+        if (result.hasErrors()) {
+            String errMsg = "";
+            ObjectError error = result.getAllErrors().iterator().next();
+            if (error instanceof FieldError) {
+                errMsg = ((FieldError) error).getField() + " ";
+            }
+            errMsg += error.getDefaultMessage();
+
+            return errMsg;
+        }
+
+        return null;
     }
 
     protected void throwErrorException(Method method, Message message) {
@@ -121,4 +93,5 @@ public abstract class AbstractValidateInterceptor extends AbstractScannedMethodI
     protected void doBefore(MethodInvocation invocation) throws Throwable {
         validate(invocation);
     }
+
 }
