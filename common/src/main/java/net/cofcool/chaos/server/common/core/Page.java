@@ -129,7 +129,7 @@ public class Page<T> implements Serializable {
     public T getCondition(Class<T> clazz) {
         if (condition == null) {
             try {
-                condition = clazz.getConstructor(clazz).newInstance();
+                condition = clazz.getConstructor().newInstance();
             } catch (Exception ignore) {
                 throw new IllegalArgumentException("create condition instance failure");
             }
