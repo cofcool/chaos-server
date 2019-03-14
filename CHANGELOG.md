@@ -11,3 +11,8 @@
 * Shiro 配置优化，应用未配置`ShiroFilterFactoryBean`时会创建默认实例
 * 优化`data-*`模块
 * 全局异常处理错误
+
+**0.3.2**:
+
+* Shiro 升级到`1.4.0`，并移除"shiro-ehcache"(Ehcache 版本过低，与 Spring 监控不兼容)
+* 其它问题修复

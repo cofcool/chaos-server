@@ -7,7 +7,7 @@
     <groupId>net.cofcool.chaos</groupId>
     <artifactId>chaos-server</artifactId>
     <packaging>pom</packaging>
-    <version>0.3.1</version>
+    <version>0.3.2</version>
     <description>Chaos Web Server</description>
     <url>https://github.com/cofcool/chaos-server</url>
 
@@ -70,7 +70,6 @@
 
         <lombok.version>1.18.0</lombok.version>
         <mysql.driver.version>5.1.30</mysql.driver.version>
-        <ehcache.version>3.5.2</ehcache.version>
         <jackson-joda-time.version>2.9.5</jackson-joda-time.version>
 
         <spring-data.version>2.1.2.RELEASE</spring-data.version>
@@ -141,13 +140,6 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>${mysql.driver.version}</version>
             <scope>runtime</scope>
-        </dependency>
-
-        <!-- ehcache -->
-        <dependency>
-            <groupId>org.ehcache</groupId>
-            <artifactId>ehcache</artifactId>
-            <version>${ehcache.version}</version>
         </dependency>
 
         <dependency>
