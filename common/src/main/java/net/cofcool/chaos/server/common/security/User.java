@@ -93,15 +93,6 @@ public class User <T extends Auth<D, ID>, D extends Serializable, ID extends Ser
         return Collections.unmodifiableCollection(userStatuses);
     }
 
-    protected UserStatus checkPassword(String loginPwd) {
-        switch (loginPwd) {
-            case "054E5FA6F520415C6D173FB744412EFC":
-                return UserStatus.PASSWORD_WEAK;
-            default:
-                return UserStatus.PASSWORD_STRONG;
-        }
-    }
-
     public ID getUserId() {
         return userId;
     }
@@ -140,7 +131,6 @@ public class User <T extends Auth<D, ID>, D extends Serializable, ID extends Ser
 
     public void setLoginPwd(String loginPwd) {
         this.loginPwd = loginPwd;
-        addUserStatus(checkPassword(loginPwd));
     }
 
     public Collection<UserRole> getRoles() {
