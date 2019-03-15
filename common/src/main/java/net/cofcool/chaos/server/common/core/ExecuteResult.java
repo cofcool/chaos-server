@@ -12,10 +12,11 @@ import javax.annotation.Nullable;
 public interface ExecuteResult<T> extends Result<T> {
 
     /**
-     * 携带数据
+     * 获取结果数据，建议先调用 {@link #successful()} 确保执行成功
      *
-     * @throws NoSuchElementException 数据不存在或未成功时抛出异常
+     * @throws NoSuchElementException 执行未成功或数据不存在时抛出异常
      */
+    @Nullable
     T getEntity();
 
     /**
@@ -39,6 +40,8 @@ public interface ExecuteResult<T> extends Result<T> {
      * @param fn 需要执行的 Function
      * @param <R> 返回数据类型
      * @return fn 执行结果
+     *
+     * @throws NoSuchElementException 执行未成功或数据不存在时抛出异常
      */
     @Nullable
     default <R> R apply(Function<T, R> fn) {
