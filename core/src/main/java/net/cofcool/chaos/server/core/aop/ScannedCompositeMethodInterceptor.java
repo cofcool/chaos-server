@@ -8,7 +8,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 
 /**
- * 代理配置，可通过 {@link #setInterceptorList(List)} 方法配置 {@link ScannedMethodInterceptor}，用户可自定义{@link ScannedMethodInterceptor} 实例，被拦截对象需使用 {@link Scanned} 注解
+ * 代理配置, 可通过 {@link #setInterceptorList(List)} 方法配置 {@link ScannedMethodInterceptor}, 用户可自定义{@link ScannedMethodInterceptor} 实例, 被拦截对象需使用 {@link Scanned} 注解
  *
  * @see Scanned
  *

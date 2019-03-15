@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * 抽象类，实现 ScannedMethodInterceptor 接口，推荐应用继承该类，而不是直接实现 ScannedMethodInterceptor
+ * 抽象类, 实现 ScannedMethodInterceptor 接口, 推荐应用继承该类, 而不是直接实现 ScannedMethodInterceptor
  *
  * @author CofCool
  */

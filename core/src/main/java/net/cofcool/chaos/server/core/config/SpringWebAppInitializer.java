@@ -4,7 +4,7 @@ import javax.servlet.Filter;
 import org.springframework.web.filter.DelegatingFilterProxy;
 
 /**
- * 和Spring Boot项目冲突，优先使用SpringBootServletInitializer
+ * 和Spring Boot项目冲突, 优先使用SpringBootServletInitializer
  *
  * @author CofCool
  */

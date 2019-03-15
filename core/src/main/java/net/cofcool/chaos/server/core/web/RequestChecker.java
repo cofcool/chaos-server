@@ -17,7 +17,7 @@ public interface RequestChecker {
      * @param response 响应
      * @return 校验结果
      *
-     * @throws net.cofcool.chaos.server.common.core.ServiceException 如果想返回校验失败原因，可通过此异常进行处理
+     * @throws net.cofcool.chaos.server.common.core.ServiceException 如果想返回校验失败原因, 可通过此异常进行处理
      */
     boolean check(HttpServletRequest request, HttpServletResponse response);
 

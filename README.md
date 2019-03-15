@@ -1,6 +1,6 @@
 # 项目说明
 
-基于 Spring Boot 的 Java Web Server 框架，简化开发 。
+基于 Spring Boot 的 Java Web Server 框架, 简化开发 。
 
 
 通过`maven`引入:
@@ -81,18 +81,18 @@ fi
 必需组件:
 
 * UserAuthorizationService (chaos-server-security-*): 授权相关
-* JpaConfig (chaos-server-data-jpa): JPA配置，DataSource等
-* PasswordProcessor (chaos-server-security-*): 密码处理，加密解密
+* JpaConfig (chaos-server-data-jpa): JPA配置, DataSource等
+* PasswordProcessor (chaos-server-security-*): 密码处理, 加密解密
 
 ### 使用
 
-业务相关Service可继承`DataAccess`接口，实现类可继承`SimpleService`抽象类。
+业务相关Service可继承`DataAccess`接口, 实现类可继承`SimpleService`抽象类。
 
 
-使用`Page`类封装分页的相关数据，ORM模块的`Paging`继承并扩展。
+使用`Page`类封装分页的相关数据, ORM模块的`Paging`继承并扩展。
 
 * Mybatis: 通过`PageHelper`分页。
 * Jpa: 通过`Pageable`分页。
 
-**异常**处理时，自定义业务相关异常需继承`ServiceException`。如需设定异常级别，实现`ExceptionLevel`接口即可，该级别影响异常的打印。`ServiceException`已实现该接口，默认为最高级别。
+**异常**处理时, 自定义业务相关异常需继承`ServiceException`。如需设定异常级别, 实现`ExceptionLevel`接口即可, 该级别影响异常的打印。`ServiceException`已实现该接口, 默认为最高级别。
 

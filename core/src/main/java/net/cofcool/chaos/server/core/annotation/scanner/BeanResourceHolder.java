@@ -21,7 +21,7 @@ import org.springframework.core.annotation.AnnotationUtils;
  * 注解管理。
  * <br>
  *
- * 如果使用<code>@Scanned</code>，可通过以下方法获取：
+ * 如果使用<code>@Scanned</code>, 可通过以下方法获取：
  *
  * {@link #getAnnotation(Class, Class)}
  * {@link #getAnnotation(Method, Class)}
@@ -29,7 +29,7 @@ import org.springframework.core.annotation.AnnotationUtils;
  *
  * <br>
  *
- * 若未使用<code>@Scanned</code>，可通过前缀为"find"的方法获取。
+ * 若未使用<code>@Scanned</code>, 可通过前缀为"find"的方法获取。
  *
  * @see Scanned
  * @see org.springframework.core.annotation.AnnotatedElementUtils
@@ -103,7 +103,7 @@ public final class BeanResourceHolder {
      * 解析方法或类标注的注解
      * @param method 方法
      * @param annotationType 注解类
-     * @param allScope 是否解析方法和类（如为 true，解析方法和声明方法的类并按照"方法 > 类"的优先级返回，如为 false，只解析方法的注解）
+     * @param allScope 是否解析方法和类（如为 true, 解析方法和声明方法的类并按照"方法 > 类"的优先级返回, 如为 false, 只解析方法的注解）
      * @param <T> 注解类型
      * @return 注解
      */
@@ -117,7 +117,7 @@ public final class BeanResourceHolder {
      * 解析方法或类标注的注解
      * @param element 目标
      * @param annotationType 注解类
-     * @param allScope 是否解析方法和类（如为 true，解析方法和声明方法的类并按照"方法 > 类"的优先级返回，如为 false，只解析方法的注解）
+     * @param allScope 是否解析方法和类（如为 true, 解析方法和声明方法的类并按照"方法 > 类"的优先级返回, 如为 false, 只解析方法的注解）
      * @param <A> 注解类型
      * @return 注解
      *

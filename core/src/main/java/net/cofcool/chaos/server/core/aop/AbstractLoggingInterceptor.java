@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 /**
- * 记录日志，包括http请求与返回值等。被代理类需使用 {@link Scanned} 注解。
+ * 记录日志, 包括http请求与返回值等。被代理类需使用 {@link Scanned} 注解。
  *
  * @author CofCool
  */

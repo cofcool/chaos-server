@@ -59,7 +59,7 @@ public final class ChaosProperties {
         public static final String AUTHORIZE_KEY = "authorization";
 
         /**
-         * 注入数据key配置，多个时以","分隔
+         * 注入数据key配置, 多个时以","分隔
          */
         private String checkedKeys = "";
 
@@ -122,7 +122,7 @@ public final class ChaosProperties {
         }
 
         /**
-         * 授权码，参考 {@link WebApplicationContext#isDevAuthorization(String)}
+         * 授权码, 参考 {@link WebApplicationContext#isDevAuthorization(String)}
          */
         public String getAuthorizeCode() {
             return authorizeCode;
@@ -270,7 +270,7 @@ public final class ChaosProperties {
     }
 
     /**
-     * 项目配置文件路径，相对路径则在 ${user.home} 目录下
+     * 项目配置文件路径, 相对路径则在 ${user.home} 目录下
      * @return 配置文件路径
      */
     public String getBaseConfigureDirectory() {

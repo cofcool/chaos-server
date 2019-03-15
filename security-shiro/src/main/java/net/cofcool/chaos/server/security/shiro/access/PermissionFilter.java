@@ -10,7 +10,7 @@ import net.cofcool.chaos.server.core.config.WebApplicationContext;
 import org.apache.shiro.web.filter.AccessControlFilter;
 
 /**
- * 权限处理，未授权时跳转到 {@link Auth#getUnauthUrl()}
+ * 权限处理, 未授权时跳转到 {@link Auth#getUnauthUrl()}
  *
  * @author CofCool
  */

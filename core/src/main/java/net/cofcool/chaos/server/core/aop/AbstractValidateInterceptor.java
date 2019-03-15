@@ -17,7 +17,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
 /**
- * 参数校验切面，通过拦截<b>Controller</b>实现，被代理类需使用 {@link Scanned} 注解。
+ * 参数校验切面, 通过拦截<b>Controller</b>实现, 被代理类需使用 {@link Scanned} 注解。
  *
  * @author zq
  * @author CofCool
@@ -60,7 +60,7 @@ public abstract class AbstractValidateInterceptor extends AbstractScannedMethodI
     }
 
     /**
-     * 从 <code>BindingResult</code> 中读取验证信息，如果没有，则返回 "NULL"
+     * 从 <code>BindingResult</code> 中读取验证信息, 如果没有, 则返回 "NULL"
      * @param result BindingResult 实例
      * @return 验证信息
      */

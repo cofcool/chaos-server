@@ -121,7 +121,7 @@ public final class WebUtils {
     /**
      * 设置CORS响应头
      * @param servletResponse 响应
-     * @param allowedDomain 允许跨域请求的域名，默认为 <b>*<b/>
+     * @param allowedDomain 允许跨域请求的域名, 默认为 <b>*<b/>
      * @return ServletResponse
      */
     public static ServletResponse setupCorsHeader(HttpServletResponse servletResponse, @Nullable String allowedDomain) {

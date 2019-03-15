@@ -8,7 +8,7 @@ import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
 
 /**
- * 密码验证，配合 {@link CaptchaUsernamePasswordToken}
+ * 密码验证, 配合 {@link CaptchaUsernamePasswordToken}
  *
  * @author CofCool
  */

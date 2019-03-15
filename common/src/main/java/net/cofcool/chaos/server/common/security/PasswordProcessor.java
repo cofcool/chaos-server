@@ -1,7 +1,7 @@
 package net.cofcool.chaos.server.common.security;
 
 /**
- * 密码处理，包括加密和解密
+ * 密码处理, 包括加密和解密
  *
  * @author CofCool
  */

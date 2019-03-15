@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 
 /**
- * JPA相关配置，如下示例:
+ * JPA相关配置, 如下示例:
  *
  * <pre class="code">
  * &#064;Configuration

@@ -39,7 +39,7 @@ public final class BeanUtils {
     }
 
     /**
-     * 拷贝source实例的属性到target中，并返回
+     * 拷贝source实例的属性到target中, 并返回
      * @param source 源对象
      * @param targetClass 目标类
      * @param <T> 目标类类型

@@ -18,14 +18,14 @@ public interface ExceptionLevel {
     int LOWEST_LEVEL = Integer.MAX_VALUE;
 
     /**
-     * 普通等级，高于该等级的异常会输出日志
+     * 普通等级, 高于该等级的异常会输出日志
      */
     int NORMAL_LEVEL = 0;
 
     int getLevel();
 
     /**
-     * 是否输出日志，true则表示输出日志
+     * 是否输出日志, true则表示输出日志
      * @return 是否输出日志
      */
     default boolean showable() {

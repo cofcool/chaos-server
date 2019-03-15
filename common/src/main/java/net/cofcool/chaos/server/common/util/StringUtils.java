@@ -20,7 +20,7 @@ public final class StringUtils {
     }
 
     /**
-     * 去除头尾空格，如果去除后为空则返回null
+     * 去除头尾空格, 如果去除后为空则返回null
      */
     public static String clean(String in) {
         String out = in;

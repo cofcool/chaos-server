@@ -8,7 +8,7 @@ import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 /**
  * Redis configuration
  *
- * Spring Boot 会创建<code>redisTemplate</code>，<code>stringRedisTemplate</code>实例
+ * Spring Boot 会创建<code>redisTemplate</code>, <code>stringRedisTemplate</code>实例
  *
  * @see org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
  * @see org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration

@@ -4,7 +4,7 @@ package net.cofcool.chaos.server.common.core;
 import java.util.Objects;
 
 /**
- * 基础 <b>Service</b>，简化查询操作
+ * 基础 <b>Service</b>, 简化查询操作
  *
  * @see DataAccess
  *
@@ -36,7 +36,7 @@ public abstract class SimpleService<T> implements DataAccess<T> {
      * @param condition 条件
      * @param entity 实体
      *
-     * @return 查询结果，需和 {@link #pageProcessor} 支持类型一致
+     * @return 查询结果, 需和 {@link #pageProcessor} 支持类型一致
      */
     protected abstract Object queryWithPage(Page<T> condition, T entity);
 

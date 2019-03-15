@@ -15,7 +15,7 @@ public final class ExceptionCode {
     public static final String SERVER_OK = "00";
 
     /**
-     * 未登录，或登录过期
+     * 未登录, 或登录过期
      */
     public static final String NO_LOGIN = "A1";
 

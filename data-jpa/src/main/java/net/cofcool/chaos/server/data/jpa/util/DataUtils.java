@@ -11,7 +11,7 @@ import org.springframework.data.domain.PageImpl;
 public class DataUtils {
 
     /**
-     * 处理连表结果，适用于单条数据，多条分页数据参考 {@link Paging}
+     * 处理连表结果, 适用于单条数据, 多条分页数据参考 {@link Paging}
      * <br>
      *
      * @see Paging
@@ -28,7 +28,7 @@ public class DataUtils {
     }
 
     /**
-     * 处理连表结果，适用于多条数据，分页数据参考 {@link Paging}
+     * 处理连表结果, 适用于多条数据, 分页数据参考 {@link Paging}
      * <br>
      *
      * @see Paging

@@ -78,7 +78,7 @@ public class JsonAuthenticationFilter extends UsernamePasswordAuthenticationFilt
                     authResult, this.getClass()));
         }
 
-        // 直接返回数据，如重定向到“/”路径可调用父类方法
+        // 直接返回数据, 如重定向到“/”路径可调用父类方法
         request.getSession(true).setAttribute(AuthConstant.LOGINED_USER_KEY, authResult.getPrincipal());
          messageConverter.write(authResult.getPrincipal(), MediaType.APPLICATION_JSON, new ServletServerHttpResponse(response));
     }

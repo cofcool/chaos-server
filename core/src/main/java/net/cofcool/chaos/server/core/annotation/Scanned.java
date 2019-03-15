@@ -10,7 +10,7 @@ import net.cofcool.chaos.server.core.aop.ScannedMethodInterceptor;
 import net.cofcool.chaos.server.core.aop.ScannedResourceAdvisor;
 
 /**
- * 标记资源，若标记，可通过 {@link BeanResourceHolder} 管理该资源
+ * 标记资源, 若标记, 可通过 {@link BeanResourceHolder} 管理该资源
  *
  * @author CofCool
  *

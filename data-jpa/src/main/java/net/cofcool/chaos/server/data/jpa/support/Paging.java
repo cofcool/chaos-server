@@ -55,8 +55,8 @@ public class Paging<T> extends Page<T> {
     }
 
     /**
-     * Page中的元素为List时，本方法可合并List的元素到 primaryBean。
-     * 当primaryBean中的getter方法使用@Transient标注时，即触发合并操作。<br>
+     * Page中的元素为List时, 本方法可合并List的元素到 primaryBean。
+     * 当primaryBean中的getter方法使用@Transient标注时, 即触发合并操作。<br>
      *
      * 注意：primaryBean需有getter和setter方法
      *
@@ -89,7 +89,7 @@ public class Paging<T> extends Page<T> {
         Map<Class, Object> classValueMap = new HashMap<>();
         for (int i = 0; i < mPageList.size(); i++) {
             Object item = mPageList.get(i);
-            // 连表时有多个结果的话，item类型为数组，即Object[]
+            // 连表时有多个结果的话, item类型为数组, 即Object[]
             if (item.getClass().isArray()) {
                 Object[] result = (Object[]) item;
                 for (Object cItem : result) {

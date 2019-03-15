@@ -13,7 +13,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * 基于 {@link JpaRepository} 的简单 <b>Service</b> 实现，子类需通过 {@link #afterPropertiesSet()} 方法配置 <b>jpaRepository</b>
+ * 基于 {@link JpaRepository} 的简单 <b>Service</b> 实现, 子类需通过 {@link #afterPropertiesSet()} 方法配置 <b>jpaRepository</b>
  *
  * @author CofCool
  */

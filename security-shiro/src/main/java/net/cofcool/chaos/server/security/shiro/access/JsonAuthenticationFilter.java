@@ -10,7 +10,7 @@ import net.cofcool.chaos.server.core.config.WebApplicationContext;
 import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
 
 /**
- * 处理未登录情况，未登录时跳转到 {@link Auth#getUnLoginUrl()}，重写"Shiro"默认的未登录处理方法。
+ * 处理未登录情况, 未登录时跳转到 {@link Auth#getUnLoginUrl()}, 重写"Shiro"默认的未登录处理方法。
  *
  * @author CofCool
  */

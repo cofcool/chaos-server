@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * 代理 {@link MethodInvocation}，不支持 {@link #proceed()} 操作。
+ * 代理 {@link MethodInvocation}, 不支持 {@link #proceed()} 操作。
  *
  * @author CofCool
  */

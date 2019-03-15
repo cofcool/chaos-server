@@ -9,7 +9,7 @@ import java.util.HashSet;
 
 /**
  * 用户信息
- * @param <T> 用户具体数据，通过{@link #getDetail()}获取
+ * @param <T> 用户具体数据, 通过{@link #getDetail()}获取
  * @author CofCool
  *
  * @see UserRole
@@ -43,7 +43,7 @@ public class User <T extends Auth<D, ID>, D extends Serializable, ID extends Ser
     private Collection<UserStatus> userStatuses = new HashSet<>();
 
     /**
-     * 用户具体数据，根据用户级别获取对应类型的用户数据
+     * 用户具体数据, 根据用户级别获取对应类型的用户数据
      */
     private T detail;
 

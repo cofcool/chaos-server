@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 标识基础组件，避免组件调用混乱
+ * 标识基础组件, 避免组件调用混乱
  *
  * @author CofCool
  */

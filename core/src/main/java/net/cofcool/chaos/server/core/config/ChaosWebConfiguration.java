@@ -24,7 +24,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 /**
- * Spring Mvc 配置，包含message converter, locale等，应用可继承该类
+ * Spring Mvc 配置, 包含message converter, locale等, 应用可继承该类
  *
  * @author CofCool
  *
@@ -60,7 +60,7 @@ public class ChaosWebConfiguration extends DelegatingWebMvcConfiguration {
     }
 
     /**
-     * 根据情况设置，Spring Boot会自动配置
+     * 根据情况设置, Spring Boot会自动配置
      *
      * @see org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration
      */

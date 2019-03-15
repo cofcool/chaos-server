@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 /**
- * JPA分页模型，实现Pageable接口
+ * JPA分页模型, 实现Pageable接口
  *
  * @author CofCool
  *

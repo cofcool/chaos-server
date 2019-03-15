@@ -15,7 +15,7 @@ public class PageSupport {
      * <p>
      *     <b>1. 页数</b>
      *     <ul>
-     *         <li>添加默认值，查看{@link Page}</li>
+     *         <li>添加默认值, 查看{@link Page}</li>
      *         <li>临界值处理</li>
      *     </ul>
      * </p>

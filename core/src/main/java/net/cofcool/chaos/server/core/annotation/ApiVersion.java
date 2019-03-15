@@ -8,11 +8,11 @@ import java.lang.annotation.Target;
 
 /**
  *
- * 设定接口版本号，版本号一致时接口才会允许调用，值需为int类型，类似build_version<br/>
+ * 设定接口版本号, 版本号一致时接口才会允许调用, 值需为int类型, 类似build_version<br/>
  *
  * <ul>
- *     <li>如果值为<b>ALLOW_ALL</b>，则适用于所有版本</li>
- *     <li>如果值为<b>DENIAL_ALL</b>，则禁止访问</li>
+ *     <li>如果值为<b>ALLOW_ALL</b>, 则适用于所有版本</li>
+ *     <li>如果值为<b>DENIAL_ALL</b>, 则禁止访问</li>
  * </ul>
  *
  * 可通过<b>ChaosConfiguration.CURRENT_BUILD_VERSION</b>获取当前构建版本<br/>
@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
  *
  * <br>
  *
- * 如只在<code>method<code/>上使用，需使用<code>@Scanned</code>标注该方法所在的类
+ * 如只在<code>method<code/>上使用, 需使用<code>@Scanned</code>标注该方法所在的类
  *
  *
  * @author CofCool

@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 import net.cofcool.chaos.server.common.util.BeanUtils;
 
 /**
- * 分页实体，包含日期处理，关键字等，默认 pageNumber 为 0 时为第一页
+ * 分页实体, 包含日期处理, 关键字等, 默认 pageNumber 为 0 时为第一页
  *
  * @author CofCool
  **/
@@ -62,7 +62,7 @@ public class Page<T> implements Serializable {
     public Page() {}
 
     /**
-     * 创建空列表Page实例，推荐使用，不建议使用 {@link #Page()}
+     * 创建空列表Page实例, 推荐使用, 不建议使用 {@link #Page()}
      * @param <T> 类型
      * @return Page
      */
@@ -122,7 +122,7 @@ public class Page<T> implements Serializable {
     }
 
     /**
-     * 获取T类型的condition实例，如果为null，则会创建
+     * 获取T类型的condition实例, 如果为null, 则会创建
      * @param clazz T
      * @return condition实例
      */

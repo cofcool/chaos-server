@@ -7,7 +7,7 @@ import org.apache.shiro.authc.pam.AbstractAuthenticationStrategy;
 import org.apache.shiro.realm.Realm;
 
 /**
- * 继承 {@link AbstractAuthenticationStrategy}，重写 {@link #afterAttempt(Realm, AuthenticationToken, AuthenticationInfo, AuthenticationInfo, Throwable)} 方法，当应用抛出异常时，shiro 应直接抛出该异常
+ * 继承 {@link AbstractAuthenticationStrategy}, 重写 {@link #afterAttempt(Realm, AuthenticationToken, AuthenticationInfo, AuthenticationInfo, Throwable)} 方法, 当应用抛出异常时, shiro 应直接抛出该异常
  *
  * @author CofCool
  */

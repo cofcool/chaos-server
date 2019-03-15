@@ -148,8 +148,8 @@ public class SpecificationUtils {
 
     /**
      * <p>
-     * JDK 8 的 HashMap 在并发操作(如<code>computeIfAbsent</code>)时并不会抛出 <code>ConcurrentModificationException</code> 异常，
-     * 但是 JDK 11 会抛出异常，因此改为 <code>ConcurrentHashMap</code>。
+     * JDK 8 的 HashMap 在并发操作(如<code>computeIfAbsent</code>)时并不会抛出 <code>ConcurrentModificationException</code> 异常,
+     * 但是 JDK 11 会抛出异常, 因此改为 <code>ConcurrentHashMap</code>。
      * <pre>
      *     int mc = modCount;
      *     V v = mappingFunction.apply(key);

@@ -78,7 +78,7 @@ public class ChaosConfiguration implements AsyncConfigurer, ApplicationContextAw
     }
 
     /**
-     * 配置AOP，使用 {@link Scanned} 注解的类可以被代理
+     * 配置AOP, 使用 {@link Scanned} 注解的类可以被代理
      *
      * @param scannedMethodInterceptors 应用创建的 {@link ScannedMethodInterceptor} 实例列表
      * @return Advisor

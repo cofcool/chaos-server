@@ -3,7 +3,7 @@ package net.cofcool.chaos.server.core.support;
 import net.cofcool.chaos.server.common.core.ExceptionCode;
 
 /**
- * 异常描述信息，从"国际化资源文件"读取描述信息，默认使用前缀{@link #EXCEPTION_CODE_INFO_PREFIX}。
+ * 异常描述信息, 从"国际化资源文件"读取描述信息, 默认使用前缀{@link #EXCEPTION_CODE_INFO_PREFIX}。
  *
  * @see ExceptionCode
  *
@@ -27,7 +27,7 @@ public class ExceptionCodeInfo {
     }
 
     /**
-     * 未登录，或登录过期
+     * 未登录, 或登录过期
      */
     public static String noLogin() {
         return EXCEPTION_CODE_MANAGER.get("noLogin", true);

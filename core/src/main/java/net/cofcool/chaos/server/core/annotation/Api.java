@@ -9,11 +9,11 @@ import net.cofcool.chaos.server.common.security.Device;
 import net.cofcool.chaos.server.common.security.UserRole;
 
 /**
- * 接口属性定义，包括版本号，支持设备，数据过滤，描述等
+ * 接口属性定义, 包括版本号, 支持设备, 数据过滤, 描述等
  *
  * <br>
  *
- * 如只在<code>method<code/>上使用，需使用<code>@Scanned</code>标注该方法所在的类
+ * 如只在<code>method<code/>上使用, 需使用<code>@Scanned</code>标注该方法所在的类
  *
  * @see ApiVersion
  * @see DataAuthExclude

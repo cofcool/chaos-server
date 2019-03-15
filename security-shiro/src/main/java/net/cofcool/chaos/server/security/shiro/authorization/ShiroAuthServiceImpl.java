@@ -123,7 +123,7 @@ public class ShiroAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable,
     }
 
     /**
-     * 存储用户数据，会覆盖旧数据，谨慎使用
+     * 存储用户数据, 会覆盖旧数据, 谨慎使用
      * @param currentUser 用户信息
      */
     protected void storageUser(User currentUser) {

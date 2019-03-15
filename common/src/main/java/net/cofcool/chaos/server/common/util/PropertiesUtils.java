@@ -38,7 +38,7 @@ public class PropertiesUtils {
     }
 
     /**
-     * 从配置文件读取对应的值，不存在时返回""，
+     * 从配置文件读取对应的值, 不存在时返回"",
      * 调用本方法前需调用 {@link #getConfigProperties(String)} 或 {@link #getConfigProperty(String, String)}
      */
     public static String getConfigProperty(String key) {
@@ -66,7 +66,7 @@ public class PropertiesUtils {
      * @param properties properties
      * @param rootKey key前缀
      * @param clazz T的class实例
-     * @param <T> 对象类型，属性需为"String"类型
+     * @param <T> 对象类型, 属性需为"String"类型
      *
      * @return T
      *
@@ -88,7 +88,7 @@ public class PropertiesUtils {
      * @param properties properties
      * @param rootKey key前缀
      * @param clazz T的class实例
-     * @param <T> 对象类型，属性需为"String"类型
+     * @param <T> 对象类型, 属性需为"String"类型
      *
      * @return T
      *

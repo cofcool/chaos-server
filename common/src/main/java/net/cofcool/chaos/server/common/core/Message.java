@@ -3,7 +3,7 @@ package net.cofcool.chaos.server.common.core;
 import java.io.Serializable;
 
 /**
- * 封装数据，包含状态与描述
+ * 封装数据, 包含状态与描述
  *
  * @author CofCool
  */
