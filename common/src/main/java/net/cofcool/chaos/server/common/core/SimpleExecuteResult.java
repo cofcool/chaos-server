@@ -1,5 +1,7 @@
 package net.cofcool.chaos.server.common.core;
 
+import java.util.NoSuchElementException;
+
 /**
  * ExecuteResult 简单实现
  *
@@ -31,6 +33,10 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
 
     @Override
     public T getEntity() {
+        if (!successful() || entity == null) {
+            throw new NoSuchElementException("No value present");
+        }
+
         return entity;
     }
 

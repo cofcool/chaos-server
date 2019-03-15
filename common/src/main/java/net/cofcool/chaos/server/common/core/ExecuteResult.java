@@ -1,5 +1,6 @@
 package net.cofcool.chaos.server.common.core;
 
+import java.util.NoSuchElementException;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 
@@ -12,6 +13,8 @@ public interface ExecuteResult<T> extends Result<T> {
 
     /**
      * 携带数据
+     *
+     * @throws NoSuchElementException 数据不存在或未成功时抛出异常
      */
     T getEntity();
 
