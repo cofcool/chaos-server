@@ -12,6 +12,7 @@ import net.cofcool.chaos.server.common.core.ExceptionCode;
 import net.cofcool.chaos.server.common.core.ExceptionLevel;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.core.ServiceException;
+import net.cofcool.chaos.server.common.util.WebUtils;
 import net.cofcool.chaos.server.core.aop.AbstractValidateInterceptor;
 import net.cofcool.chaos.server.core.config.DevelopmentMode;
 import net.cofcool.chaos.server.core.config.WebApplicationContext;
@@ -64,7 +65,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     @Override
     protected ModelAndView doResolveException(HttpServletRequest request,
                                               HttpServletResponse response, Object handler, Exception ex) {
-        printExceptionLog(handler, ex);
+        printExceptionLog(request, handler, ex);
 
         if (ex instanceof DuplicateKeyException) {
             return handleSqlIntegrityViolationException(response, ex);
@@ -98,16 +99,16 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         return EMPTY_MODEL_AND_VIEW;
     }
 
-    private void printExceptionLog(Object handler, Exception ex) {
+    protected void printExceptionLog(HttpServletRequest request, Object handler, Exception ex) {
         if (logger.isErrorEnabled() && ((!(ex instanceof ExceptionLevel)) || ((ExceptionLevel) ex).showable())) {
             OutputStream outputStream = new ByteArrayOutputStream();
             ex.printStackTrace(new PrintStream(outputStream));
 
-            logger.error("exception log: " + outputStream.toString());
+            logger.error("exception log: path=[" + WebUtils.getRealRequestPath(request) + "];exception=[" + outputStream.toString() + "]");
         }
     }
 
-    private ModelAndView resolveOthersException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+    protected ModelAndView resolveOthersException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         ModelAndView modelAndView = this.defaultExceptionResolver.resolveException(request, response, handler, ex);
         if (modelAndView == null) {
             writeMessage(
