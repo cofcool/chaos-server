@@ -13,27 +13,27 @@ import net.cofcool.chaos.server.common.security.User;
  *
  * @author CofCool
  */
-public interface UserAuthorizationService<T extends Auth<D, ID>, D extends Serializable, ID extends Serializable> {
+public interface UserAuthorizationService<T extends Auth, ID extends Serializable> {
 
     /**
      * 查询登陆用户
      * @param loginUser 登陆参数
      * @return 查询结果
      */
-    User<T, D, ID> queryUser(AbstractLogin loginUser);
+    User<T, ID> queryUser(AbstractLogin loginUser);
 
     /**
      * 检查用户, 登陆时调用
      * @param currentUser 当前用户
      * @return {@link Message}
      */
-    Message<Boolean> checkUser(User<T, D, ID> currentUser);
+    Message<Boolean> checkUser(User<T, ID> currentUser);
 
     /**
      * 配置登陆时的用户数据
      * @param currentUser 当前用户
      */
-    void setupUserData(User<T, D, ID> currentUser);
+    void setupUserData(User<T, ID> currentUser);
 
     /**
      * 检查权限

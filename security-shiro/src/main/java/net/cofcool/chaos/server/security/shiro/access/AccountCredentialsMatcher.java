@@ -33,6 +33,6 @@ public class AccountCredentialsMatcher implements CredentialsMatcher {
 
         CaptchaUsernamePasswordToken userToken = (CaptchaUsernamePasswordToken) token;
         User user = (User) info.getPrincipals().getPrimaryPrincipal();
-        return passwordProcessor.doMatch(new String(userToken.getPassword()), user.getLoginPwd());
+        return passwordProcessor.doMatch(new String(userToken.getPassword()), user.getPassword());
     }
 }

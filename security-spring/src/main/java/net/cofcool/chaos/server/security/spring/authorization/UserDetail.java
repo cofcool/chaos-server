@@ -1,6 +1,5 @@
 package net.cofcool.chaos.server.security.spring.authorization;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Collection;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.UserStatus;
@@ -33,12 +32,6 @@ public class UserDetail extends User implements
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return UserUtils.convertUserRolesForSpring(getRoles());
-    }
-
-    @Override
-    @JsonIgnore
-    public String getPassword() {
-        return getLoginPwd();
     }
 
     @Override

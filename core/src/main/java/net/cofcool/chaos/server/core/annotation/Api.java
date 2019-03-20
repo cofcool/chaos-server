@@ -13,7 +13,7 @@ import net.cofcool.chaos.server.common.security.UserRole;
  *
  * <br>
  *
- * 如只在<code>method<code/>上使用, 需使用<code>@Scanned</code>标注该方法所在的类
+ * 如只在<code>method</code>上使用, 需使用<code>@Scanned</code>标注该方法所在的类
  *
  * @see ApiVersion
  * @see DataAuthExclude

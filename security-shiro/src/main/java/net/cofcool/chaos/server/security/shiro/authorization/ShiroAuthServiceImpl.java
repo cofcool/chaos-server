@@ -30,22 +30,22 @@ import org.springframework.util.Assert;
  *
  * @author CofCool
  */
-public class ShiroAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable, ID extends Serializable> implements AuthService<T, D, ID>, InitializingBean {
+public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> implements AuthService<T, ID>, InitializingBean {
 
-    private UserAuthorizationService<T, D, ID> userAuthorizationService;
+    private UserAuthorizationService<T, ID> userAuthorizationService;
 
-    public UserAuthorizationService<T, D, ID> getUserAuthorizationService() {
+    public UserAuthorizationService<T, ID> getUserAuthorizationService() {
         return userAuthorizationService;
     }
 
-    public void setUserAuthorizationService(UserAuthorizationService<T, D, ID> userAuthorizationService) {
+    public void setUserAuthorizationService(UserAuthorizationService<T, ID> userAuthorizationService) {
         this.userAuthorizationService = userAuthorizationService;
         this.userAuthorizationService.setUserProcessor(this::storageUser);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public Message<User<T, D, ID>> login(AbstractLogin loginUser) {
+    public Message<User<T, ID>> login(AbstractLogin loginUser) {
         CaptchaUsernamePasswordToken token = new CaptchaUsernamePasswordToken(loginUser);
 
         Subject user = SecurityUtils.getSubject();
@@ -131,21 +131,21 @@ public class ShiroAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable,
     }
 
     @SuppressWarnings("unchecked")
-    private User<T, D, ID> getCachedUser() {
+    private User<T, ID> getCachedUser() {
         Session session = SecurityUtils.getSubject().getSession(false);
         if (session != null) {
-            return (User<T, D, ID>) session.getAttribute(AuthConstant.LOGINED_USER_KEY);
+            return (User<T, ID>) session.getAttribute(AuthConstant.LOGINED_USER_KEY);
         }
 
         return null;
     }
 
-    private Message<User<T, D, ID>> returnUserInfo(User<T, D, ID> user) {
+    private Message<User<T, ID>> returnUserInfo(User<T, ID> user) {
         return Message.successful(ExceptionCodeInfo.serverOk(), user);
     }
 
     @Override
-    public User<T, D, ID> readCurrentUser() {
+    public User<T, ID> readCurrentUser() {
         return getCachedUser();
     }
 

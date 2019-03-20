@@ -1,6 +1,5 @@
 package net.cofcool.chaos.server.common.security;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,7 +14,7 @@ import java.util.HashSet;
  * @see UserRole
  * @see UserStatus
  */
-public class User <T extends Auth<D, ID>, D extends Serializable, ID extends Serializable> implements Serializable {
+public class User <T extends Auth, ID extends Serializable> implements Serializable {
 
     private static final long serialVersionUID = -7130929029282810791L;
 
@@ -29,8 +28,7 @@ public class User <T extends Auth<D, ID>, D extends Serializable, ID extends Ser
 
     private String avatar;
 
-    @JsonIgnore
-    private String loginPwd;
+    private String password;
 
     private Collection<UserRole> roles = new HashSet<>();
 
@@ -43,21 +41,20 @@ public class User <T extends Auth<D, ID>, D extends Serializable, ID extends Ser
     private Collection<UserStatus> userStatuses = new HashSet<>();
 
     /**
-     * 用户具体数据, 根据用户级别获取对应类型的用户数据
+     * 用户具体数据
      */
     private T detail;
 
     public User() {
     }
 
-    public User(String userName, String loginPwd) {
-        this(userName, loginPwd, SimpleDevice.BROWSER);
+    public User(String userName, String password) {
+        this(userName, password, SimpleDevice.BROWSER);
     }
 
-    public User(String userName, String loginPwd,
-        Device device) {
+    public User(String userName, String password, Device device) {
         this.userName = userName;
-        this.loginPwd = loginPwd;
+        this.password = password;
         this.device = device;
     }
 
@@ -125,12 +122,12 @@ public class User <T extends Auth<D, ID>, D extends Serializable, ID extends Ser
         this.avatar = avatar;
     }
 
-    public String getLoginPwd() {
-        return loginPwd;
+    public String getPassword() {
+        return password;
     }
 
-    public void setLoginPwd(String loginPwd) {
-        this.loginPwd = loginPwd;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Collection<UserRole> getRoles() {
@@ -190,7 +187,7 @@ public class User <T extends Auth<D, ID>, D extends Serializable, ID extends Ser
         newUser.setMobile(mobile);
         newUser.setNickName(nickName);
         newUser.setUserName(userName);
-        newUser.setLoginPwd(loginPwd);
+        newUser.setPassword(password);
         newUser.setRoles(roles);
         newUser.setRegisterTime(registerTime);
         newUser.setLatestLoginTime(latestLoginTime);

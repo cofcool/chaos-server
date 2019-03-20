@@ -1,14 +1,19 @@
 package net.cofcool.chaos.server.demo.config;
 
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
+import net.cofcool.chaos.server.common.security.Auth;
 import net.cofcool.chaos.server.common.security.User;
+import net.cofcool.chaos.server.common.security.UserRole;
+import net.cofcool.chaos.server.common.security.UserStatus;
 import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
-import net.cofcool.chaos.server.core.support.UserConfiguration;
 import net.cofcool.chaos.server.demo.item.UserData;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -43,10 +48,43 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService, I
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        User user = UserConfiguration.buildDefaultUser();
-        UserData userData = new UserData("1", "test data");
-        user.setDetail(userData);
+        User user = buildDefaultUser();
         userMap.put(user.getUserName(), user);
+    }
+
+    private User<? extends Auth, Long> buildDefaultUser() {
+        User<UserData, Long>defaultUser = new User<>();
+        defaultUser.addRole(new UserRole() {
+            private static final long serialVersionUID = 5571835917896222870L;
+
+            @Nullable
+            @Override
+            public UserRole getParent() {
+                return null;
+            }
+
+            @Nullable
+            @Override
+            public Collection<UserRole> getChildren() {
+                return null;
+            }
+
+            @Override
+            public int getRoleId() {
+                return 0;
+            }
+
+        });
+        defaultUser.setUserName("root");
+        defaultUser.setPassword("000000");
+        defaultUser.setNickName("Root");
+        defaultUser.setUserId(0L);
+        defaultUser.setRegisterTime(new Date(0));
+        defaultUser.setLatestLoginTime(new Date());
+        defaultUser.setDetail(new UserData());
+        defaultUser.addUserStatus(UserStatus.NORMAL);
+
+        return defaultUser;
     }
 
 }

@@ -25,12 +25,12 @@ import org.springframework.util.Assert;
  * @author CofCool
  */
 @Slf4j
-public class SpringAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable, ID extends Serializable> implements AuthService<T, D, ID>, UserDetailsManager,
+public class SpringAuthServiceImpl<T extends Auth, ID extends Serializable> implements AuthService<T, ID>, UserDetailsManager,
     InitializingBean {
 
-    private UserAuthorizationService<T, D, ID> userAuthorizationService;
+    private UserAuthorizationService<T, ID> userAuthorizationService;
 
-    public UserAuthorizationService<T, D, ID> getUserAuthorizationService() {
+    public UserAuthorizationService<T, ID> getUserAuthorizationService() {
         return userAuthorizationService;
     }
 
@@ -45,7 +45,7 @@ public class SpringAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable
     }
 
     @Override
-    public Message<User<T, D, ID>> login(AbstractLogin loginUser) {
+    public Message<User<T, ID>> login(AbstractLogin loginUser) {
         return Message.successful( "Ok", userAuthorizationService.queryUser(loginUser));
     }
 
@@ -58,8 +58,8 @@ public class SpringAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable
     @SuppressWarnings("unchecked")
     @Nullable
     @Override
-    public User<T, D, ID> readCurrentUser() {
-        return (User<T, D, ID>) WebUtils.getRequest().getSession().getAttribute(AuthConstant.LOGINED_USER_KEY);
+    public User<T, ID> readCurrentUser() {
+        return (User<T, ID>) WebUtils.getRequest().getSession().getAttribute(AuthConstant.LOGINED_USER_KEY);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class SpringAuthServiceImpl<T extends Auth<D, ID>, D extends Serializable
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User<T, D, ID> user = userAuthorizationService.queryUser(new DefaultLogin(username, ""));
+        User<T, ID> user = userAuthorizationService.queryUser(new DefaultLogin(username, ""));
 
         if (user == null) {
             UsernameNotFoundException e = new UsernameNotFoundException(username);

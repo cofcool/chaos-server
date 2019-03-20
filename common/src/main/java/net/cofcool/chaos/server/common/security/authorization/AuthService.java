@@ -1,6 +1,5 @@
 package net.cofcool.chaos.server.common.security.authorization;
 
-
 import java.io.Serializable;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
@@ -14,19 +13,18 @@ import net.cofcool.chaos.server.common.security.User;
  * 授权管理
  *
  * @param <T> User中用户详细数据
- * @param <D> T中对应的详细数据
- * @param <ID> ID
+ * @param <ID> 用户id
  *
  * @author CofCool
  */
-public interface AuthService<T extends Auth<D, ID>, D extends Serializable, ID extends Serializable> {
+public interface AuthService<T extends Auth, ID extends Serializable> {
 
     /**
      * 登陆
      * @param loginUser 登陆时携带的参数
      * @return 登陆数据
      */
-    Message<User<T, D, ID>> login(AbstractLogin loginUser);
+    Message<User<T, ID>> login(AbstractLogin loginUser);
 
     /**
      * 退出登陆
@@ -38,6 +36,6 @@ public interface AuthService<T extends Auth<D, ID>, D extends Serializable, ID e
      * @return {@link User}
      */
     @Nullable
-    User<T, D, ID> readCurrentUser();
+    User<T, ID> readCurrentUser();
 
 }

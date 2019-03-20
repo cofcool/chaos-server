@@ -12,7 +12,7 @@ import net.cofcool.chaos.server.common.security.ExcludeType;
  *
  * <br>
  *
- * 如只在<code>method<code/>上使用, 需使用<code>@Scanned</code>标注该方法所在的类, 如果该类已使用<code>@Api</code>注解, 则需使用 {@link Api#authExclude()} 配置, 直接使用 {@link #value()} 不会生效。
+ * 如只在<code>method</code>上使用, 需使用<code>@Scanned</code>标注该方法所在的类, 如果该类已使用<code>@Api</code>注解, 则需使用 {@link Api#authExclude()} 配置, 直接使用 {@link #value()} 不会生效。
  *
  * @author CofCool
  *
