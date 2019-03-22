@@ -34,7 +34,14 @@ public interface ExecuteResult<T> extends Result<T> {
     }
 
     /**
-     * 如果 {@link #successful()} 为 true, 则执行 fn, 否则返回 null
+     * 获取结果数据, 如果为"NULL", 则返回"newVal"
+     * @param newVal 替代数据
+     * @return 结果数据
+     */
+    T orElse(T newVal);
+
+    /**
+     * 如果 {@link #successful()} 为"true", 则执行"fn", 否则返回"NULL"
      *
      * @param fn 需要执行的 Function
      * @param <R> 返回数据类型

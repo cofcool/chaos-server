@@ -58,6 +58,11 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
         return message;
     }
 
+    @Override
+    public T orElse(T newVal) {
+        return entity == null ? newVal : entity;
+    }
+
     public void setMessage(Message<T> message) {
         this.message = message;
     }
