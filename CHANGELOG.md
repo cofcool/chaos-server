@@ -16,3 +16,9 @@
 
 * Shiro 升级到`1.4.0`, 并移除"shiro-ehcache"(Ehcache 版本过低, 与 Spring 监控不兼容)
 * 其它问题修复
+
+**0.4.0-SNAPSHOT**:
+
+* 简化`User`结构
+* 修改`ExecuteResult.getEntity`实现, 如果执行失败, 调用时会抛出异常
+* `ExecuteResult`添加`orElse`方法
