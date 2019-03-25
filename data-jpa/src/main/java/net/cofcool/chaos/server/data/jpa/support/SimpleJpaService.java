@@ -8,6 +8,7 @@ import net.cofcool.chaos.server.common.core.Result.ResultState;
 import net.cofcool.chaos.server.common.core.SimpleExecuteResult;
 import net.cofcool.chaos.server.common.core.SimpleService;
 import net.cofcool.chaos.server.common.util.BeanUtils;
+import org.hibernate.event.spi.FlushEntityEvent;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -50,6 +51,14 @@ public abstract class SimpleJpaService<T, ID> extends SimpleService<T> implement
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * <br>
+     *
+     * 除了手动更新数据外, 也可直接修改查询到的实体数据("set"操作), 当"Hibernate"执行"flush"操作时,
+     * {@link org.hibernate.event.internal.DefaultFlushEntityEventListener#onFlushEntity(FlushEntityEvent)} 会检查实体是否需要更新数据,
+     * 但该操作可能耗时严重, 因此尽量避免触发自动更新操作
+     */
     @Override
     public ExecuteResult<T> update(T entity) {
         ExecuteResult<T> result = queryById(entity);

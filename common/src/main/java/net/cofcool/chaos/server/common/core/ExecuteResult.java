@@ -41,17 +41,15 @@ public interface ExecuteResult<T> extends Result<T> {
     T orElse(T newVal);
 
     /**
-     * 如果 {@link #successful()} 为"true", 则执行"fn", 否则返回"NULL"
+     * 如果 <b>Entity</b> 不为"NULL", 则执行"fn", 否则返回"NULL"
      *
      * @param fn 需要执行的 Function
      * @param <R> 返回数据类型
      * @return fn 执行结果
-     *
-     * @throws NoSuchElementException 执行未成功或数据不存在时抛出异常
      */
     @Nullable
     default <R> R apply(Function<T, R> fn) {
-        if (successful()) {
+        if (orElse(null) != null) {
             return fn.apply(getEntity());
         }
 
