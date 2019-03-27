@@ -5,7 +5,6 @@ import java.util.Optional;
 import net.cofcool.chaos.server.common.core.ExecuteResult;
 import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.core.Result.ResultState;
-import net.cofcool.chaos.server.common.core.SimpleExecuteResult;
 import net.cofcool.chaos.server.common.core.SimpleService;
 import net.cofcool.chaos.server.common.util.BeanUtils;
 import org.hibernate.event.spi.FlushEntityEvent;
@@ -37,7 +36,7 @@ public abstract class SimpleJpaService<T, ID> extends SimpleService<T> implement
 
     @Override
     public ExecuteResult<T> add(T entity) {
-        return new SimpleExecuteResult<>(jpaRepository.save(entity), ResultState.SUCCESSFUL);
+        return ExecuteResult.of(jpaRepository.save(entity), ResultState.SUCCESSFUL);
     }
 
     @Override
@@ -68,12 +67,12 @@ public abstract class SimpleJpaService<T, ID> extends SimpleService<T> implement
 
         BeanUtils.overwriteNullProperties(entity, result.getEntity());
 
-        return new SimpleExecuteResult<>(jpaRepository.save(entity), ResultState.SUCCESSFUL);
+        return ExecuteResult.of(jpaRepository.save(entity), ResultState.SUCCESSFUL);
     }
 
     @Override
     public ExecuteResult<List<T>> queryAll(T entity) {
-        return new SimpleExecuteResult<>(jpaRepository.findAll(Example.of(entity)), ResultState.SUCCESSFUL);
+        return ExecuteResult.of(jpaRepository.findAll(Example.of(entity)), ResultState.SUCCESSFUL);
     }
 
     @Override
@@ -81,9 +80,9 @@ public abstract class SimpleJpaService<T, ID> extends SimpleService<T> implement
         Optional<T> data = jpaRepository.findById(getEntityId(entity));
         return data
             .<ExecuteResult<T>>map(t ->
-                new SimpleExecuteResult<>(t, ResultState.SUCCESSFUL))
+                ExecuteResult.of(t, ResultState.SUCCESSFUL))
             .orElseGet(() ->
-                new SimpleExecuteResult<>(null, ResultState.FAILURE));
+                ExecuteResult.of(null, ResultState.FAILURE));
     }
 
     /**

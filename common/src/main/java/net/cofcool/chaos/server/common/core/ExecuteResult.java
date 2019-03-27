@@ -56,4 +56,32 @@ public interface ExecuteResult<T> extends Result<T> {
         return null;
     }
 
+    /**
+     * 创建 ExecuteResult 实例的方便方法
+     *
+     * @param entity 结果数据
+     * @param state 执行状态
+     * @param <T> 结果类型
+     * @return ExecuteResult 实例
+     *
+     * @see SimpleExecuteResult
+     */
+    static <T> ExecuteResult<T> of(T entity, ResultState state) {
+        return new SimpleExecuteResult<>(entity, state);
+    }
+
+    /**
+     * 创建 ExecuteResult 实例的方便方法
+     *
+     * @param state 执行状态
+     * @param msg 描述信息
+     * @param <T> 结果类型
+     * @return ExecuteResult 实例
+     *
+     * @see SimpleExecuteResult
+     */
+    static <T> ExecuteResult<T> of(ResultState state, Message<T> msg) {
+        return new SimpleExecuteResult<>(state, msg);
+    }
+
 }
