@@ -5,7 +5,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import net.cofcool.chaos.server.common.security.ExcludeType;
 
 /**
  * 排除授权类型,  带有该注解的方法会忽略指定类型的参数注入。
@@ -17,7 +16,6 @@ import net.cofcool.chaos.server.common.security.ExcludeType;
  * @author CofCool
  *
  * @see Api
- * @see ExcludeType
  * @see Scanned
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
@@ -27,13 +25,27 @@ import net.cofcool.chaos.server.common.security.ExcludeType;
 public @interface DataAuthExclude {
 
     /**
-     * ExcludeType 类型
+     * 需要排除的字段, 需要和 {@link #mode()} 配合使用, 只有"always"模式时才会进行排除
      */
-    Class<? extends ExcludeType> type() default ExcludeType.SimpleExcludeType.class;
+    String[] value() default { };
 
     /**
-     * 需要排除的字段
+     * 是否需要检测
+     * @return 默认不检测
      */
-    String[] value() default { ExcludeType.NONE };
+    ExcludeMode mode() default ExcludeMode.never;
+
+    enum ExcludeMode {
+
+        /**
+         * 从不检测
+         */
+        never,
+
+        /**
+         * 始终检测
+         */
+        always
+    }
 
 }

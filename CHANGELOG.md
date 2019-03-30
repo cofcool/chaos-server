@@ -22,3 +22,5 @@
 * 简化`User`结构
 * 修改`ExecuteResult.getEntity`实现, 如果执行失败, 调用时会抛出异常
 * `ExecuteResult`添加`orElse`方法
+* 优化`AbstractApiInterceptor`, 移除`ExcludeType`
+* 移除`security-shiro`模块对的`data-redis`依赖

@@ -1,9 +1,10 @@
 package net.cofcool.chaos.server.core.config;
 
 import java.io.File;
+import java.util.Map;
+import net.cofcool.chaos.server.core.annotation.ApiVersion;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.util.StringUtils;
 
 /**
  * 项目可配置项
@@ -23,6 +24,11 @@ public final class ChaosProperties {
     private Development development = new Development();
 
     private Data data = new Data();
+
+    /**
+     * 应用自定义配置
+     */
+    private Map<String, String> properties;
 
     public static class Data {
 
@@ -215,8 +221,10 @@ public final class ChaosProperties {
 
         /**
          * 项目版本
+         *
+         * @see net.cofcool.chaos.server.core.annotation.ApiVersion
          */
-        private Integer version;
+        private Integer version = ApiVersion.NO_LIMIT;
 
         /**
          * 定义扫描 Scanned 注解的路径
@@ -312,13 +320,17 @@ public final class ChaosProperties {
         this.data = data;
     }
 
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
+
     public boolean isDev() {
         return getDevelopment().getMode().equals(DevelopmentMode.DEV) ||
                 getDevelopment().getMode().equals(DevelopmentMode.TEST);
-    }
-
-    public String[] getDefinedAuthDataKeys() {
-        return StringUtils.delimitedListToStringArray(getAuth().getCheckedKeys(), ",");
     }
 
 }
