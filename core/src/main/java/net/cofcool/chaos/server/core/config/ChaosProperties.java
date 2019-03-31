@@ -1,10 +1,11 @@
 package net.cofcool.chaos.server.core.config;
 
-import java.io.File;
-import java.util.Map;
 import net.cofcool.chaos.server.core.annotation.ApiVersion;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.io.File;
+import java.util.Map;
 
 /**
  * 项目可配置项
@@ -70,11 +71,6 @@ public final class ChaosProperties {
         private String checkedKeys = "";
 
         /**
-         * 授权码
-         */
-        private String authorizeCode = "";
-
-        /**
          * 是否开启验证码
          */
         private Boolean usingCaptcha = false;
@@ -125,17 +121,6 @@ public final class ChaosProperties {
 
         public void setCheckedKeys(String checkedKeys) {
             this.checkedKeys = checkedKeys;
-        }
-
-        /**
-         * 授权码, 参考 {@link WebApplicationContext#isDevAuthorization(String)}
-         */
-        public String getAuthorizeCode() {
-            return authorizeCode;
-        }
-
-        public void setAuthorizeCode(String authorizeCode) {
-            this.authorizeCode = authorizeCode;
         }
 
         public Boolean getUsingCaptcha() {
@@ -326,11 +311,6 @@ public final class ChaosProperties {
 
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
-    }
-
-    public boolean isDev() {
-        return getDevelopment().getMode().equals(DevelopmentMode.DEV) ||
-                getDevelopment().getMode().equals(DevelopmentMode.TEST);
     }
 
 }

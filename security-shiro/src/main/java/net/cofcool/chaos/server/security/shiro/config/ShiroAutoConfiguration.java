@@ -1,19 +1,10 @@
 package net.cofcool.chaos.server.security.shiro.config;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.Filter;
 import net.cofcool.chaos.server.common.security.PasswordProcessor;
 import net.cofcool.chaos.server.common.security.authorization.AuthService;
 import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
-import net.cofcool.chaos.server.core.config.WebApplicationContext;
-import net.cofcool.chaos.server.security.shiro.access.AccountCredentialsMatcher;
-import net.cofcool.chaos.server.security.shiro.access.AuthRealm;
-import net.cofcool.chaos.server.security.shiro.access.ExceptionAuthenticationStrategy;
-import net.cofcool.chaos.server.security.shiro.access.JsonAuthenticationFilter;
-import net.cofcool.chaos.server.security.shiro.access.PermissionFilter;
+import net.cofcool.chaos.server.core.config.ChaosProperties;
+import net.cofcool.chaos.server.security.shiro.access.*;
 import net.cofcool.chaos.server.security.shiro.authorization.ShiroAuthServiceImpl;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.Authenticator;
@@ -32,6 +23,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.servlet.Filter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Shiro 配置
  *
@@ -49,17 +46,29 @@ public class ShiroAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public ShiroFilterFactoryBean shiroFilter(UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, PasswordProcessor passwordProcessor) {
+    public ShiroFilterFactoryBean shiroFilter(UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, PasswordProcessor passwordProcessor, ChaosProperties properties) {
         Map<String, Filter> filterMap = new HashMap<>();
-        filterMap.put(PermissionFilter.FILTER_KEY, new PermissionFilter(userAuthorizationService));
-        filterMap.put(JsonAuthenticationFilter.FILTER_KEY, new JsonAuthenticationFilter(WebApplicationContext.getConfiguration().getAuth().getLoginUrl()));
+        filterMap.put(
+                PermissionFilter.FILTER_KEY,
+                new PermissionFilter(
+                        userAuthorizationService,
+                        properties.getAuth().getUnauthUrl()
+                )
+        );
+        filterMap.put(
+                JsonAuthenticationFilter.FILTER_KEY,
+                new JsonAuthenticationFilter(
+                        properties.getAuth().getLoginUrl(),
+                        properties.getAuth().getUnLoginUrl()
+                )
+        );
 
         ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
         factoryBean.setFilters(filterMap);
-        factoryBean.setSecurityManager(createSecurityManager(sessionManager, createDefaultAuthenticator(userAuthorizationService, passwordProcessor), shiroCacheManager));
-        factoryBean.setLoginUrl(WebApplicationContext.getConfiguration().getAuth().getLoginUrl());
-        factoryBean.setUnauthorizedUrl(WebApplicationContext.getConfiguration().getAuth().getUnauthUrl());
-        factoryBean.setFilterChainDefinitions(WebApplicationContext.getConfiguration().getAuth().getUrls());
+        factoryBean.setSecurityManager(createSecurityManager(sessionManager, createDefaultAuthenticator(userAuthorizationService, passwordProcessor, properties.getAuth()), shiroCacheManager));
+        factoryBean.setLoginUrl(properties.getAuth().getLoginUrl());
+        factoryBean.setUnauthorizedUrl(properties.getAuth().getUnauthUrl());
+        factoryBean.setFilterChainDefinitions(properties.getAuth().getUrls());
 
         return factoryBean;
     }
@@ -83,9 +92,9 @@ public class ShiroAutoConfiguration {
      * @param passwordProcessor 密码处理
      * @return authenticator
      */
-    public ModularRealmAuthenticator createDefaultAuthenticator(UserAuthorizationService userAuthorizationService, PasswordProcessor passwordProcessor) {
+    public ModularRealmAuthenticator createDefaultAuthenticator(UserAuthorizationService userAuthorizationService, PasswordProcessor passwordProcessor, ChaosProperties.Auth auth) {
         List<Realm> shiroRealms = new ArrayList<>();
-        shiroRealms.add(createDefaultAuthRealm(userAuthorizationService, passwordProcessor));
+        shiroRealms.add(createDefaultAuthRealm(userAuthorizationService, passwordProcessor, auth));
 
         ModularRealmAuthenticator realmAuthenticator = new ModularRealmAuthenticator();
         realmAuthenticator.setAuthenticationStrategy(new ExceptionAuthenticationStrategy());
@@ -94,13 +103,14 @@ public class ShiroAutoConfiguration {
         return realmAuthenticator;
     }
 
-    private Realm createDefaultAuthRealm(UserAuthorizationService userAuthorizationService, PasswordProcessor passwordProcessor) {
+    private Realm createDefaultAuthRealm(UserAuthorizationService userAuthorizationService, PasswordProcessor passwordProcessor, ChaosProperties.Auth auth) {
         AccountCredentialsMatcher matcher = new AccountCredentialsMatcher();
         matcher.setPasswordProcessor(passwordProcessor);
 
         AuthRealm realm = new AuthRealm();
         realm.setCredentialsMatcher(matcher);
         realm.setUserAuthorizationService(userAuthorizationService);
+        realm.setAuth(auth);
 
         return realm;
     }

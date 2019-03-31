@@ -17,5 +17,16 @@ public enum DevelopmentMode {
     /**
      * 发布模式
      */
-    RELEASE
+    RELEASE;
+
+    /**
+     * 是否是调试模式, 在 {@link #DEV} 和 {@link #TEST} 模式下会处于调试模式
+     * @return 是否是调试模式
+     */
+    public boolean isDebugMode() {
+        return this.equals(DevelopmentMode.DEV) ||
+                this.equals(DevelopmentMode.TEST);
+    }
+
+
 }

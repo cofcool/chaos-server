@@ -1,16 +1,15 @@
 package net.cofcool.chaos.server.security.shiro.access;
 
+import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
+import net.cofcool.chaos.server.common.util.WebUtils;
+import org.apache.shiro.web.filter.AccessControlFilter;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
-import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
-import net.cofcool.chaos.server.common.util.WebUtils;
-import net.cofcool.chaos.server.core.config.ChaosProperties.Auth;
-import net.cofcool.chaos.server.core.config.WebApplicationContext;
-import org.apache.shiro.web.filter.AccessControlFilter;
 
 /**
- * 权限处理, 未授权时跳转到 {@link Auth#getUnauthUrl()}
+ * 权限处理, 未授权时跳转到 {@link #unAuthUrl}
  *
  * @author CofCool
  */
@@ -20,8 +19,19 @@ public class PermissionFilter extends AccessControlFilter {
 
     private UserAuthorizationService authorizationService;
 
-    public PermissionFilter(UserAuthorizationService authorizationService) {
+    private String unAuthUrl;
+
+    public String getUnAuthUrl() {
+        return unAuthUrl;
+    }
+
+    public void setUnAuthUrl(String unAuthUrl) {
+        this.unAuthUrl = unAuthUrl;
+    }
+
+    public PermissionFilter(UserAuthorizationService authorizationService, String unAuthUrl) {
         this.authorizationService = authorizationService;
+        this.unAuthUrl = unAuthUrl;
     }
 
     public UserAuthorizationService getAuthorizationService() {
@@ -36,7 +46,7 @@ public class PermissionFilter extends AccessControlFilter {
     protected boolean isAccessAllowed(javax.servlet.ServletRequest servletRequest,
                                       javax.servlet.ServletResponse servletResponse, Object o) throws Exception {
         if (!getAuthorizationService().checkPermission(servletRequest, servletResponse)) {
-            servletRequest.getRequestDispatcher(WebApplicationContext.getConfiguration().getAuth().getUnauthUrl()).forward(servletRequest, servletResponse);
+            servletRequest.getRequestDispatcher(getUnAuthUrl()).forward(servletRequest, servletResponse);
             return false;
         }
 

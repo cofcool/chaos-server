@@ -1,13 +1,6 @@
 package net.cofcool.chaos.server.core.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.NoSuchElementException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.ExceptionCode;
 import net.cofcool.chaos.server.common.core.ExceptionLevel;
 import net.cofcool.chaos.server.common.core.Message;
@@ -15,7 +8,6 @@ import net.cofcool.chaos.server.common.core.ServiceException;
 import net.cofcool.chaos.server.common.util.WebUtils;
 import net.cofcool.chaos.server.core.aop.AbstractValidateInterceptor;
 import net.cofcool.chaos.server.core.config.DevelopmentMode;
-import net.cofcool.chaos.server.core.config.WebApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -24,6 +16,14 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.NoSuchElementException;
 
 /**
  * 异常处理器, 应用处于 {@link DevelopmentMode#DEV} 时优先级低于Spring默认异常解析器的, 其它情况优先级最高
@@ -43,8 +43,18 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
 
     private ObjectMapper jacksonObjectMapper;
 
+    private DevelopmentMode developmentMode;
+
+    public DevelopmentMode getDevelopmentMode() {
+        return developmentMode;
+    }
+
+    public void setDevelopmentMode(DevelopmentMode developmentMode) {
+        this.developmentMode = developmentMode;
+    }
+
     public GlobalHandlerExceptionResolver() {
-        if (!WebApplicationContext.getConfiguration().isDev()) {
+        if (!developmentMode.equals(DevelopmentMode.DEV)) {
             setOrder(Ordered.HIGHEST_PRECEDENCE);
         }
         defaultExceptionResolver = new DefaultHandlerExceptionResolver();
@@ -115,7 +125,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
                 response,
                 getMessage(
                     ExceptionCode.OPERATION_ERR,
-                    WebApplicationContext.getConfiguration().isDev() ? ex.getMessage() : ExceptionCodeInfo.operatingError(),
+                    developmentMode.isDebugMode() ? ex.getMessage() : ExceptionCodeInfo.operatingError(),
                     null
                 )
             );

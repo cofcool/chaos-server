@@ -2,11 +2,8 @@ package net.cofcool.chaos.server.data.mybatis.config;
 
 import com.github.pagehelper.PageInterceptor;
 import com.zaxxer.hikari.HikariDataSource;
-import java.io.IOException;
-import java.util.Properties;
-import javax.sql.DataSource;
 import net.cofcool.chaos.server.core.config.ChaosConfiguration;
-import net.cofcool.chaos.server.core.config.WebApplicationContext;
+import net.cofcool.chaos.server.core.config.ChaosProperties;
 import org.apache.ibatis.plugin.Interceptor;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
@@ -18,6 +15,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternUtils;
+
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  * @author CofCool
@@ -35,14 +36,14 @@ public class MybatisConfig {
     }
 
     @Bean
-    public SqlSessionFactoryBean sqlSessionFactory(DataSource dataSource, org.apache.ibatis.session.Configuration configuration, Interceptor[] mybatisPlugins, ApplicationContext applicationContext)
+    public SqlSessionFactoryBean sqlSessionFactory(DataSource dataSource, org.apache.ibatis.session.Configuration configuration, Interceptor[] mybatisPlugins, ApplicationContext applicationContext, ChaosProperties chaosProperties)
         throws IOException {
         SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
         factoryBean.setMapperLocations(
             ResourcePatternUtils
                 .getResourcePatternResolver(applicationContext)
                 .getResources(
-                    WebApplicationContext.getConfiguration().getData().getXmlPath()
+                    chaosProperties.getData().getXmlPath()
                 )
         );
         factoryBean.setDataSource(dataSource);
@@ -78,9 +79,9 @@ public class MybatisConfig {
     }
 
     @Bean
-    public MapperScannerConfigurer mapperScannerConfigurer() {
+    public MapperScannerConfigurer mapperScannerConfigurer(ChaosProperties chaosProperties) {
         MapperScannerConfigurer configurer = new MapperScannerConfigurer();
-        configurer.setBasePackage(WebApplicationContext.getConfiguration().getData
+        configurer.setBasePackage(chaosProperties.getData
 ().getMapperPackage());
         configurer.setSqlSessionFactoryBeanName("sqlSessionFactory");
 

@@ -1,7 +1,5 @@
 package net.cofcool.chaos.server.core.config;
 
-import java.lang.reflect.Method;
-import java.util.List;
 import net.cofcool.chaos.server.common.util.StringUtils;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import net.cofcool.chaos.server.core.annotation.scanner.BeanScannerConfigure;
@@ -16,8 +14,6 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.context.properties.bind.Bindable;
-import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
@@ -28,6 +24,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Controller;
+
+import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * 项目配置
@@ -63,12 +62,12 @@ public class ChaosConfiguration implements AsyncConfigurer, ApplicationContextAw
      * 扫描 {@link Scanned} 注解
      */
     @Bean
-    public BeanDefinitionRegistryPostProcessor beanScannerConfigurer() {
+    public BeanDefinitionRegistryPostProcessor beanScannerConfigurer(ChaosProperties properties) {
         BeanScannerConfigure configure = new BeanScannerConfigure();
 
         String path = PACKAGE_PATH;
 
-        String annotationPath = WebApplicationContext.getConfiguration().getDevelopment().getAnnotationPath();
+        String annotationPath = properties.getDevelopment().getAnnotationPath();
         if (!StringUtils.isNullOrEmpty(annotationPath)) {
             path = path + "," + annotationPath;
         }
@@ -92,13 +91,6 @@ public class ChaosConfiguration implements AsyncConfigurer, ApplicationContextAw
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        // 解析配置文件
-        ChaosProperties properties = Binder
-            .get(applicationContext.getEnvironment())
-            .bind(PROJECT_CONFIGURE_PREFIX, Bindable.of(ChaosProperties.class))
-            .get();
-        WebApplicationContext.setConfiguration(properties);
-
         // 配置 ExceptionCodeManager
         ExceptionCodeManager.setMessageSource(applicationContext.getBean(MessageSource.class));
         if (log.isTraceEnabled()) {

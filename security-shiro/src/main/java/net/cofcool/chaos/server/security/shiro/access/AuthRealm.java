@@ -9,7 +9,7 @@ import net.cofcool.chaos.server.common.security.authorization.exception.CaptchaE
 import net.cofcool.chaos.server.common.security.authorization.exception.LoginException;
 import net.cofcool.chaos.server.common.security.authorization.exception.UserNotExistException;
 import net.cofcool.chaos.server.common.util.StringUtils;
-import net.cofcool.chaos.server.core.config.WebApplicationContext;
+import net.cofcool.chaos.server.core.config.ChaosProperties;
 import net.cofcool.chaos.server.core.support.ExceptionCodeInfo;
 import net.cofcool.chaos.server.security.shiro.authorization.CaptchaUsernamePasswordToken;
 import org.apache.shiro.SecurityUtils;
@@ -28,6 +28,16 @@ import org.springframework.util.Assert;
 public class AuthRealm extends AuthorizingRealm implements InitializingBean {
 
     private UserAuthorizationService userAuthorizationService;
+
+    private ChaosProperties.Auth auth;
+
+    public ChaosProperties.Auth getAuth() {
+        return auth;
+    }
+
+    public void setAuth(ChaosProperties.Auth auth) {
+        this.auth = auth;
+    }
 
     public UserAuthorizationService getUserAuthorizationService() {
         return userAuthorizationService;
@@ -54,9 +64,7 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authcToken) throws AuthenticationException {
         CaptchaUsernamePasswordToken token = (CaptchaUsernamePasswordToken) authcToken;
 
-        if (!WebApplicationContext.getConfiguration().isDev()) {
-            checkCaptcha(token);
-        }
+        checkCaptcha(token);
 
         User user = getUserAuthorizationService().queryUser(token.getLogin());
 
@@ -72,7 +80,7 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
     }
 
     private void checkCaptcha(CaptchaUsernamePasswordToken token) {
-        if (WebApplicationContext.getConfiguration().getAuth().getUsingCaptcha() && token.getLogin().getDevice().shouldValidate()) {
+        if (getAuth().getUsingCaptcha() && token.getLogin().getDevice().shouldValidate()) {
             String realCaptcha = (String) SecurityUtils.getSubject().getSession().getAttribute(AuthConstant.CAPTCHA_CODE_KEY);
             String captcha = token.getLogin().getCode();
 
