@@ -1,24 +1,20 @@
-package net.cofcool.chaos.server.core.config;
+package net.cofcool.chaos.server.auto.config;
 
+import static net.cofcool.chaos.server.auto.config.ChaosAutoConfiguration.PROJECT_CONFIGURE_PREFIX;
+
+import java.util.Map;
 import net.cofcool.chaos.server.core.annotation.ApiVersion;
 import net.cofcool.chaos.server.core.annotation.Scanned;
+import net.cofcool.chaos.server.core.config.DevelopmentMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import java.io.File;
-import java.util.Map;
 
 /**
  * 项目可配置项
  *
  * @author CofCool
  */
-@ConfigurationProperties(prefix = ChaosConfiguration.PROJECT_CONFIGURE_PREFIX)
-public final class ChaosProperties {
-
-    /**
-     * 项目配置文件路径
-     */
-    private String configureDir = "";
+@ConfigurationProperties(prefix = PROJECT_CONFIGURE_PREFIX)
+public class ChaosProperties {
 
     private Auth auth = new Auth();
 
@@ -252,24 +248,6 @@ public final class ChaosProperties {
             this.annotationPath = annotationPath;
         }
 
-    }
-
-    public String getConfigureDir() {
-        return configureDir;
-    }
-
-    public void setConfigureDir(String configureDir) {
-        this.configureDir = configureDir;
-    }
-
-    /**
-     * 项目配置文件路径, 相对路径则在 ${user.home} 目录下
-     * @return 配置文件路径
-     */
-    public String getBaseConfigureDirectory() {
-        return getConfigureDir().startsWith(File.separator) ?
-            getConfigureDir() :
-            System.getProperty("user.home") + File.separator + getConfigureDir();
     }
 
     /**

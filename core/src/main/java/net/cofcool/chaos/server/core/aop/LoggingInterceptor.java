@@ -13,6 +13,7 @@ import net.cofcool.chaos.server.core.annotation.scanner.BeanResourceHolder;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -20,13 +21,20 @@ import org.springframework.stereotype.Controller;
  *
  * @author CofCool
  */
-public abstract class AbstractLoggingInterceptor extends AbstractScannedMethodInterceptor {
+public class LoggingInterceptor extends AbstractScannedMethodInterceptor {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
+    private ObjectMapper objectMapper;
 
-    protected abstract ObjectMapper getObjectMapper();
+    @Autowired
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
+    }
 
     protected StringBuilder appendAfterLog(StringBuilder sb, Object returnValue) {
         sb.append(";result=[");

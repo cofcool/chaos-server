@@ -2,6 +2,7 @@ package net.cofcool.chaos.server.core.support;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import net.cofcool.chaos.server.common.core.ExceptionCode;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.core.Result;
 import org.springframework.http.HttpOutputMessage;
@@ -15,19 +16,34 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
  */
 public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConverter {
 
+    private ExceptionCodeManager exceptionCodeManager;
+
+    public ExceptionCodeManager getExceptionCodeManager() {
+        return exceptionCodeManager;
+    }
+
+    public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
+        this.exceptionCodeManager = exceptionCodeManager;
+    }
+
     @Override
     protected void writeInternal(Object object, Type type, HttpOutputMessage outputMessage)
         throws IOException, HttpMessageNotWritableException {
         if (object instanceof Result) {
             object = handleResult((Result) object);
         } else if (object instanceof Number || object instanceof String){
-            object = Message.successful(ExceptionCodeInfo.serverOk(), object);
+            object = Message.successful(exceptionCodeManager.get(ExceptionCode.SERVER_OK_KEY, true), object);
         }
 
         super.writeInternal(object, object.getClass(), outputMessage);
     }
 
     private Message handleResult(Result result) {
-        return result.getResult(result.successful() ? ExceptionCodeInfo.serverOk() : ExceptionCodeInfo.operatingError());
+        return result.getResult(
+            result.successful() ?
+                exceptionCodeManager.get(ExceptionCode.SERVER_OK_KEY, true) :
+                exceptionCodeManager.get(ExceptionCode.OPERATION_ERR_KEY, true)
+        );
     }
+
 }

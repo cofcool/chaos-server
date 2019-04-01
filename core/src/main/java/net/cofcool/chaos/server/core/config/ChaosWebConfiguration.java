@@ -2,26 +2,19 @@ package net.cofcool.chaos.server.core.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
-import javax.annotation.Nullable;
-import javax.annotation.Resource;
-import javax.servlet.ServletContext;
 import net.cofcool.chaos.server.core.i18n.RequestLocaleChangeInterceptor;
+import net.cofcool.chaos.server.core.support.ExceptionCodeManager;
 import net.cofcool.chaos.server.core.support.ResponseBodyMessageConverter;
 import org.hibernate.validator.HibernateValidator;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.web.context.ServletContextAware;
-import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.DelegatingWebMvcConfiguration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 /**
  * Spring Mvc 配置, 包含message converter, locale等, 应用可继承该类
@@ -36,15 +29,33 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
  */
 public class ChaosWebConfiguration extends DelegatingWebMvcConfiguration {
 
-    @Resource
     private ObjectMapper objectMapper;
+    private ExceptionCodeManager exceptionCodeManager;
 
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
+    }
+
+    @Autowired
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
+    public ExceptionCodeManager getExceptionCodeManager() {
+        return exceptionCodeManager;
+    }
+
+    @Autowired
+    public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
+        this.exceptionCodeManager = exceptionCodeManager;
+    }
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         ResponseBodyMessageConverter converter = new ResponseBodyMessageConverter();
         converter.setObjectMapper(objectMapper);
         converters.add(converter);
+        converter.setExceptionCodeManager(exceptionCodeManager);
 
         super.configureMessageConverters(converters);
     }
@@ -80,32 +91,5 @@ public class ChaosWebConfiguration extends DelegatingWebMvcConfiguration {
         return validator;
     }
 
-
-    /**
-     * setup ServletContext for WebMvcConfigurationSupport
-     */
-    @Component
-    public static class ChaosWebConfigurationSupport implements ServletContextAware {
-
-        private ChaosWebConfiguration chaosWebConfiguration;
-
-        public ChaosWebConfigurationSupport(ChaosWebConfiguration chaosWebConfiguration) {
-            this.chaosWebConfiguration = chaosWebConfiguration;
-        }
-
-        @Override
-        public void setServletContext(@Nullable ServletContext servletContext) {
-            if (chaosWebConfiguration.getServletContext() == null && servletContext != null) {
-                chaosWebConfiguration.setServletContext(servletContext);
-            }
-        }
-
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public LocaleResolver localeResolver() {
-        return new SessionLocaleResolver();
-    }
 
 }

@@ -1,6 +1,7 @@
 package net.cofcool.chaos.server.security.shiro.access;
 
 import lombok.extern.slf4j.Slf4j;
+import net.cofcool.chaos.server.common.core.ExceptionCode;
 import net.cofcool.chaos.server.common.security.AuthConstant;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.UserStatus;
@@ -9,8 +10,7 @@ import net.cofcool.chaos.server.common.security.authorization.exception.CaptchaE
 import net.cofcool.chaos.server.common.security.authorization.exception.LoginException;
 import net.cofcool.chaos.server.common.security.authorization.exception.UserNotExistException;
 import net.cofcool.chaos.server.common.util.StringUtils;
-import net.cofcool.chaos.server.core.config.ChaosProperties;
-import net.cofcool.chaos.server.core.support.ExceptionCodeInfo;
+import net.cofcool.chaos.server.core.support.ExceptionCodeManager;
 import net.cofcool.chaos.server.security.shiro.authorization.CaptchaUsernamePasswordToken;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
@@ -29,14 +29,19 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
 
     private UserAuthorizationService userAuthorizationService;
 
-    private ChaosProperties.Auth auth;
+    private ExceptionCodeManager exceptionCodeManager;
 
-    public ChaosProperties.Auth getAuth() {
-        return auth;
+    /**
+     * 是否使用验证码
+     */
+    private boolean usingCaptcha = false;
+
+    public boolean isUsingCaptcha() {
+        return usingCaptcha;
     }
 
-    public void setAuth(ChaosProperties.Auth auth) {
-        this.auth = auth;
+    public void setUsingCaptcha(boolean usingCaptcha) {
+        this.usingCaptcha = usingCaptcha;
     }
 
     public UserAuthorizationService getUserAuthorizationService() {
@@ -46,6 +51,14 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
     public void setUserAuthorizationService(
         UserAuthorizationService userAuthorizationService) {
         this.userAuthorizationService = userAuthorizationService;
+    }
+
+    public ExceptionCodeManager getExceptionCodeManager() {
+        return exceptionCodeManager;
+    }
+
+    public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
+        this.exceptionCodeManager = exceptionCodeManager;
     }
 
     /**
@@ -69,23 +82,23 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
         User user = getUserAuthorizationService().queryUser(token.getLogin());
 
         if (user == null) {
-            throw new UserNotExistException(ExceptionCodeInfo.userNotExists());
+            throw new UserNotExistException(exceptionCodeManager.get(ExceptionCode.USER_NOT_EXITS_KEY, true));
         }
 
         if (user.getUserStatuses().contains(UserStatus.LOCKED) || user.getUserStatuses().contains(UserStatus.CANCEL)) {
-            throw new LoginException(ExceptionCodeInfo.denialAuth());
+            throw new LoginException(exceptionCodeManager.get(ExceptionCode.DENIAL_AUTH_KEY, true));
         }
 
         return new SimpleAuthenticationInfo(user, token, this.getName());
     }
 
     private void checkCaptcha(CaptchaUsernamePasswordToken token) {
-        if (getAuth().getUsingCaptcha() && token.getLogin().getDevice().shouldValidate()) {
+        if (isUsingCaptcha() && token.getLogin().getDevice().shouldValidate()) {
             String realCaptcha = (String) SecurityUtils.getSubject().getSession().getAttribute(AuthConstant.CAPTCHA_CODE_KEY);
             String captcha = token.getLogin().getCode();
 
             if (StringUtils.isNullOrEmpty(captcha) || !captcha.equalsIgnoreCase(realCaptcha)) {
-                throw new CaptchaException(ExceptionCodeInfo.captchaError());
+                throw new CaptchaException(exceptionCodeManager.get(ExceptionCode.CAPTCHA_ERROR_KEY, true));
             }
         }
     }

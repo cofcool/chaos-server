@@ -3,11 +3,13 @@ package net.cofcool.chaos.server.core.aop;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import net.cofcool.chaos.server.common.core.ExceptionCode;
 import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.core.ServiceException;
 import net.cofcool.chaos.server.common.security.Auth;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.UserRole;
+import net.cofcool.chaos.server.common.security.authorization.AuthService;
 import net.cofcool.chaos.server.common.util.BeanUtils;
 import net.cofcool.chaos.server.core.annotation.Api;
 import net.cofcool.chaos.server.core.annotation.ApiVersion;
@@ -15,14 +17,11 @@ import net.cofcool.chaos.server.core.annotation.DataAuthExclude;
 import net.cofcool.chaos.server.core.annotation.DataAuthExclude.ExcludeMode;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import net.cofcool.chaos.server.core.annotation.scanner.BeanResourceHolder;
-import net.cofcool.chaos.server.core.config.ChaosProperties;
-import net.cofcool.chaos.server.core.support.ExceptionCodeInfo;
+import net.cofcool.chaos.server.core.support.ExceptionCodeManager;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 
 /**
  * 接口拦截, 包括 {@link User} 数据注入, 设备检查, 版本对比以及覆盖ID等, 通过拦截<b>Controller</b>实现,  被代理类需使用 {@link Scanned} 注解。
@@ -35,9 +34,26 @@ import org.springframework.util.StringUtils;
  *
  * @author CofCool
  */
-public abstract class AbstractApiInterceptor extends AbstractScannedMethodInterceptor {
+public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
+
+    private AuthService authService;
+
+    private ExceptionCodeManager exceptionCodeManager;
+
+    public ExceptionCodeManager getExceptionCodeManager() {
+        return exceptionCodeManager;
+    }
+
+    public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
+        this.exceptionCodeManager = exceptionCodeManager;
+    }
+
+    public void setAuthService(
+        AuthService authService) {
+        this.authService = authService;
+    }
 
     /**
      * 注入到参数的数据的key
@@ -65,13 +81,6 @@ public abstract class AbstractApiInterceptor extends AbstractScannedMethodInterc
         this.definedCheckedKeys = definedCheckedKeys;
     }
 
-    @Autowired
-    public void setupProperties(ChaosProperties properties) {
-        definedCheckedKeys = StringUtils
-            .delimitedListToStringArray(properties.getAuth().getCheckedKeys(), ",");
-        version = properties.getDevelopment().getVersion();
-    }
-
     private void checkApi(MethodInvocation invocation) {
         checkApi(invocation, getUser());
     }
@@ -80,7 +89,9 @@ public abstract class AbstractApiInterceptor extends AbstractScannedMethodInterc
      * 获取User
      * @return user
      */
-    protected abstract User getUser();
+    protected User getUser() {
+        return authService.readCurrentUser();
+    }
 
 
     protected void checkApi(MethodInvocation invocation, User user) {
@@ -107,7 +118,7 @@ public abstract class AbstractApiInterceptor extends AbstractScannedMethodInterc
 
     protected void checkDevice(String[] devices, User user) {
         if (user != null && user.getDevice() != null && !user.getDevice().contained(devices)) {
-            throw new ServiceException(ExceptionCodeInfo.denialDevice());
+            throw new ServiceException(exceptionCodeManager.get(ExceptionCode.DENIAL_DEVICE_KEY, true));
         }
     }
 
@@ -117,7 +128,7 @@ public abstract class AbstractApiInterceptor extends AbstractScannedMethodInterc
             Collection<UserRole> userRoles = data.getRoles();
             userRoles.forEach(userRole -> {
                 if (!userRole.contains(roles)) {
-                    throw new ServiceException(ExceptionCodeInfo.denialOperating());
+                    throw new ServiceException(exceptionCodeManager.get(ExceptionCode.DEINAL_OPERATING_KEY, true));
                 }
             });
 
@@ -127,7 +138,7 @@ public abstract class AbstractApiInterceptor extends AbstractScannedMethodInterc
 
     protected void checkVersion(ApiVersion apiVersion) {
         if (apiVersion != null && (apiVersion.value() == ApiVersion.DENIAL_ALL || (apiVersion.value() != ApiVersion.ALLOW_ALL && compareApiVersion(apiVersion)))) {
-            throw new ServiceException(ExceptionCodeInfo.lowApiVersion());
+            throw new ServiceException(exceptionCodeManager.get(ExceptionCode.LOW_LEVEL_API_KEY, true));
         }
     }
 

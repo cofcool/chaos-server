@@ -15,7 +15,7 @@ import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationS
 import net.cofcool.chaos.server.common.security.authorization.exception.CaptchaException;
 import net.cofcool.chaos.server.common.security.authorization.exception.LoginException;
 import net.cofcool.chaos.server.common.security.authorization.exception.UserNotExistException;
-import net.cofcool.chaos.server.core.support.ExceptionCodeInfo;
+import net.cofcool.chaos.server.core.support.ExceptionCodeManager;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -33,6 +33,17 @@ import org.springframework.util.Assert;
 public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> implements AuthService<T, ID>, InitializingBean {
 
     private UserAuthorizationService<T, ID> userAuthorizationService;
+
+    private ExceptionCodeManager exceptionCodeManager;
+
+    public ExceptionCodeManager getExceptionCodeManager() {
+        return exceptionCodeManager;
+    }
+
+    public void setExceptionCodeManager(
+        ExceptionCodeManager exceptionCodeManager) {
+        this.exceptionCodeManager = exceptionCodeManager;
+    }
 
     public UserAuthorizationService<T, ID> getUserAuthorizationService() {
         return userAuthorizationService;
@@ -78,15 +89,15 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
                 return returnUserInfo(currentUser);
             }
 
-            return Message.error(ExceptionCode.SERVER_ERR, ExceptionCodeInfo.serverError());
+            return Message.error(ExceptionCode.SERVER_ERR, exceptionCodeManager.get(ExceptionCode.SERVER_ERR_KEY, true));
         } catch (UnknownAccountException e) {
             reportException(loginUser, e);
 
-            return Message.error(ExceptionCode.DENIAL_AUTH, ExceptionCodeInfo.usernameError());
+            return Message.error(ExceptionCode.DENIAL_AUTH, exceptionCodeManager.get(ExceptionCode.DENIAL_AUTH_KEY, true));
         } catch (IncorrectCredentialsException e) {
             reportException(loginUser, e);
 
-            return Message.error(ExceptionCode.DENIAL_AUTH, ExceptionCodeInfo.userPasswordError());
+            return Message.error(ExceptionCode.DENIAL_AUTH, exceptionCodeManager.get(ExceptionCode.USER_PASSWORD_ERROR_KEY, true));
         } catch (AuthenticationException e) {
             reportException(loginUser, e);
 
@@ -97,11 +108,11 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
             } else if (ex instanceof ServiceException) {
                 return Message.error(((ServiceException)ex).getCode() == null ? ExceptionCode.DENIAL_AUTH : ((ServiceException)ex).getCode(), e.getMessage());
             } else {
-                return Message.error(ExceptionCode.NO_LOGIN, ExceptionCodeInfo.noLogin());
+                return Message.error(ExceptionCode.NO_LOGIN, exceptionCodeManager.get(ExceptionCode.NO_LOGIN_KEY, true));
             }
         } catch (Exception e) {
             reportException(loginUser, e);
-            return Message.error(ExceptionCode.SERVER_ERR, ExceptionCodeInfo.serverError());
+            return Message.error(ExceptionCode.SERVER_ERR, exceptionCodeManager.get(ExceptionCode.SERVER_ERR_KEY, true));
         } finally {
             if (!isOk) {
                 user.logout();
@@ -141,7 +152,7 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
     }
 
     private Message<User<T, ID>> returnUserInfo(User<T, ID> user) {
-        return Message.successful(ExceptionCodeInfo.serverOk(), user);
+        return Message.successful(exceptionCodeManager.get(ExceptionCode.SERVER_OK_KEY, true), user);
     }
 
     @Override

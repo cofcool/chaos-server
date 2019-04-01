@@ -3,7 +3,6 @@ package net.cofcool.chaos.server.core.support;
 import java.util.Locale;
 import net.cofcool.chaos.server.common.util.WebUtils;
 import org.springframework.context.MessageSource;
-import org.springframework.web.context.ContextLoader;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
@@ -25,56 +24,21 @@ interface LocaleResolver {
  */
 public class ExceptionCodeManager {
 
-    private static final ExceptionCodeManager MANAGER;
-
-    static {
-        MANAGER = new ExceptionCodeManager();
-    }
 
     private LocaleResolver localeResolver;
 
     private String prefix;
 
-    private ExceptionCodeManager() {
+    public ExceptionCodeManager(MessageSource messageSource) {
+        this.localeResolver = new InternalLocalResolver(messageSource);
+        prefix = "chaos-exception.";
     }
-
-    /**
-     * 当ContextLoader.getCurrentWebApplicationContext()获取不到Context时手动设置
-     */
-    public static void setMessageSource(MessageSource messageSource) {
-        if (MANAGER.localeResolver == null) {
-            MANAGER.localeResolver = new InternalLocalResolver(messageSource);
-        }
-    }
-
-    ExceptionCodeManager setPrefix(String prefix) {
-        MANAGER.prefix = prefix;
-
-        return MANAGER;
-    }
-
-    public static ExceptionCodeManager getInstance() {
-        if (MANAGER.localeResolver != null) {
-            return MANAGER;
-        }
-
-        synchronized (MANAGER) {
-            if (MANAGER.localeResolver == null) {
-                MessageSource source = ContextLoader.getCurrentWebApplicationContext()
-                        .getBean(MessageSource.class);
-                MANAGER.localeResolver = new InternalLocalResolver(source);
-            }
-        }
-
-        return MANAGER;
-    }
-
 
     public String get(String code) {
         return get(code, false);
     }
 
-    String get(String code, boolean usePrefix) {
+    public String get(String code, boolean usePrefix) {
         return localeResolver.resolve(usePrefix ? prefix + code : code);
     }
 

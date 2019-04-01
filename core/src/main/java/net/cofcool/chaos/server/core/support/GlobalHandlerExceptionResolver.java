@@ -1,6 +1,13 @@
 package net.cofcool.chaos.server.core.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.NoSuchElementException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.ExceptionCode;
 import net.cofcool.chaos.server.common.core.ExceptionLevel;
 import net.cofcool.chaos.server.common.core.Message;
@@ -8,6 +15,8 @@ import net.cofcool.chaos.server.common.core.ServiceException;
 import net.cofcool.chaos.server.common.util.WebUtils;
 import net.cofcool.chaos.server.core.aop.AbstractValidateInterceptor;
 import net.cofcool.chaos.server.core.config.DevelopmentMode;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -16,14 +25,6 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.NoSuchElementException;
 
 /**
  * 异常处理器, 应用处于 {@link DevelopmentMode#DEV} 时优先级低于Spring默认异常解析器的, 其它情况优先级最高
@@ -35,7 +36,7 @@ import java.util.NoSuchElementException;
  *
  * @author CofCool
  */
-public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
+public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionResolver implements InitializingBean {
 
     private HandlerExceptionResolver defaultExceptionResolver;
 
@@ -43,20 +44,34 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
 
     private ObjectMapper jacksonObjectMapper;
 
+    private ExceptionCodeManager exceptionCodeManager;
+
+    public ExceptionCodeManager getExceptionCodeManager() {
+        return exceptionCodeManager;
+    }
+
+    public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
+        this.exceptionCodeManager = exceptionCodeManager;
+    }
+
     private DevelopmentMode developmentMode;
 
     public DevelopmentMode getDevelopmentMode() {
         return developmentMode;
     }
 
+    /**
+     * 该设置需在 Spring 创建 Bean 结束前设置，可通过 {@link #afterPropertiesSet()} 或构造方法
+     */
     public void setDevelopmentMode(DevelopmentMode developmentMode) {
         this.developmentMode = developmentMode;
+
+        if (!developmentMode.isDebugMode()) {
+            setOrder(Ordered.HIGHEST_PRECEDENCE);
+        }
     }
 
     public GlobalHandlerExceptionResolver() {
-        if (!developmentMode.equals(DevelopmentMode.DEV)) {
-            setOrder(Ordered.HIGHEST_PRECEDENCE);
-        }
         defaultExceptionResolver = new DefaultHandlerExceptionResolver();
     }
 
@@ -64,6 +79,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         return jacksonObjectMapper;
     }
 
+    @Autowired
     protected void setJacksonObjectMapper(ObjectMapper jacksonObjectMapper) {
         this.jacksonObjectMapper = jacksonObjectMapper;
     }
@@ -71,6 +87,8 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     protected HandlerExceptionResolver getDefaultExceptionResolver() {
         return defaultExceptionResolver;
     }
+
+
 
     @Override
     protected ModelAndView doResolveException(HttpServletRequest request,
@@ -125,7 +143,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
                 response,
                 getMessage(
                     ExceptionCode.OPERATION_ERR,
-                    developmentMode.isDebugMode() ? ex.getMessage() : ExceptionCodeInfo.operatingError(),
+                    developmentMode.isDebugMode() ? ex.getMessage() : exceptionCodeManager.get(ExceptionCode.OPERATION_ERR_KEY,true),
                     null
                 )
             );
@@ -138,7 +156,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handleNullException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getMessage(ExceptionCode.OPERATION_ERR, ExceptionCodeInfo.dataError(), null)
+            getMessage(ExceptionCode.OPERATION_ERR, exceptionCodeManager.get(ExceptionCode.DATA_ERROR_KEY, true), null)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -147,7 +165,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handle5xxException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getMessage(ExceptionCode.SERVER_ERR, ExceptionCodeInfo.serverError(), null)
+            getMessage(ExceptionCode.SERVER_ERR, exceptionCodeManager.get(ExceptionCode.SERVER_ERR_KEY, true), null)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -156,7 +174,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handleSqlIntegrityViolationException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getMessage(ExceptionCode.DATA_EXISTS, ExceptionCodeInfo.dataExists(), null)
+            getMessage(ExceptionCode.DATA_EXISTS, exceptionCodeManager.get(ExceptionCode.DATA_EXISTS_KEY, true), null)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -179,7 +197,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handle4xxException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getMessage(ExceptionCode.PARAM_ERROR, ExceptionCodeInfo.paramError(), null)
+            getMessage(ExceptionCode.PARAM_ERROR, exceptionCodeManager.get(ExceptionCode.PARAM_ERROR_KEY, true), null)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -202,4 +220,10 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         return Message.error(code, msg, data);
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (getDefaultExceptionResolver() == null) {
+            setDevelopmentMode(DevelopmentMode.RELEASE);
+        }
+    }
 }
