@@ -1,5 +1,6 @@
 package net.cofcool.chaos.server.auto.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInterceptor;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -149,18 +150,22 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
         @Bean
         @ConditionalOnMissingBean
-        public GlobalHandlerExceptionResolver exceptionResolver(ExceptionCodeManager exceptionCodeManager) {
+        public GlobalHandlerExceptionResolver exceptionResolver(ExceptionCodeManager exceptionCodeManager, ObjectMapper objectMapper) {
             GlobalHandlerExceptionResolver ex = new GlobalHandlerExceptionResolver();
             ex.setDevelopmentMode(chaosProperties.getDevelopment().getMode());
             ex.setExceptionCodeManager(exceptionCodeManager);
+            ex.setJacksonObjectMapper(objectMapper);
 
             return ex;
         }
 
         @Bean
         @ConditionalOnMissingBean
-        public LoggingInterceptor loggingInterceptor() {
-            return new LoggingInterceptor();
+        public LoggingInterceptor loggingInterceptor(ObjectMapper objectMapper) {
+            LoggingInterceptor interceptor = new LoggingInterceptor();
+            interceptor.setObjectMapper(objectMapper);
+
+            return interceptor;
         }
 
         @Bean

@@ -13,7 +13,6 @@ import net.cofcool.chaos.server.core.annotation.scanner.BeanResourceHolder;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -27,7 +26,6 @@ public class LoggingInterceptor extends AbstractScannedMethodInterceptor {
 
     private ObjectMapper objectMapper;
 
-    @Autowired
     public void setObjectMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }

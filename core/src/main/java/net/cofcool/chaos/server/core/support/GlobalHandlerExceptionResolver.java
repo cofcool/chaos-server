@@ -16,7 +16,6 @@ import net.cofcool.chaos.server.common.util.WebUtils;
 import net.cofcool.chaos.server.core.aop.ValidateInterceptor;
 import net.cofcool.chaos.server.core.config.DevelopmentMode;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -75,12 +74,11 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         defaultExceptionResolver = new DefaultHandlerExceptionResolver();
     }
 
-    protected ObjectMapper getJacksonObjectMapper() {
+    public ObjectMapper getJacksonObjectMapper() {
         return jacksonObjectMapper;
     }
 
-    @Autowired
-    protected void setJacksonObjectMapper(ObjectMapper jacksonObjectMapper) {
+    public void setJacksonObjectMapper(ObjectMapper jacksonObjectMapper) {
         this.jacksonObjectMapper = jacksonObjectMapper;
     }
 
