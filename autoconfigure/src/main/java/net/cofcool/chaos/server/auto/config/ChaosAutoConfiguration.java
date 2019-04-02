@@ -12,7 +12,9 @@ import javax.sql.DataSource;
 import net.cofcool.chaos.server.common.security.PasswordProcessor;
 import net.cofcool.chaos.server.common.security.authorization.AuthService;
 import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
+import net.cofcool.chaos.server.common.util.StringUtils;
 import net.cofcool.chaos.server.core.annotation.Scanned;
+import net.cofcool.chaos.server.core.annotation.scanner.BeanScannerConfigure;
 import net.cofcool.chaos.server.core.aop.ApiProcessingInterceptor;
 import net.cofcool.chaos.server.core.aop.LoggingInterceptor;
 import net.cofcool.chaos.server.core.aop.ScannedCompositeMethodInterceptor;
@@ -43,14 +45,17 @@ import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.aop.Advisor;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -73,30 +78,38 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 @Configuration
 @ConditionalOnClass(ChaosProperties.class)
 @AutoConfigureAfter(JacksonAutoConfiguration.class)
-public class ChaosAutoConfiguration {
+public class ChaosAutoConfiguration implements ApplicationContextAware {
 
     public static final String PACKAGE_PATH = "net.cofcool.chaos";
 
     public static final String PROJECT_CONFIGURE_PREFIX = "chaos";
 
+    private ApplicationContext applicationContext;
 
-//    /**
-//     * 扫描 {@link Scanned} 注解
-//     */
-//    @Bean
-//    public BeanDefinitionRegistryPostProcessor beanScannerConfigurer() {
-//        BeanScannerConfigure configure = new BeanScannerConfigure();
-//
-//        String path = PACKAGE_PATH;
-//
-//        String annotationPath = chaosProperties.getDevelopment().getAnnotationPath();
-//        if (!StringUtils.isNullOrEmpty(annotationPath)) {
-//            path = path + "," + annotationPath;
-//        }
-//        configure.setBasePackage(path);
-//
-//        return configure;
-//    }
+    /**
+     * 扫描 {@link Scanned} 注解
+     */
+    @Bean
+    public BeanDefinitionRegistryPostProcessor beanScannerConfigurer() {
+        BeanScannerConfigure configure = new BeanScannerConfigure();
+
+        String path = PACKAGE_PATH;
+
+        // 从配置文件中解析 annotationPath
+        String annotationPath = applicationContext.getEnvironment().getProperty("chaos.development.annotation-path");
+        if (!StringUtils.isNullOrEmpty(annotationPath)) {
+            path = path + "," + annotationPath;
+        }
+        configure.setBasePackage(path);
+
+        return configure;
+    }
+
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 
     /**
      * 配置AOP, 使用 {@link Scanned} 注解的类可以被代理

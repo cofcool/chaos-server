@@ -10,6 +10,8 @@ import net.cofcool.chaos.server.common.security.User;
 
 /**
  * 授权相关方法定义, 用户需实现该类处理相关逻辑
+ * <br>
+ * <b>注意</b> : 由于本实例创建较早, 会导致关联组件提早创建, 可能会导致关联组件的事务失效, 谨慎操作, 避免插入修改等操作。
  *
  * @author CofCool
  */
