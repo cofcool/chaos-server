@@ -231,7 +231,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                 factoryBean.setSecurityManager(createSecurityManager(sessionManager, createDefaultAuthenticator(userAuthorizationService, passwordProcessor, chaosProperties.getAuth(), exceptionCodeManager), shiroCacheManager));
                 factoryBean.setLoginUrl(chaosProperties.getAuth().getLoginUrl());
                 factoryBean.setUnauthorizedUrl(chaosProperties.getAuth().getUnauthUrl());
-                factoryBean.setFilterChainDefinitions("");
+                factoryBean.setFilterChainDefinitions(chaosProperties.getAuth().getUrls());
 
                 return factoryBean;
             }
