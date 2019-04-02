@@ -22,7 +22,7 @@ import org.springframework.validation.ObjectError;
  * @author zq
  * @author CofCool
  **/
-public abstract class AbstractValidateInterceptor extends AbstractScannedMethodInterceptor {
+public class ValidateInterceptor extends AbstractScannedMethodInterceptor {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 

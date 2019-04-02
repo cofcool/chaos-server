@@ -13,7 +13,7 @@ import net.cofcool.chaos.server.common.core.ExceptionLevel;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.core.ServiceException;
 import net.cofcool.chaos.server.common.util.WebUtils;
-import net.cofcool.chaos.server.core.aop.AbstractValidateInterceptor;
+import net.cofcool.chaos.server.core.aop.ValidateInterceptor;
 import net.cofcool.chaos.server.core.config.DevelopmentMode;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,7 +119,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         writeMessage(
             response,
             getMessage(ExceptionCode.PARAM_NULL,
-                AbstractValidateInterceptor.getFirstErrorString(ex.getBindingResult()),
+                ValidateInterceptor.getFirstErrorString(ex.getBindingResult()),
                 null
             )
         );

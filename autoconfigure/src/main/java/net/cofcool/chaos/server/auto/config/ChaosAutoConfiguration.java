@@ -20,6 +20,7 @@ import net.cofcool.chaos.server.core.aop.LoggingInterceptor;
 import net.cofcool.chaos.server.core.aop.ScannedCompositeMethodInterceptor;
 import net.cofcool.chaos.server.core.aop.ScannedMethodInterceptor;
 import net.cofcool.chaos.server.core.aop.ScannedResourceAdvisor;
+import net.cofcool.chaos.server.core.aop.ValidateInterceptor;
 import net.cofcool.chaos.server.core.support.ExceptionCodeManager;
 import net.cofcool.chaos.server.core.support.GlobalHandlerExceptionResolver;
 import net.cofcool.chaos.server.security.shiro.access.AccountCredentialsMatcher;
@@ -160,6 +161,12 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
         @ConditionalOnMissingBean
         public LoggingInterceptor loggingInterceptor() {
             return new LoggingInterceptor();
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public ValidateInterceptor validateInterceptor() {
+            return new ValidateInterceptor();
         }
 
         @Bean
