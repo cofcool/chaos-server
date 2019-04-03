@@ -24,3 +24,4 @@
 * `ExecuteResult`添加`orElse`方法
 * 优化`AbstractApiInterceptor`, 移除`ExcludeType`
 * 移除`security-shiro`模块对的`data-redis`依赖
+* 优化配置, 按照`Spring Boot`自动配置的方式进行配置

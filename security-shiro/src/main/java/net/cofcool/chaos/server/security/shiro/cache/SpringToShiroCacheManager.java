@@ -12,9 +12,9 @@ import org.springframework.web.context.ContextLoader;
 /**
  * @author CofCool
  */
-public class RedisCacheManager implements CacheManager, Initializable, Destroyable {
+public class SpringToShiroCacheManager implements CacheManager, Initializable, Destroyable {
 
-    private static final Logger log = LoggerFactory.getLogger(RedisCacheManager.class);
+    private static final Logger log = LoggerFactory.getLogger(SpringToShiroCacheManager.class);
 
     protected org.springframework.cache.CacheManager manager;
 
@@ -22,7 +22,7 @@ public class RedisCacheManager implements CacheManager, Initializable, Destroyab
         return manager;
     }
 
-    public void setManager(org.springframework.data.redis.cache.RedisCacheManager manager) {
+    public void setManager(org.springframework.cache.CacheManager manager) {
         this.manager = manager;
     }
 
@@ -42,7 +42,7 @@ public class RedisCacheManager implements CacheManager, Initializable, Destroyab
 
             }
 
-            return new RedisCache<>(cache);
+            return new SpringCache<>(cache);
         } catch (Exception e) {
             throw new CacheException(e);
         }

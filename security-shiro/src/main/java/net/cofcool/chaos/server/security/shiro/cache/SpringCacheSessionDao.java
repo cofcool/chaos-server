@@ -12,10 +12,10 @@ import org.apache.shiro.session.mgt.eis.CachingSessionDAO;
 /**
  * @author CofCool
  */
-public class RedisCacheSessionDao extends CachingSessionDAO {
+public class SpringCacheSessionDao extends CachingSessionDAO {
 
 
-    public RedisCacheSessionDao() {
+    public SpringCacheSessionDao() {
         setCacheManager(new AbstractCacheManager() {
             @Override
             protected Cache<Serializable, Session> createCache(String name) throws CacheException {

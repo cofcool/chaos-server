@@ -13,13 +13,13 @@ import org.springframework.cache.Cache.ValueWrapper;
  *
  * @author CofCool
  */
-public class RedisCache<K, V> implements Cache<K, V> {
+public class SpringCache<K, V> implements Cache<K, V> {
 
-    private static final Logger log = LoggerFactory.getLogger(RedisCache.class);
+    private static final Logger log = LoggerFactory.getLogger(SpringCache.class);
 
     private org.springframework.cache.Cache cache;
 
-    public RedisCache(org.springframework.cache.Cache cache) {
+    public SpringCache(org.springframework.cache.Cache cache) {
         if (cache == null) {
             throw new IllegalArgumentException("Cache argument cannot be null.");
         }
