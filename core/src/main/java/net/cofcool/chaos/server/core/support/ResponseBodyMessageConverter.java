@@ -35,7 +35,7 @@ public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConv
             object = Message.successful(exceptionCodeManager.get(ExceptionCode.SERVER_OK_KEY, true), object);
         }
 
-        super.writeInternal(object, object.getClass(), outputMessage);
+        super.writeInternal(object, type, outputMessage);
     }
 
     private Message handleResult(Result result) {

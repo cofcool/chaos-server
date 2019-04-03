@@ -17,8 +17,33 @@ public interface QueryResult<T, R> extends Result<R> {
     Page<T> getPage();
 
     /**
-     * 扩展信息
+     * QueryResult 携带的额外数据
+     *
+     * @return 扩展数据
      */
     Object getExt();
+
+    /**
+     * 创建 QueryResult 实例的方便方法
+     *
+     * @param page 分页数据
+     * @param <T> 数据类型
+     * @return QueryResult 实例
+     */
+    static <T> QueryResult<T, ?> of(Page<T> page) {
+        return new SimpleQueryResult<>(page);
+    }
+
+    /**
+     * 创建 QueryResult 实例的方便方法
+     *
+     * @param page 分页数据
+     * @param ext 扩展数据
+     * @param <T>  数据类型
+     * @return QueryResult 实例
+     */
+    static <T> QueryResult<T, ?> of(Page<T> page, Object ext) {
+        return new SimpleQueryResult<>(page, ext);
+    }
 
 }
