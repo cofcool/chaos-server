@@ -12,7 +12,7 @@
     <artifactId>chaos-server-actuator</artifactId>
 
     <properties>
-        <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
+        <spring-boot.version>2.1.4.RELEASE</spring-boot.version>
         <boot-admin-boot.version>2.1.0</boot-admin-boot.version>
     </properties>
 
