@@ -17,7 +17,6 @@ import net.cofcool.chaos.server.core.aop.ValidateInterceptor;
 import net.cofcool.chaos.server.core.config.DevelopmentMode;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Ordered;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -93,10 +92,15 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
                                               HttpServletResponse response, Object handler, Exception ex) {
         printExceptionLog(request, handler, ex);
 
-        if (ex instanceof DuplicateKeyException) {
-            return handleSqlIntegrityViolationException(response, ex);
+        try {
+            Class dupClass = Class.forName("org.springframework.dao.DuplicateKeyException.DuplicateKeyException");
+            if (ex.getClass().isAssignableFrom(dupClass)) {
+                return handleSqlIntegrityViolationException(response, ex);
+            }
+        } catch (ClassNotFoundException ignore) {
         }
-        else if (ex instanceof ServiceException) {
+
+        if (ex instanceof ServiceException) {
             return handleServiceException(response, ex);
         }
         else if (ex instanceof NullPointerException || ex instanceof IndexOutOfBoundsException || ex instanceof NoSuchElementException) {

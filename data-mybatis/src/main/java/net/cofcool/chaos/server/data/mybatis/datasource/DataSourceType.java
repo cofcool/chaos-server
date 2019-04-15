@@ -1,4 +1,4 @@
-package net.cofcool.chaos.server.core.datasource;
+package net.cofcool.chaos.server.data.mybatis.datasource;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;

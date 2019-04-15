@@ -2,8 +2,8 @@ package net.cofcool.chaos.server.data.mybatis.aop;
 
 import java.lang.reflect.Method;
 import net.cofcool.chaos.server.common.util.BeanUtils;
-import net.cofcool.chaos.server.core.datasource.DataSourceType;
-import net.cofcool.chaos.server.core.datasource.DynamicDataSourceHolder;
+import net.cofcool.chaos.server.data.mybatis.datasource.DataSourceType;
+import net.cofcool.chaos.server.data.mybatis.datasource.DynamicDataSourceHolder;
 import net.cofcool.chaos.server.data.mybatis.transaction.DynamicManagedTransaction;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;

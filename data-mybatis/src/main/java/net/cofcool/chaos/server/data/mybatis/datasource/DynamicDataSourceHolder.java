@@ -1,4 +1,4 @@
-package net.cofcool.chaos.server.core.datasource;
+package net.cofcool.chaos.server.data.mybatis.datasource;
 
 /**
  * 动态数据源资源管理

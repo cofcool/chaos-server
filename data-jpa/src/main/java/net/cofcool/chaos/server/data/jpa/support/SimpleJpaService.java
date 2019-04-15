@@ -9,23 +9,28 @@ import net.cofcool.chaos.server.common.core.SimpleService;
 import net.cofcool.chaos.server.common.util.BeanUtils;
 import org.hibernate.event.spi.FlushEntityEvent;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * 基于 {@link JpaRepository} 的简单 <b>Service</b> 实现, 子类需通过 {@link #afterPropertiesSet()} 方法配置 <b>jpaRepository</b>
+ * 基于 {@link JpaRepository} 的简单 <b>Service</b> 实现
  *
+ * @param <T> 实体
+ * @param <ID> 实体的 ID
+ * @param <J> 实体对应的 JpaRepository
  * @author CofCool
  */
-public abstract class SimpleJpaService<T, ID> extends SimpleService<T> implements InitializingBean {
+public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> extends SimpleService<T> implements InitializingBean {
 
-    private JpaRepository<T, ID> jpaRepository;
+    private J jpaRepository;
 
-    public JpaRepository<T, ID> getJpaRepository() {
+    protected J getJpaRepository() {
         return jpaRepository;
     }
 
-    public void setJpaRepository(JpaRepository<T, ID> jpaRepository) {
+    @Autowired
+    public void setJpaRepository(J jpaRepository) {
         this.jpaRepository = jpaRepository;
     }
 
