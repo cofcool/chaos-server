@@ -27,7 +27,7 @@ public abstract class SimpleService<T> implements DataAccess<T> {
         Page<T> page = PageSupport.checkPage(condition);
 
         Objects.requireNonNull(getPageProcessor());
-        return QueryResult.of(getPageProcessor().process(page, queryWithPage(page, entity)));
+        return QueryResult.of(getPageProcessor().process(page, queryWithPage(page, entity)), "", "");
     }
 
     /**

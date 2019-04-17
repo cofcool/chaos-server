@@ -17,18 +17,11 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
 
     private Message<T> message;
 
-    public SimpleExecuteResult(T entity, ResultState state) {
-        this(entity, state, null);
-    }
-
-    public SimpleExecuteResult(T entity, ResultState state, Message<T> message) {
-        this.entity = entity;
-        this.state = state;
-        this.message = message;
-    }
 
     public SimpleExecuteResult(ResultState state, Message<T> message) {
-        this(message.getData(), state, message);
+        this.entity = message.getData();
+        this.state = state;
+        this.message = message;
     }
 
     @Override
@@ -40,22 +33,9 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
         return entity;
     }
 
-    public void setEntity(T entity) {
-        this.entity = entity;
-    }
-
     @Override
     public ResultState getState() {
         return state;
-    }
-
-    public void setState(ResultState state) {
-        this.state = state;
-    }
-
-    @Override
-    public Message<T> getMessage() {
-        return message;
     }
 
     @Override
@@ -63,20 +43,8 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
         return entity == null ? newVal : entity;
     }
 
-    public void setMessage(Message<T> message) {
-        this.message = message;
-    }
-
     @Override
-    public Message<T> getResult(String message) {
-        if (getMessage() != null) {
-            return getMessage();
-        }
-
-        if (successful()) {
-            return Message.successful(message, getEntity());
-        } else {
-            return Message.error(ExceptionCode.OPERATION_ERR, message, null);
-        }
+    public Message<T> getResult() {
+        return message;
     }
 }

@@ -30,8 +30,8 @@ public interface QueryResult<T, R> extends Result<R> {
      * @param <T> 数据类型
      * @return QueryResult 实例
      */
-    static <T> QueryResult<T, ?> of(Page<T> page) {
-        return new SimpleQueryResult<>(page);
+    static <T> QueryResult<T, ?> of(Page<T> page, String code, String msg) {
+        return new SimpleQueryResult<>(page, code, msg);
     }
 
     /**
@@ -42,8 +42,8 @@ public interface QueryResult<T, R> extends Result<R> {
      * @param <T>  数据类型
      * @return QueryResult 实例
      */
-    static <T> QueryResult<T, ?> of(Page<T> page, Object ext) {
-        return new SimpleQueryResult<>(page, ext);
+    static <T> QueryResult<T, ?> of(Page<T> page, Object ext, String code, String msg) {
+        return new SimpleQueryResult<>(page, ext, code, msg);
     }
 
 }

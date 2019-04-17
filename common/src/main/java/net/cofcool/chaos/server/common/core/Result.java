@@ -35,12 +35,11 @@ public interface Result<T> extends Serializable {
     /**
      * 结果数据
      *
-     * @param message 描述信息
      * @return 封装的Message对象
      *
      * @see Message
      */
-    Message<T> getResult(String message);
+    Message<T> getResult();
 
     /**
      * 执行是否成功

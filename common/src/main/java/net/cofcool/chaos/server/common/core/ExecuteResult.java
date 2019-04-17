@@ -1,8 +1,8 @@
 package net.cofcool.chaos.server.common.core;
 
+import javax.annotation.Nullable;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
-import javax.annotation.Nullable;
 
 /**
  * 执行结果, 如果执行成功, 那 <code>entity</code> 必须有值
@@ -23,10 +23,6 @@ public interface ExecuteResult<T> extends Result<T> {
      */
     ResultState getState();
 
-    /**
-     * 描述信息
-     */
-    Message<T> getMessage();
 
     @Override
     default boolean successful() {
@@ -61,13 +57,15 @@ public interface ExecuteResult<T> extends Result<T> {
      *
      * @param entity 结果数据
      * @param state 执行状态
+     * @param code 描述码
+     * @param msg 描述信息
      * @param <T> 结果类型
      * @return ExecuteResult 实例
      *
      * @see SimpleExecuteResult
      */
-    static <T> ExecuteResult<T> of(T entity, ResultState state) {
-        return new SimpleExecuteResult<>(entity, state);
+    static <T> ExecuteResult<T> of(T entity, ResultState state, String code, String msg) {
+        return new SimpleExecuteResult<>(state, Message.of(code, msg, entity));
     }
 
     /**

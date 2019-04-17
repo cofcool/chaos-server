@@ -1,9 +1,9 @@
 package net.cofcool.chaos.server.common.core;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import javax.annotation.Nonnull;
 
 /**
  * {@link QueryResult} 简单实现
@@ -24,13 +24,15 @@ public class SimpleQueryResult<T> implements QueryResult<T, Map<String, Object>>
      */
     private Object ext;
 
+    private Message<Map<String, Object>> message;
+
     /**
      * 查询结果封装
      *
      * @param page 分页数据
      */
-    public SimpleQueryResult(@Nonnull Page<T> page) {
-        this(page, null);
+    public SimpleQueryResult(@Nonnull Page<T> page, String code, String msg) {
+        this(page, null, code, msg);
     }
 
     /**
@@ -39,21 +41,18 @@ public class SimpleQueryResult<T> implements QueryResult<T, Map<String, Object>>
      * @param page 分页数据
      * @param ext 扩展信息
      */
-    public SimpleQueryResult(Page<T> page, Object ext) {
+    public SimpleQueryResult(Page<T> page, Object ext, String code, String msg) {
         Objects.requireNonNull(page);
         Objects.requireNonNull(page.getList());
 
         this.page = page;
         this.ext = ext;
+        this.message = Message.of(code, msg, getResultMap(page));
     }
 
     @Override
     public Page<T> getPage() {
         return page;
-    }
-
-    public void setPage(Page<T> page) {
-        this.page = page;
     }
 
     @Override
@@ -65,7 +64,7 @@ public class SimpleQueryResult<T> implements QueryResult<T, Map<String, Object>>
         this.ext = ext;
     }
 
-    private Map<String, Object> getResultMap() {
+    private Map<String, Object> getResultMap(Page<T> page) {
         Map<String, Object> result = new HashMap<>();
         result.put("totalRow", page.getTotal());
         result.put("list", page.getList());
@@ -80,8 +79,8 @@ public class SimpleQueryResult<T> implements QueryResult<T, Map<String, Object>>
     }
 
     @Override
-    public Message<Map<String, Object>> getResult(String message) {
-        return Message.successful(message, getResultMap());
+    public Message<Map<String, Object>> getResult() {
+        return message;
     }
 
 }
