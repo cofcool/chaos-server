@@ -7,7 +7,7 @@ package net.cofcool.chaos.server.common.core;
  *
  * @see ExceptionCodeDescriptor
  */
-public class ExceptionCodeManager implements ExceptionCodeDescriptor {
+public class ExceptionCodeManager {
 
     private final ExceptionCodeDescriptor descriptor;
 
@@ -27,18 +27,12 @@ public class ExceptionCodeManager implements ExceptionCodeDescriptor {
         return descriptor;
     }
 
-    @Override
     public String getCode(String type) {
         return descriptor.getCode(type);
     }
 
-    @Override
     public String getDescription(String type) {
         return descriptor.getDescription(type);
     }
 
-    @Override
-    public ExceptionCode wrap(String type) {
-        return descriptor.wrap(type);
-    }
 }

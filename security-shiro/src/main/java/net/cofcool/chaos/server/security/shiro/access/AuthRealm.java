@@ -83,14 +83,14 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
 
         if (user == null) {
             throw new UserNotExistException(
-                getExceptionDesc(ExceptionCodeDescriptor.USER_NOT_EXITS),
+                getExceptionDesc(ExceptionCodeDescriptor.USER_NOT_EXITS_DESC),
                 getExceptionCode(ExceptionCodeDescriptor.USER_NOT_EXITS)
             );
         }
 
         if (user.getUserStatuses().contains(UserStatus.LOCKED) || user.getUserStatuses().contains(UserStatus.CANCEL)) {
             throw new LoginException(
-                getExceptionDesc(ExceptionCodeDescriptor.DENIAL_AUTH),
+                getExceptionDesc(ExceptionCodeDescriptor.DENIAL_AUTH_DESC),
                 getExceptionCode(ExceptionCodeDescriptor.DENIAL_AUTH)
             );
         }
@@ -113,7 +113,7 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
 
             if (StringUtils.isNullOrEmpty(captcha) || !captcha.equalsIgnoreCase(realCaptcha)) {
                 throw new CaptchaException(
-                    getExceptionDesc(ExceptionCodeDescriptor.CAPTCHA_ERROR),
+                    getExceptionDesc(ExceptionCodeDescriptor.CAPTCHA_ERROR_DESC),
                     getExceptionCode(ExceptionCodeDescriptor.CAPTCHA_ERROR)
                 );
             }

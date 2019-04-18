@@ -45,7 +45,7 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
         return ExecuteResult.of(
             jpaRepository.save(entity), ResultState.SUCCESSFUL,
             getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
-            getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK)
+            getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC)
         );
     }
 
@@ -80,7 +80,7 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
         return ExecuteResult.of(
             jpaRepository.save(entity), ResultState.SUCCESSFUL,
             getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
-            getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK)
+            getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC)
         );
     }
 
@@ -90,7 +90,7 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
             jpaRepository.findAll(Example.of(entity)),
             ResultState.SUCCESSFUL,
             getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
-            getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK)
+            getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC)
         );
     }
 
@@ -103,7 +103,7 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
                     t,
                     ResultState.SUCCESSFUL,
                     getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
-                    getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK)
+                    getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC)
                 )
             )
             .orElseGet(() ->
@@ -111,7 +111,7 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
                     null,
                     ResultState.FAILURE,
                     getExceptionCodeManager().getCode(ExceptionCodeDescriptor.OPERATION_ERR),
-                    getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.OPERATION_ERR)
+                    getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.OPERATION_ERR_DESC)
                 ));
     }
 

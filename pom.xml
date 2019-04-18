@@ -7,7 +7,7 @@
     <groupId>net.cofcool.chaos</groupId>
     <artifactId>chaos-server</artifactId>
     <packaging>pom</packaging>
-    <version>0.4.0-SNAPSHOT</version>
+    <version>0.4.0.2019.04.18-SNAPSHOT</version>
     <description>Chaos Web Server</description>
     <url>https://github.com/cofcool/chaos-server</url>
 
@@ -112,6 +112,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <version>${spring-boot.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.2.0</version>
             <scope>test</scope>
         </dependency>
 

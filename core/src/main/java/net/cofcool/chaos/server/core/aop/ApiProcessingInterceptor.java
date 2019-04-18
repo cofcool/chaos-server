@@ -118,11 +118,11 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor {
 
     protected void checkDevice(String[] devices, User user) {
         if (user != null && user.getDevice() != null && !user.getDevice().contained(devices)) {
-            throwException(ExceptionCodeDescriptor.DENIAL_DEVICE);
+            throwException(ExceptionCodeDescriptor.DENIAL_DEVICE, ExceptionCodeDescriptor.DENIAL_DEVICE_DESC);
         }
     }
 
-    private void throwException(String exceptionType) {
+    private void throwException(String code, String exceptionType) {
         throw new ServiceException(
             exceptionCodeManager.getDescription(exceptionType),
             exceptionCodeManager.getCode(exceptionType)
@@ -135,7 +135,7 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor {
             Collection<UserRole> userRoles = data.getRoles();
             userRoles.forEach(userRole -> {
                 if (!userRole.contains(roles)) {
-                    throwException(ExceptionCodeDescriptor.DENIAL_OPERATING);
+                    throwException(ExceptionCodeDescriptor.DENIAL_OPERATING, ExceptionCodeDescriptor.DENIAL_OPERATING_DESC);
                 }
             });
 
@@ -145,7 +145,7 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor {
 
     protected void checkVersion(ApiVersion apiVersion) {
         if (apiVersion != null && (apiVersion.value() == ApiVersion.DENIAL_ALL || (apiVersion.value() != ApiVersion.ALLOW_ALL && compareApiVersion(apiVersion)))) {
-            throwException(ExceptionCodeDescriptor.LOWEST_LEVEL_API);
+            throwException(ExceptionCodeDescriptor.LOWEST_LEVEL_API, ExceptionCodeDescriptor.LOWEST_LEVEL_API_DESC);
         }
     }
 

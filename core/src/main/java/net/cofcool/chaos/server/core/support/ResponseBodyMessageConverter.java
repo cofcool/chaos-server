@@ -35,7 +35,7 @@ public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConv
         } else if (object instanceof Number || object instanceof String){
             object = Message.of(
                 exceptionCodeManager.getCode(ExceptionCodeDescriptor.SERVER_OK),
-                exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK),
+                exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC),
                 object
             );
         }

@@ -147,7 +147,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
                 getMessage(
                     exceptionCodeManager.getCode(ExceptionCodeDescriptor.OPERATION_ERR),
                     developmentMode.isDebugMode() ? ex.getMessage() : exceptionCodeManager.getDescription(
-                        ExceptionCodeDescriptor.OPERATION_ERR)
+                        ExceptionCodeDescriptor.OPERATION_ERR_DESC)
                 )
             );
             modelAndView = EMPTY_MODEL_AND_VIEW;
@@ -159,7 +159,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handleNullException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getMessage(ExceptionCodeDescriptor.OPERATION_ERR)
+            getExceptionMessage(ExceptionCodeDescriptor.OPERATION_ERR, ExceptionCodeDescriptor.OPERATION_ERR_DESC)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -168,7 +168,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handle5xxException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getMessage(ExceptionCodeDescriptor.SERVER_ERR)
+            getExceptionMessage(ExceptionCodeDescriptor.SERVER_ERR, ExceptionCodeDescriptor.SERVER_ERR_DESC)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -177,7 +177,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handleSqlIntegrityViolationException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getMessage(ExceptionCodeDescriptor.DATA_EXISTS)
+            getExceptionMessage(ExceptionCodeDescriptor.DATA_EXISTS, ExceptionCodeDescriptor.DATA_EXISTS_DESC)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -198,7 +198,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handle4xxException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getMessage(ExceptionCodeDescriptor.PARAM_ERROR)
+            getExceptionMessage(ExceptionCodeDescriptor.PARAM_ERROR, ExceptionCodeDescriptor.PARAM_ERROR_DESC)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -217,9 +217,9 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         }
     }
 
-    protected Message getMessage(String type) {
+    protected Message getExceptionMessage(String code, String type) {
         return Message.of(
-            exceptionCodeManager.getCode(type),
+            exceptionCodeManager.getCode(code),
             exceptionCodeManager.getDescription(type)
         );
     }

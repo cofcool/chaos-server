@@ -86,15 +86,15 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
                 return returnUserInfo(currentUser);
             }
 
-            return getExceptionMessage(ExceptionCodeDescriptor.AUTH_ERROR);
+            return getExceptionMessage(ExceptionCodeDescriptor.AUTH_ERROR, ExceptionCodeDescriptor.AUTH_ERROR_DESC);
         } catch (UnknownAccountException e) {
             reportException(loginUser, e);
 
-            return getExceptionMessage(ExceptionCodeDescriptor.USER_NOT_EXITS);
+            return getExceptionMessage(ExceptionCodeDescriptor.USER_NOT_EXITS, ExceptionCodeDescriptor.USER_NOT_EXITS_DESC);
         } catch (IncorrectCredentialsException e) {
             reportException(loginUser, e);
 
-            return getExceptionMessage(ExceptionCodeDescriptor.USER_PASSWORD_ERROR);
+            return getExceptionMessage(ExceptionCodeDescriptor.USER_PASSWORD_ERROR, ExceptionCodeDescriptor.USER_PASSWORD_ERROR_DESC);
         } catch (AuthenticationException e) {
             reportException(loginUser, e);
 
@@ -109,7 +109,7 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
             }
         } catch (Exception e) {
             reportException(loginUser, e);
-            return getExceptionMessage(ExceptionCodeDescriptor.AUTH_ERROR);
+            return getExceptionMessage(ExceptionCodeDescriptor.AUTH_ERROR, ExceptionCodeDescriptor.AUTH_ERROR_DESC);
         } finally {
             if (!isOk) {
                 user.logout();
@@ -117,9 +117,9 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
         }
     }
 
-    protected Message<User<T, ID>> getExceptionMessage(String type) {
+    protected Message<User<T, ID>> getExceptionMessage(String code, String type) {
         return Message.of(
-            exceptionCodeManager.getCode(type),
+            exceptionCodeManager.getCode(code),
             exceptionCodeManager.getDescription(type)
         );
     }
@@ -158,7 +158,7 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
     private Message<User<T, ID>> returnUserInfo(User<T, ID> user) {
         return Message.of(
             exceptionCodeManager.getCode(ExceptionCodeDescriptor.SERVER_OK),
-            exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK),
+            exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC),
             user
         );
     }

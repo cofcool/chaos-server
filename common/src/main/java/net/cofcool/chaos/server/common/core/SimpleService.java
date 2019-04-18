@@ -42,7 +42,7 @@ public abstract class SimpleService<T> implements DataAccess<T> {
         return QueryResult.of(
             getPageProcessor().process(page, queryWithPage(page, entity)),
             exceptionCodeManager.getCode(ExceptionCodeDescriptor.SERVER_OK),
-            exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK)
+            exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC)
         );
     }
 

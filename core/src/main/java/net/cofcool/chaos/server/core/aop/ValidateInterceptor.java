@@ -15,7 +15,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 /**
- * 参数校验切面, 通过拦截<b>Controller</b>实现, 被代理类需使用 {@link Scanned} 注解。
+ * 参数校验切面, 处理含有 {@link BindingResult} 参数的方法, 通过拦截<b>Controller</b>实现, 被代理类需使用 {@link Scanned} 注解。
  *
  * @author zq
  * @author CofCool

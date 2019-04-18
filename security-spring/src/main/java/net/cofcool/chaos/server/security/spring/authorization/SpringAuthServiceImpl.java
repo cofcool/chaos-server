@@ -61,7 +61,7 @@ public class SpringAuthServiceImpl<T extends Auth, ID extends Serializable> impl
     public Message<User<T, ID>> login(AbstractLogin loginUser) {
         return Message.of(
             exceptionCodeManager.getCode(ExceptionCodeDescriptor.SERVER_OK),
-            exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK),
+            exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC),
             userAuthorizationService.queryUser(loginUser)
         );
     }

@@ -13,7 +13,7 @@ public class ResourceExceptionCodeDescriptor implements ExceptionCodeDescriptor 
 
     private MessageSource messageSource;
 
-    ResourceExceptionCodeDescriptor(MessageSource messageSource) {
+    public ResourceExceptionCodeDescriptor(MessageSource messageSource) {
         this.messageSource = messageSource;
     }
 
