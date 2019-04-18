@@ -33,7 +33,7 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService, I
 
     @Override
     public Message<Boolean> checkUser(User currentUser) {
-        return Message.successful("", Boolean.TRUE);
+        return Message.of("", "", Boolean.TRUE);
     }
 
     @Override

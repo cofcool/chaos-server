@@ -6,8 +6,8 @@ public class LoginException extends AuthorizationException {
 
     private static final long serialVersionUID = 1334911102389930098L;
 
-    public LoginException(String message) {
-        super(message);
+    public LoginException(String message, String code) {
+        super(message, code);
     }
 
     @Override

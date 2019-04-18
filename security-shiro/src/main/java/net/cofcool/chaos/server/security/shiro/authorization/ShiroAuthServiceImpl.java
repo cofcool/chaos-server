@@ -3,19 +3,16 @@ package net.cofcool.chaos.server.security.shiro.authorization;
 import java.io.Serializable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.cofcool.chaos.server.common.core.ExceptionCode;
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
+import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.Message;
-import net.cofcool.chaos.server.common.core.ServiceException;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.security.Auth;
 import net.cofcool.chaos.server.common.security.AuthConstant;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.authorization.AuthService;
 import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
-import net.cofcool.chaos.server.common.security.authorization.exception.CaptchaException;
-import net.cofcool.chaos.server.common.security.authorization.exception.LoginException;
-import net.cofcool.chaos.server.common.security.authorization.exception.UserNotExistException;
-import net.cofcool.chaos.server.core.support.ExceptionCodeManager;
+import net.cofcool.chaos.server.common.security.authorization.exception.AuthorizationException;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -81,7 +78,7 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
                     getUserAuthorizationService().setupUserData(currentUser);
                 } else {
                     user.logout();
-                    return Message.error(checkedMessage.getCode(), checkedMessage.getMessage());
+                    return Message.of(checkedMessage.getCode(), checkedMessage.getMessage());
                 }
 
                 isOk = true;
@@ -89,35 +86,42 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
                 return returnUserInfo(currentUser);
             }
 
-            return Message.error(ExceptionCode.SERVER_ERR, exceptionCodeManager.get(ExceptionCode.SERVER_ERR_KEY, true));
+            return getExceptionMessage(ExceptionCodeDescriptor.AUTH_ERROR);
         } catch (UnknownAccountException e) {
             reportException(loginUser, e);
 
-            return Message.error(ExceptionCode.DENIAL_AUTH, exceptionCodeManager.get(ExceptionCode.DENIAL_AUTH_KEY, true));
+            return getExceptionMessage(ExceptionCodeDescriptor.USER_NOT_EXITS);
         } catch (IncorrectCredentialsException e) {
             reportException(loginUser, e);
 
-            return Message.error(ExceptionCode.DENIAL_AUTH, exceptionCodeManager.get(ExceptionCode.USER_PASSWORD_ERROR_KEY, true));
+            return getExceptionMessage(ExceptionCodeDescriptor.USER_PASSWORD_ERROR);
         } catch (AuthenticationException e) {
             reportException(loginUser, e);
 
             Throwable ex = e.getCause();
-            if (ex instanceof CaptchaException || ex instanceof UserNotExistException
-                || ex instanceof LoginException) {
-                return Message.error(ExceptionCode.DENIAL_AUTH, ex.getMessage());
-            } else if (ex instanceof ServiceException) {
-                return Message.error(((ServiceException)ex).getCode() == null ? ExceptionCode.DENIAL_AUTH : ((ServiceException)ex).getCode(), e.getMessage());
+            if (ex instanceof AuthorizationException) {
+                return Message.of(((AuthorizationException) ex).getCode(), ex.getMessage());
             } else {
-                return Message.error(ExceptionCode.NO_LOGIN, exceptionCodeManager.get(ExceptionCode.NO_LOGIN_KEY, true));
+                return Message.of(
+                    exceptionCodeManager.getCode(ExceptionCodeDescriptor.AUTH_ERROR),
+                    e.getMessage()
+                );
             }
         } catch (Exception e) {
             reportException(loginUser, e);
-            return Message.error(ExceptionCode.SERVER_ERR, exceptionCodeManager.get(ExceptionCode.SERVER_ERR_KEY, true));
+            return getExceptionMessage(ExceptionCodeDescriptor.AUTH_ERROR);
         } finally {
             if (!isOk) {
                 user.logout();
             }
         }
+    }
+
+    protected Message<User<T, ID>> getExceptionMessage(String type) {
+        return Message.of(
+            exceptionCodeManager.getCode(type),
+            exceptionCodeManager.getDescription(type)
+        );
     }
 
     private void reportException(AbstractLogin loginUser, Exception e) {
@@ -152,7 +156,11 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
     }
 
     private Message<User<T, ID>> returnUserInfo(User<T, ID> user) {
-        return Message.successful(exceptionCodeManager.get(ExceptionCode.SERVER_OK_KEY, true), user);
+        return Message.of(
+            exceptionCodeManager.getCode(ExceptionCodeDescriptor.SERVER_OK),
+            exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK),
+            user
+        );
     }
 
     @Override

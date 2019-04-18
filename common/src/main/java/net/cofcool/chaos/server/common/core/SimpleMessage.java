@@ -26,19 +26,6 @@ public class SimpleMessage<T> implements Message<T> {
         this.data = data;
     }
 
-    public static<T> Message<T> successful(String msg, T data) {
-        return new SimpleMessage<>(ExceptionCode.SERVER_OK, msg, data);
-    }
-
-    public static<T> Message<T>  error(String code, String msg, T data) {
-        return new SimpleMessage<>(code, msg, data);
-
-    }
-
-    public static<T> Message<T> error(String code, String msg) {
-        return new SimpleMessage<>(code, msg, null);
-    }
-
     @Override
     public String getCode() {
         return code;

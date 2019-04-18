@@ -2,8 +2,8 @@ package net.cofcool.chaos.server.core.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.core.i18n.RequestLocaleChangeInterceptor;
-import net.cofcool.chaos.server.core.support.ExceptionCodeManager;
 import net.cofcool.chaos.server.core.support.ResponseBodyMessageConverter;
 import org.hibernate.validator.HibernateValidator;
 import org.springframework.beans.factory.annotation.Autowired;

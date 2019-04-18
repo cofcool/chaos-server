@@ -2,6 +2,7 @@ package net.cofcool.chaos.server.common.core;
 
 
 import java.util.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 基础 <b>Service</b>, 简化查询操作
@@ -22,12 +23,27 @@ public abstract class SimpleService<T> implements DataAccess<T> {
         this.pageProcessor = pageProcessor;
     }
 
+    private ExceptionCodeManager exceptionCodeManager;
+
+    public ExceptionCodeManager getExceptionCodeManager() {
+        return exceptionCodeManager;
+    }
+
+    @Autowired
+    public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
+        this.exceptionCodeManager = exceptionCodeManager;
+    }
+
     @Override
     public QueryResult<T, ?> query(Page<T> condition, T entity) {
         Page<T> page = PageSupport.checkPage(condition);
 
         Objects.requireNonNull(getPageProcessor());
-        return QueryResult.of(getPageProcessor().process(page, queryWithPage(page, entity)), "", "");
+        return QueryResult.of(
+            getPageProcessor().process(page, queryWithPage(page, entity)),
+            exceptionCodeManager.getCode(ExceptionCodeDescriptor.SERVER_OK),
+            exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK)
+        );
     }
 
     /**

@@ -5,6 +5,8 @@ import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
+import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.security.AbstractLogin.DefaultLogin;
@@ -30,6 +32,17 @@ public class SpringAuthServiceImpl<T extends Auth, ID extends Serializable> impl
 
     private UserAuthorizationService<T, ID> userAuthorizationService;
 
+    private ExceptionCodeManager exceptionCodeManager;
+
+    public ExceptionCodeManager getExceptionCodeManager() {
+        return exceptionCodeManager;
+    }
+
+    public void setExceptionCodeManager(
+        ExceptionCodeManager exceptionCodeManager) {
+        this.exceptionCodeManager = exceptionCodeManager;
+    }
+
     public UserAuthorizationService<T, ID> getUserAuthorizationService() {
         return userAuthorizationService;
     }
@@ -46,7 +59,11 @@ public class SpringAuthServiceImpl<T extends Auth, ID extends Serializable> impl
 
     @Override
     public Message<User<T, ID>> login(AbstractLogin loginUser) {
-        return Message.successful( "Ok", userAuthorizationService.queryUser(loginUser));
+        return Message.of(
+            exceptionCodeManager.getCode(ExceptionCodeDescriptor.SERVER_OK),
+            exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK),
+            userAuthorizationService.queryUser(loginUser)
+        );
     }
 
     @Override

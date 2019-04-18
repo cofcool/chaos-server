@@ -5,7 +5,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.cofcool.chaos.server.common.core.ExceptionCode;
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin.DefaultLogin;
 import net.cofcool.chaos.server.common.security.AuthConstant;
@@ -100,12 +100,12 @@ public class JsonAuthenticationFilter extends UsernamePasswordAuthenticationFilt
 
         String errorCode;
         if (failed instanceof UsernameNotFoundException) {
-            errorCode = ExceptionCode.NO_LOGIN;
+            errorCode = ExceptionCodeDescriptor.NO_LOGIN;
         } else {
-            errorCode = ExceptionCode.DENIAL_AUTH;
+            errorCode = ExceptionCodeDescriptor.DENIAL_AUTH;
         }
 
-        messageConverter.write(Message.error(errorCode, failed.getMessage()), MediaType.APPLICATION_JSON, new ServletServerHttpResponse(response));
+        messageConverter.write(Message.of(errorCode, failed.getMessage()), MediaType.APPLICATION_JSON, new ServletServerHttpResponse(response));
     }
 
     @Override

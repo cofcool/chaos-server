@@ -11,8 +11,7 @@ public class AuthorizationException extends ServiceException {
 
     private static final long serialVersionUID = -3675915399264475516L;
 
-    public AuthorizationException(String message) {
-        super(message);
+    public AuthorizationException(String message, String code) {
+        super(message, code);
     }
-
 }

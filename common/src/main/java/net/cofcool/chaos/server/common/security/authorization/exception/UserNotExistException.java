@@ -6,8 +6,8 @@ public class UserNotExistException extends AuthorizationException {
 
     private static final long serialVersionUID = -1672933472827014235L;
 
-    public UserNotExistException(String message) {
-        super(message);
+    public UserNotExistException(String message, String code) {
+        super(message, code);
     }
 
     @Override

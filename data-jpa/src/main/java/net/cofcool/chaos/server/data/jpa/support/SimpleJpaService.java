@@ -2,6 +2,7 @@ package net.cofcool.chaos.server.data.jpa.support;
 
 import java.util.List;
 import java.util.Optional;
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExecuteResult;
 import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.core.Result.ResultState;
@@ -41,7 +42,11 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
 
     @Override
     public ExecuteResult<T> add(T entity) {
-        return ExecuteResult.of(jpaRepository.save(entity), ResultState.SUCCESSFUL);
+        return ExecuteResult.of(
+            jpaRepository.save(entity), ResultState.SUCCESSFUL,
+            getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
+            getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK)
+        );
     }
 
     @Override
@@ -72,22 +77,42 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
 
         BeanUtils.overwriteNullProperties(entity, result.getEntity());
 
-        return ExecuteResult.of(jpaRepository.save(entity), ResultState.SUCCESSFUL);
+        return ExecuteResult.of(
+            jpaRepository.save(entity), ResultState.SUCCESSFUL,
+            getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
+            getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK)
+        );
     }
 
     @Override
     public ExecuteResult<List<T>> queryAll(T entity) {
-        return ExecuteResult.of(jpaRepository.findAll(Example.of(entity)), ResultState.SUCCESSFUL);
+        return ExecuteResult.of(
+            jpaRepository.findAll(Example.of(entity)),
+            ResultState.SUCCESSFUL,
+            getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
+            getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK)
+        );
     }
 
     @Override
     public ExecuteResult<T> queryById(T entity) {
         Optional<T> data = jpaRepository.findById(getEntityId(entity));
         return data
-            .<ExecuteResult<T>>map(t ->
-                ExecuteResult.of(t, ResultState.SUCCESSFUL))
+            .map(t ->
+                ExecuteResult.of(
+                    t,
+                    ResultState.SUCCESSFUL,
+                    getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
+                    getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK)
+                )
+            )
             .orElseGet(() ->
-                ExecuteResult.of(null, ResultState.FAILURE));
+                ExecuteResult.of(
+                    null,
+                    ResultState.FAILURE,
+                    getExceptionCodeManager().getCode(ExceptionCodeDescriptor.OPERATION_ERR),
+                    getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.OPERATION_ERR)
+                ));
     }
 
     /**

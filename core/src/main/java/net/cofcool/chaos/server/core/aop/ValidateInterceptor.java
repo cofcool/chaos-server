@@ -2,19 +2,17 @@ package net.cofcool.chaos.server.core.aop;
 
 import java.lang.reflect.Method;
 import javax.annotation.Nullable;
-import net.cofcool.chaos.server.common.core.ExceptionCode;
-import net.cofcool.chaos.server.common.core.ExceptionLevel;
-import net.cofcool.chaos.server.common.core.Message;
-import net.cofcool.chaos.server.common.core.ServiceException;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import net.cofcool.chaos.server.core.annotation.scanner.BeanResourceHolder;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 /**
  * 参数校验切面, 通过拦截<b>Controller</b>实现, 被代理类需使用 {@link Scanned} 注解。
@@ -30,7 +28,7 @@ public class ValidateInterceptor extends AbstractScannedMethodInterceptor {
     /**
      * 处理 BindingResult 携带的验证信息
      */
-    protected void validate(MethodInvocation invocation) {
+    protected void validate(MethodInvocation invocation) throws Exception {
         Object[] objects = invocation.getArguments();
         Method method = invocation.getMethod();
         if (objects.length == 0) {
@@ -46,14 +44,8 @@ public class ValidateInterceptor extends AbstractScannedMethodInterceptor {
                         log.debug("validate message: {}", errMsg);
                     }
 
-                    throwErrorException(
-                        method,
-                        Message.error(
-                            ExceptionCode.PARAM_ERROR,
-                            errMsg,
-                            null
-                        )
-                    );
+                    // 假定拦截对象为第一个参数
+                    throw new MethodArgumentNotValidException(new MethodParameter(method, 0), (BindingResult) object);
                 }
             }
         }
@@ -78,10 +70,6 @@ public class ValidateInterceptor extends AbstractScannedMethodInterceptor {
         }
 
         return null;
-    }
-
-    protected void throwErrorException(Method method, Message message) {
-        throw new ServiceException(message.getMessage(), message.getCode(), ExceptionLevel.LOWEST_LEVEL);
     }
 
     @Override

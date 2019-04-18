@@ -8,7 +8,8 @@ import java.io.PrintStream;
 import java.util.NoSuchElementException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.cofcool.chaos.server.common.core.ExceptionCode;
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
+import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.ExceptionLevel;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.core.ServiceException;
@@ -101,7 +102,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         }
 
         if (ex instanceof ServiceException) {
-            return handleServiceException(response, ex);
+            return handleServiceException(response, (ServiceException) ex);
         }
         else if (ex instanceof NullPointerException || ex instanceof IndexOutOfBoundsException || ex instanceof NoSuchElementException) {
             return handleNullException(response, ex);
@@ -120,9 +121,9 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView resolveValidException(HttpServletResponse response, MethodArgumentNotValidException ex) {
         writeMessage(
             response,
-            getMessage(ExceptionCode.PARAM_NULL,
-                ValidateInterceptor.getFirstErrorString(ex.getBindingResult()),
-                null
+            getMessage(
+                ExceptionCodeDescriptor.PARAM_NULL,
+                ValidateInterceptor.getFirstErrorString(ex.getBindingResult())
             )
         );
 
@@ -144,9 +145,9 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
             writeMessage(
                 response,
                 getMessage(
-                    ExceptionCode.OPERATION_ERR,
-                    developmentMode.isDebugMode() ? ex.getMessage() : exceptionCodeManager.get(ExceptionCode.OPERATION_ERR_KEY,true),
-                    null
+                    exceptionCodeManager.getCode(ExceptionCodeDescriptor.OPERATION_ERR),
+                    developmentMode.isDebugMode() ? ex.getMessage() : exceptionCodeManager.getDescription(
+                        ExceptionCodeDescriptor.OPERATION_ERR)
                 )
             );
             modelAndView = EMPTY_MODEL_AND_VIEW;
@@ -158,7 +159,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handleNullException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getMessage(ExceptionCode.OPERATION_ERR, exceptionCodeManager.get(ExceptionCode.DATA_ERROR_KEY, true), null)
+            getMessage(ExceptionCodeDescriptor.OPERATION_ERR)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -167,7 +168,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handle5xxException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getMessage(ExceptionCode.SERVER_ERR, exceptionCodeManager.get(ExceptionCode.SERVER_ERR_KEY, true), null)
+            getMessage(ExceptionCodeDescriptor.SERVER_ERR)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -176,20 +177,18 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handleSqlIntegrityViolationException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getMessage(ExceptionCode.DATA_EXISTS, exceptionCodeManager.get(ExceptionCode.DATA_EXISTS_KEY, true), null)
+            getMessage(ExceptionCodeDescriptor.DATA_EXISTS)
         );
 
         return EMPTY_MODEL_AND_VIEW;
     }
 
-    private ModelAndView handleServiceException(HttpServletResponse response, Exception ex) {
-        ServiceException exception = (ServiceException) ex;
+    private ModelAndView handleServiceException(HttpServletResponse response, ServiceException ex) {
         writeMessage(
             response,
             getMessage(
-                exception.getCode() == null ? ExceptionCode.OPERATION_ERR : exception.getCode(),
-                exception.getMessage(),
-            null
+                ex.getCode() == null ? exceptionCodeManager.getCode(ExceptionCodeDescriptor.OPERATION_ERR) : ex.getCode(),
+                ex.getMessage()
             )
         );
 
@@ -199,7 +198,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handle4xxException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getMessage(ExceptionCode.PARAM_ERROR, exceptionCodeManager.get(ExceptionCode.PARAM_ERROR_KEY, true), null)
+            getMessage(ExceptionCodeDescriptor.PARAM_ERROR)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -218,8 +217,18 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         }
     }
 
-    protected Message getMessage(String code, String msg, Object data) {
-        return Message.error(code, msg, data);
+    protected Message getMessage(String type) {
+        return Message.of(
+            exceptionCodeManager.getCode(type),
+            exceptionCodeManager.getDescription(type)
+        );
+    }
+
+    protected Message getMessage(String code, String message) {
+        return Message.of(
+            code,
+            message
+        );
     }
 
     @Override

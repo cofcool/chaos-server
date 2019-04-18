@@ -1,6 +1,7 @@
 package net.cofcool.chaos.server.common.core;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * ExecuteResult 简单实现
@@ -43,6 +44,18 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
         return entity == null ? newVal : entity;
     }
 
+    public void setMessage(Message<T> message) {
+        Objects.requireNonNull(message);
+        this.message = message;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <br>
+     * <b>
+     *     注意: 如果 {@link #message} 不为"NULL", 则返回该"message"对象, 否则根据执行情况创建对应的"message"
+     * </b>
+     */
     @Override
     public Message<T> getResult() {
         return message;

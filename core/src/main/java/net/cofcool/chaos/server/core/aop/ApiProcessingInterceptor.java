@@ -3,7 +3,8 @@ package net.cofcool.chaos.server.core.aop;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import net.cofcool.chaos.server.common.core.ExceptionCode;
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
+import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.core.ServiceException;
 import net.cofcool.chaos.server.common.security.Auth;
@@ -17,7 +18,6 @@ import net.cofcool.chaos.server.core.annotation.DataAuthExclude;
 import net.cofcool.chaos.server.core.annotation.DataAuthExclude.ExcludeMode;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import net.cofcool.chaos.server.core.annotation.scanner.BeanResourceHolder;
-import net.cofcool.chaos.server.core.support.ExceptionCodeManager;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,8 +118,15 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor {
 
     protected void checkDevice(String[] devices, User user) {
         if (user != null && user.getDevice() != null && !user.getDevice().contained(devices)) {
-            throw new ServiceException(exceptionCodeManager.get(ExceptionCode.DENIAL_DEVICE_KEY, true));
+            throwException(ExceptionCodeDescriptor.DENIAL_DEVICE);
         }
+    }
+
+    private void throwException(String exceptionType) {
+        throw new ServiceException(
+            exceptionCodeManager.getDescription(exceptionType),
+            exceptionCodeManager.getCode(exceptionType)
+        );
     }
 
     @SuppressWarnings("unchecked")
@@ -128,7 +135,7 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor {
             Collection<UserRole> userRoles = data.getRoles();
             userRoles.forEach(userRole -> {
                 if (!userRole.contains(roles)) {
-                    throw new ServiceException(exceptionCodeManager.get(ExceptionCode.DEINAL_OPERATING_KEY, true));
+                    throwException(ExceptionCodeDescriptor.DENIAL_OPERATING);
                 }
             });
 
@@ -138,7 +145,7 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor {
 
     protected void checkVersion(ApiVersion apiVersion) {
         if (apiVersion != null && (apiVersion.value() == ApiVersion.DENIAL_ALL || (apiVersion.value() != ApiVersion.ALLOW_ALL && compareApiVersion(apiVersion)))) {
-            throw new ServiceException(exceptionCodeManager.get(ExceptionCode.LOW_LEVEL_API_KEY, true));
+            throwException(ExceptionCodeDescriptor.LOWEST_LEVEL_API);
         }
     }
 

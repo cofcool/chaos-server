@@ -1,7 +1,8 @@
 package net.cofcool.chaos.server.security.shiro.access;
 
 import lombok.extern.slf4j.Slf4j;
-import net.cofcool.chaos.server.common.core.ExceptionCode;
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
+import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.security.AuthConstant;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.UserStatus;
@@ -10,7 +11,6 @@ import net.cofcool.chaos.server.common.security.authorization.exception.CaptchaE
 import net.cofcool.chaos.server.common.security.authorization.exception.LoginException;
 import net.cofcool.chaos.server.common.security.authorization.exception.UserNotExistException;
 import net.cofcool.chaos.server.common.util.StringUtils;
-import net.cofcool.chaos.server.core.support.ExceptionCodeManager;
 import net.cofcool.chaos.server.security.shiro.authorization.CaptchaUsernamePasswordToken;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
@@ -82,14 +82,28 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
         User user = getUserAuthorizationService().queryUser(token.getLogin());
 
         if (user == null) {
-            throw new UserNotExistException(exceptionCodeManager.get(ExceptionCode.USER_NOT_EXITS_KEY, true));
+            throw new UserNotExistException(
+                getExceptionDesc(ExceptionCodeDescriptor.USER_NOT_EXITS),
+                getExceptionCode(ExceptionCodeDescriptor.USER_NOT_EXITS)
+            );
         }
 
         if (user.getUserStatuses().contains(UserStatus.LOCKED) || user.getUserStatuses().contains(UserStatus.CANCEL)) {
-            throw new LoginException(exceptionCodeManager.get(ExceptionCode.DENIAL_AUTH_KEY, true));
+            throw new LoginException(
+                getExceptionDesc(ExceptionCodeDescriptor.DENIAL_AUTH),
+                getExceptionCode(ExceptionCodeDescriptor.DENIAL_AUTH)
+            );
         }
 
         return new SimpleAuthenticationInfo(user, token, this.getName());
+    }
+
+    private String getExceptionCode(String type) {
+        return exceptionCodeManager.getCode(type);
+    }
+
+    private String getExceptionDesc(String type) {
+        return exceptionCodeManager.getDescription(type);
     }
 
     private void checkCaptcha(CaptchaUsernamePasswordToken token) {
@@ -98,7 +112,10 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
             String captcha = token.getLogin().getCode();
 
             if (StringUtils.isNullOrEmpty(captcha) || !captcha.equalsIgnoreCase(realCaptcha)) {
-                throw new CaptchaException(exceptionCodeManager.get(ExceptionCode.CAPTCHA_ERROR_KEY, true));
+                throw new CaptchaException(
+                    getExceptionDesc(ExceptionCodeDescriptor.CAPTCHA_ERROR),
+                    getExceptionCode(ExceptionCodeDescriptor.CAPTCHA_ERROR)
+                );
             }
         }
     }

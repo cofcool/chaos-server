@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Properties;
 import javax.servlet.Filter;
 import javax.sql.DataSource;
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
+import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.security.PasswordProcessor;
 import net.cofcool.chaos.server.common.security.authorization.AuthService;
 import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
@@ -22,7 +24,6 @@ import net.cofcool.chaos.server.core.aop.ScannedCompositeMethodInterceptor;
 import net.cofcool.chaos.server.core.aop.ScannedMethodInterceptor;
 import net.cofcool.chaos.server.core.aop.ScannedResourceAdvisor;
 import net.cofcool.chaos.server.core.aop.ValidateInterceptor;
-import net.cofcool.chaos.server.core.support.ExceptionCodeManager;
 import net.cofcool.chaos.server.core.support.GlobalHandlerExceptionResolver;
 import net.cofcool.chaos.server.security.shiro.access.AccountCredentialsMatcher;
 import net.cofcool.chaos.server.security.shiro.access.AuthRealm;
@@ -58,7 +59,6 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternUtils;
@@ -129,13 +129,16 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
     /**
      * 配置异常描述管理器
-     * @param messageSource messageSource
+     * @param exceptionCodeDescriptor 异常描述
      * @return ExceptionCodeManager
+     *
+     * @see net.cofcool.chaos.server.common.core.SimpleExceptionCodeDescriptor
+     * @see net.cofcool.chaos.server.common.core.ResourceExceptionCodeDescriptor
      */
     @Bean
     @ConditionalOnMissingBean
-    public ExceptionCodeManager exceptionCodeManager(MessageSource messageSource) {
-        return new ExceptionCodeManager(messageSource);
+    public ExceptionCodeManager exceptionCodeManager(@Autowired(required = false) ExceptionCodeDescriptor exceptionCodeDescriptor) {
+        return new ExceptionCodeManager(exceptionCodeDescriptor);
     }
 
     @Configuration
@@ -332,9 +335,10 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
             }
 
             @Bean
-            public AuthService authService(UserAuthorizationService userAuthorizationService) {
+            public AuthService authService(UserAuthorizationService userAuthorizationService, ExceptionCodeManager exceptionCodeManager) {
                 SpringAuthServiceImpl authService = new SpringAuthServiceImpl();
                 authService.setUserAuthorizationService(userAuthorizationService);
+                authService.setExceptionCodeManager(exceptionCodeManager);
 
                 return authService;
             }

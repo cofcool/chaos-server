@@ -2,7 +2,8 @@ package net.cofcool.chaos.server.core.support;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import net.cofcool.chaos.server.common.core.ExceptionCode;
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
+import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.core.Result;
 import org.springframework.http.HttpOutputMessage;
@@ -32,18 +33,18 @@ public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConv
         if (object instanceof Result) {
             object = handleResult((Result) object);
         } else if (object instanceof Number || object instanceof String){
-            object = Message.successful(exceptionCodeManager.get(ExceptionCode.SERVER_OK_KEY, true), object);
+            object = Message.of(
+                exceptionCodeManager.getCode(ExceptionCodeDescriptor.SERVER_OK),
+                exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK),
+                object
+            );
         }
 
         super.writeInternal(object, type, outputMessage);
     }
 
     private Message handleResult(Result result) {
-        return result.getResult(
-            result.successful() ?
-                exceptionCodeManager.get(ExceptionCode.SERVER_OK_KEY, true) :
-                exceptionCodeManager.get(ExceptionCode.OPERATION_ERR_KEY, true)
-        );
+        return result.getResult();
     }
 
 }

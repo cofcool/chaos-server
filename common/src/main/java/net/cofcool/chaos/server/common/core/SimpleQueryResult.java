@@ -1,9 +1,9 @@
 package net.cofcool.chaos.server.common.core;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import javax.annotation.Nonnull;
 
 /**
  * {@link QueryResult} 简单实现
