@@ -1,7 +1,7 @@
 package net.cofcool.chaos.server.common.core;
 
 /**
- * 异常描述管理
+ * 异常描述管理, 建议应用维护一个实例
  *
  * @author CofCool
  *

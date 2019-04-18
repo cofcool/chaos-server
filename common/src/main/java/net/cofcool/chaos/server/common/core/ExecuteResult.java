@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 
 /**
- * 执行结果, 如果执行成功, 那 <code>entity</code> 必须有值
+ * 执行结果, 如果 {@link #successful()} 为 "true", 那 <code>entity</code> 必须有值
  *
  * @author CofCool
  */

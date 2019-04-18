@@ -1,13 +1,18 @@
 package net.cofcool.chaos.server.common.core;
 
-import javax.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
- * 异常描述信息
+ * 异常描述信息, 包括异常描述码和异常描述信息, 应用可自行定义, 通过 {@link ExceptionCodeManager} 处理应用的状态码及状态描述等
  *
  * @author CofCool
+ *
+ * @see ExceptionCodeManager
+ * @see SimpleExceptionCodeDescriptor
+ * @see ResourceExceptionCodeDescriptor
  */
 public interface ExceptionCodeDescriptor {
 

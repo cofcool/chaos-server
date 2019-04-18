@@ -47,15 +47,9 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
     public void setMessage(Message<T> message) {
         Objects.requireNonNull(message);
         this.message = message;
+        this.entity = message.getData();
     }
 
-    /**
-     * {@inheritDoc}
-     * <br>
-     * <b>
-     *     注意: 如果 {@link #message} 不为"NULL", 则返回该"message"对象, 否则根据执行情况创建对应的"message"
-     * </b>
-     */
     @Override
     public Message<T> getResult() {
         return message;
