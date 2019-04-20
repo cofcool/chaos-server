@@ -4,7 +4,7 @@ import java.util.List;
 import net.cofcool.chaos.server.common.core.Result.ResultState;
 
 /**
- * 常用 <b>DAO</b> 方法
+ * 定义常用的数据查询删除等相关方法
  *
  * @author CofCool
  */

@@ -1,11 +1,11 @@
 package net.cofcool.chaos.server.common.core;
 
-import javax.annotation.Nullable;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
+import javax.annotation.Nullable;
 
 /**
- * 执行结果, 如果 {@link #successful()} 为 "true", 那 <code>entity</code> 必须有值
+ * 执行结果, 如果 {@link #successful()} 为 "true", 那"entity"必须有值
  *
  * @author CofCool
  */
@@ -53,7 +53,21 @@ public interface ExecuteResult<T> extends Result<T> {
     }
 
     /**
-     * 创建 ExecuteResult 实例的方便方法
+     * 创建 ExecuteResult 实例的方便方法, 推荐应用封装该方法，简化使用, 例如:
+     *
+     * <pre class="code">
+     * public interface MyExecuteResult {
+     *
+     *     static <T> ExecuteResult<T> of(T entity, ResultState state) {
+     *         if (state == ResultState.SUCCESSFUL) {
+     *             return ExecuteResult.of(entity, state, ExceptionCodeDescriptor.SERVER_OK, ExceptionCodeDescriptor.SERVER_OK_DESC);
+     *         } else {
+     *             return ExecuteResult.of(entity, state, ExceptionCodeDescriptor.OPERATION_ERR, ExceptionCodeDescriptor.OPERATION_ERR_DESC);
+     *         }
+     *     }
+     *
+     * }
+     * </pre>
      *
      * @param entity 结果数据
      * @param state 执行状态

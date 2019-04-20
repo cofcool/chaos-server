@@ -93,27 +93,25 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
                                               HttpServletResponse response, Object handler, Exception ex) {
         printExceptionLog(request, handler, ex);
 
-        try {
-            Class dupClass = Class.forName("org.springframework.dao.DuplicateKeyException.DuplicateKeyException");
-            if (ex.getClass().isAssignableFrom(dupClass)) {
-                return handleSqlIntegrityViolationException(response, ex);
-            }
-        } catch (ClassNotFoundException ignore) {
-        }
-
         if (ex instanceof ServiceException) {
             return handleServiceException(response, (ServiceException) ex);
-        }
-        else if (ex instanceof NullPointerException || ex instanceof IndexOutOfBoundsException || ex instanceof NoSuchElementException) {
+        } else if (ex instanceof NullPointerException || ex instanceof IndexOutOfBoundsException || ex instanceof NoSuchElementException) {
             return handleNullException(response, ex);
-        }
-        else if (ex instanceof HttpMessageNotReadableException) {
+        } else if (ex instanceof HttpMessageNotReadableException) {
             return handle4xxException(response, ex);
         } else if (ex instanceof UnsupportedOperationException) {
             return handle5xxException(response, ex);
         } else if (ex instanceof MethodArgumentNotValidException) {
             return resolveValidException(response, (MethodArgumentNotValidException) ex);
         } else {
+            try {
+                Class dupClass = Class.forName("org.springframework.dao.DuplicateKeyException.DuplicateKeyException");
+                if (ex.getClass().isAssignableFrom(dupClass)) {
+                    return handleSqlIntegrityViolationException(response, ex);
+                }
+            } catch (ClassNotFoundException ignore) {
+            }
+
             return resolveOthersException(request, response, handler, ex);
         }
     }
