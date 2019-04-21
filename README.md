@@ -60,7 +60,7 @@ fi
 10. ...
 
 
-目前有9个模块
+项目模块:
 
 1. common
 2. core
@@ -71,18 +71,27 @@ fi
 7. security-spring
 8. actuator
 9. component-processor
+10. auto-configure
 
 ### 配置 
 
-配置文件:
- 
-*.properties
 
-必需组件:
-
-* UserAuthorizationService (chaos-server-security-*): 授权相关
-* JpaConfig (chaos-server-data-jpa): JPA配置, DataSource等
-* PasswordProcessor (chaos-server-security-*): 密码处理, 加密解密
+```properties
+# 项目运行模式
+chaos.development.mode=dev
+# 项目版本
+chaos.development.version=100
+# 是否开启验证码
+chaos.auth.using-captcha=false
+# 定义扫描 Scanned 注解的路径
+chaos.development.annotation-path=net.cofcool.chaos.server.demo
+# shiro授权路径配置
+chaos.auth.urls=/auth/**\=anon\n/error\=anon\n/**\=authc
+# 登陆路径
+chaos.auth.login-url=/auth/login
+# 注入数据key配置, 多个时以","分隔
+chaos.auth.checked-keys=id
+```
 
 ### 使用
 
@@ -196,7 +205,7 @@ public interface UserAuthorizationService<T extends Auth, ID extends Serializabl
 
 默认提供三种"Controller(使用`Scanned`注解)"代理类:
 
-* 注入用户数据到请求参数中, 即多租户处理，实现类为`ApiProcessingInterceptor`
+* 注入用户数据到请求参数中, 即数据隔离，实现类为`ApiProcessingInterceptor`
 * 请求日志打印，实现类为`LoggingInterceptor`
 * 参数校验，实现类为`ValidateInterceptor`
 
@@ -314,7 +323,7 @@ public interface Result<T> extends Serializable {
 }
 ```
 
-抽象类`SimpleService`实现`DataAccess`类，实现`query`方法，简化分页操作，定义`queryWithPage`方法，用于分页查询。通过`ExceptionCodeManager`描述执行状态错误码等。
+抽象类`SimpleService`实现`DataAccess`类，实现`query`方法，简化分页操作，定义`queryWithPage`方法，用于分页查询。通过`ExceptionCodeManager`描述执行状态错误码等。JPA 应用的"Service"可继承`SimpleJpaService`。
 
 #### Dao 层
 

@@ -87,22 +87,22 @@ public class ChaosProperties {
         private String urls;
 
         /**
-         * 登陆
+         * 登陆路径
          */
         private String loginUrl = "/auth/login";
 
         /**
-         * 退出登陆
+         * 退出登陆路径
          */
         private String logoutUrl = "/auth/logout";
 
         /**
-         * 登陆过期
+         * 登陆过期路径
          */
         private String expiredUrl = "/auth/unlogin";
 
         /**
-         * 没有访问权限
+         * 没有访问权限路径
          */
         private String unauthUrl = "/auth/unauth";
 

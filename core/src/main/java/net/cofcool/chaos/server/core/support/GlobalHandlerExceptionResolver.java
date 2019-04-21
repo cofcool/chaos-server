@@ -19,6 +19,7 @@ import net.cofcool.chaos.server.core.config.DevelopmentMode;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Ordered;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
@@ -40,6 +41,17 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private HandlerExceptionResolver defaultExceptionResolver;
 
     protected static final ModelAndView EMPTY_MODEL_AND_VIEW = new ModelAndView();
+
+    private static Class<?> springDuplicateKeyException;
+
+    static {
+        try {
+            springDuplicateKeyException = ClassUtils
+                .resolveClassName("org.springframework.dao.DuplicateKeyException", GlobalHandlerExceptionResolver.class.getClassLoader());
+        } catch (Exception e) {
+            springDuplicateKeyException = null;
+        }
+    }
 
     private ObjectMapper jacksonObjectMapper;
 
@@ -103,15 +115,9 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
             return handle5xxException(response, ex);
         } else if (ex instanceof MethodArgumentNotValidException) {
             return resolveValidException(response, (MethodArgumentNotValidException) ex);
+        } else if (springDuplicateKeyException != null && ex.getClass().isAssignableFrom(springDuplicateKeyException)) {
+            return handleSqlIntegrityViolationException(response, ex);
         } else {
-            try {
-                Class dupClass = Class.forName("org.springframework.dao.DuplicateKeyException.DuplicateKeyException");
-                if (ex.getClass().isAssignableFrom(dupClass)) {
-                    return handleSqlIntegrityViolationException(response, ex);
-                }
-            } catch (ClassNotFoundException ignore) {
-            }
-
             return resolveOthersException(request, response, handler, ex);
         }
     }
