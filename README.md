@@ -111,7 +111,7 @@ chaos.auth.checked-keys=id
 
 登录:
 
-![login](./auth_login.svg)
+![login](./doc/auth_login.png)
 
 `AuthService`类定义了登录等操作, 应用不需要实现该类, 只需引用该组件即可。
 
