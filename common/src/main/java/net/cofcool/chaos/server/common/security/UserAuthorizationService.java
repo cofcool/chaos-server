@@ -1,12 +1,9 @@
-package net.cofcool.chaos.server.common.security.authorization;
+package net.cofcool.chaos.server.common.security;
 
 import java.io.Serializable;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import net.cofcool.chaos.server.common.core.Message;
-import net.cofcool.chaos.server.common.security.AbstractLogin;
-import net.cofcool.chaos.server.common.security.Auth;
-import net.cofcool.chaos.server.common.security.User;
 
 /**
  * 授权相关方法定义, 用户需实现该类处理相关逻辑
@@ -30,6 +27,15 @@ public interface UserAuthorizationService<T extends Auth, ID extends Serializabl
      * @return {@link Message}
      */
     Message<Boolean> checkUser(User<T, ID> currentUser);
+
+    /**
+     * 检查验证码
+     * @param authorizationToken 请求数据
+     * @return 是否通过验证
+     */
+    default boolean checkCaptcha(Object authorizationToken) {
+        return true;
+    }
 
     /**
      * 配置登陆时的用户数据

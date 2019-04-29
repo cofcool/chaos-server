@@ -24,5 +24,6 @@
 * `ExecuteResult`添加`orElse`方法, 简化`getResult`方法
 * 优化`AbstractApiInterceptor`, 移除`ExcludeType`
 * 移除`security-shiro`模块对的`data-redis`依赖
+* 优化验证码处理逻辑
 * 优化配置, 按照`Spring Boot`自动配置的方式进行配置
 * 优化对异常描述码和描述信息的处理, 可自定义异常描述信息, 详情参考`ExceptionCodeManager`

@@ -1,8 +1,8 @@
 package net.cofcool.chaos.server.demo.item;
 
 import javax.annotation.Resource;
+import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.User;
-import net.cofcool.chaos.server.common.security.authorization.AuthService;
 import net.cofcool.chaos.server.core.aop.ApiProcessingInterceptor;
 import org.springframework.stereotype.Component;
 

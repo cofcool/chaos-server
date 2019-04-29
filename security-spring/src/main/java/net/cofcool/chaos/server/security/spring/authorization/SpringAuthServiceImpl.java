@@ -12,9 +12,9 @@ import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.security.AbstractLogin.DefaultLogin;
 import net.cofcool.chaos.server.common.security.Auth;
 import net.cofcool.chaos.server.common.security.AuthConstant;
+import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.User;
-import net.cofcool.chaos.server.common.security.authorization.AuthService;
-import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
+import net.cofcool.chaos.server.common.security.UserAuthorizationService;
 import net.cofcool.chaos.server.common.util.WebUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,8 +27,7 @@ import org.springframework.util.Assert;
  * @author CofCool
  */
 @Slf4j
-public class SpringAuthServiceImpl<T extends Auth, ID extends Serializable> implements AuthService<T, ID>, UserDetailsManager,
-    InitializingBean {
+public class SpringAuthServiceImpl<T extends Auth, ID extends Serializable> implements AuthService<T, ID>, UserDetailsManager, InitializingBean {
 
     private UserAuthorizationService<T, ID> userAuthorizationService;
 

@@ -1,4 +1,4 @@
-package net.cofcool.chaos.server.common.security.authorization.exception;
+package net.cofcool.chaos.server.common.security.exception;
 
 import net.cofcool.chaos.server.common.core.ServiceException;
 

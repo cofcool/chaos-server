@@ -9,10 +9,10 @@ import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.security.Auth;
 import net.cofcool.chaos.server.common.security.AuthConstant;
+import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.User;
-import net.cofcool.chaos.server.common.security.authorization.AuthService;
-import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
-import net.cofcool.chaos.server.common.security.authorization.exception.AuthorizationException;
+import net.cofcool.chaos.server.common.security.UserAuthorizationService;
+import net.cofcool.chaos.server.common.security.exception.AuthorizationException;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -27,7 +27,8 @@ import org.springframework.util.Assert;
  *
  * @author CofCool
  */
-public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> implements AuthService<T, ID>, InitializingBean {
+public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> implements
+    AuthService<T, ID>, InitializingBean {
 
     private UserAuthorizationService<T, ID> userAuthorizationService;
 

@@ -1,12 +1,11 @@
 package net.cofcool.chaos.server.security.shiro.access;
 
-import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
-import net.cofcool.chaos.server.common.util.WebUtils;
-import org.apache.shiro.web.filter.AccessControlFilter;
-
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
+import net.cofcool.chaos.server.common.security.UserAuthorizationService;
+import net.cofcool.chaos.server.common.util.WebUtils;
+import org.apache.shiro.web.filter.AccessControlFilter;
 
 /**
  * 权限处理, 未授权时跳转到 {@link #unAuthUrl}

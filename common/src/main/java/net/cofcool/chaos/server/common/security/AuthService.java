@@ -1,13 +1,10 @@
-package net.cofcool.chaos.server.common.security.authorization;
+package net.cofcool.chaos.server.common.security;
 
 import java.io.Serializable;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.Message;
-import net.cofcool.chaos.server.common.security.AbstractLogin;
-import net.cofcool.chaos.server.common.security.Auth;
-import net.cofcool.chaos.server.common.security.User;
 
 /**
  * 授权管理

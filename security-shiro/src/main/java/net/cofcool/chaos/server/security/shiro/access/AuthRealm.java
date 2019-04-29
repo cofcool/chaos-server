@@ -3,16 +3,13 @@ package net.cofcool.chaos.server.security.shiro.access;
 import lombok.extern.slf4j.Slf4j;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
-import net.cofcool.chaos.server.common.security.AuthConstant;
 import net.cofcool.chaos.server.common.security.User;
+import net.cofcool.chaos.server.common.security.UserAuthorizationService;
 import net.cofcool.chaos.server.common.security.UserStatus;
-import net.cofcool.chaos.server.common.security.authorization.UserAuthorizationService;
-import net.cofcool.chaos.server.common.security.authorization.exception.CaptchaException;
-import net.cofcool.chaos.server.common.security.authorization.exception.LoginException;
-import net.cofcool.chaos.server.common.security.authorization.exception.UserNotExistException;
-import net.cofcool.chaos.server.common.util.StringUtils;
+import net.cofcool.chaos.server.common.security.exception.CaptchaErrorException;
+import net.cofcool.chaos.server.common.security.exception.LoginException;
+import net.cofcool.chaos.server.common.security.exception.UserNotExistException;
 import net.cofcool.chaos.server.security.shiro.authorization.CaptchaUsernamePasswordToken;
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -108,11 +105,8 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
 
     private void checkCaptcha(CaptchaUsernamePasswordToken token) {
         if (isUsingCaptcha() && token.getLogin().getDevice().shouldValidate()) {
-            String realCaptcha = (String) SecurityUtils.getSubject().getSession().getAttribute(AuthConstant.CAPTCHA_CODE_KEY);
-            String captcha = token.getLogin().getCode();
-
-            if (StringUtils.isNullOrEmpty(captcha) || !captcha.equalsIgnoreCase(realCaptcha)) {
-                throw new CaptchaException(
+            if (!userAuthorizationService.checkCaptcha(token)) {
+                throw new CaptchaErrorException(
                     getExceptionDesc(ExceptionCodeDescriptor.CAPTCHA_ERROR_DESC),
                     getExceptionCode(ExceptionCodeDescriptor.CAPTCHA_ERROR)
                 );

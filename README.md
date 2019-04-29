@@ -266,7 +266,7 @@ public interface DataAccess<T> {
 
 ```
 
-`Result`封装运行结果，提供两个之接口，`QueryResult`封装查询结果，其它情况`ExecuteResult`由处理。
+`Result`封装运行结果，提供两个之接口，`QueryResult`封装查询结果，其它情况由`ExecuteResult`处理。
 
 ```java
 public interface Result<T> extends Serializable {

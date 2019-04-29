@@ -6,6 +6,8 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.util.Assert;
 
 /**
+ * 存储用户名密码等数据
+ *
  * @author CofCool
  */
 public class CaptchaUsernamePasswordToken extends UsernamePasswordToken {

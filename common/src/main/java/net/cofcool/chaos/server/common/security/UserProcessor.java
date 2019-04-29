@@ -1,6 +1,4 @@
-package net.cofcool.chaos.server.common.security.authorization;
-
-import net.cofcool.chaos.server.common.security.User;
+package net.cofcool.chaos.server.common.security;
 
 /**
  * 配置用户数据
