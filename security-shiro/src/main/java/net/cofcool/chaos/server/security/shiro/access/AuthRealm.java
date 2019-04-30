@@ -105,7 +105,7 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
 
     private void checkCaptcha(CaptchaUsernamePasswordToken token) {
         if (isUsingCaptcha() && token.getLogin().getDevice().shouldValidate()) {
-            if (!userAuthorizationService.checkCaptcha(token)) {
+            if (!userAuthorizationService.checkCaptcha(token.getLogin())) {
                 throw new CaptchaErrorException(
                     getExceptionDesc(ExceptionCodeDescriptor.CAPTCHA_ERROR_DESC),
                     getExceptionCode(ExceptionCodeDescriptor.CAPTCHA_ERROR)

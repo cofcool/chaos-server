@@ -14,7 +14,7 @@ public class CaptchaUsernamePasswordToken extends UsernamePasswordToken {
 
     private static final long serialVersionUID = -4991467222582687202L;
 
-    private AbstractLogin login;
+    private final AbstractLogin login;
 
     public CaptchaUsernamePasswordToken(@Nonnull AbstractLogin login) {
         super(login.getUsername(), login.getPassword());

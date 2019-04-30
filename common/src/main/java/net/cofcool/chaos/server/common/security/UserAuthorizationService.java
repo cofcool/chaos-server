@@ -30,10 +30,10 @@ public interface UserAuthorizationService<T extends Auth, ID extends Serializabl
 
     /**
      * 检查验证码
-     * @param authorizationToken 请求数据
+     * @param loginUser 请求数据
      * @return 是否通过验证
      */
-    default boolean checkCaptcha(Object authorizationToken) {
+    default boolean checkCaptcha(AbstractLogin loginUser) {
         return true;
     }
 
