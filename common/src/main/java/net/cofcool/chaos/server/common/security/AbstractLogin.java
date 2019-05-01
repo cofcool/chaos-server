@@ -22,21 +22,6 @@ public abstract class AbstractLogin implements Serializable {
     private String password;
 
     /**
-     * 验证码
-     */
-    private String code;
-
-    /**
-     * 昵称
-     */
-    private String nickName;
-
-    /**
-     * 角色ID
-     */
-    private Integer roleId;
-
-    /**
      * 请求设备
      */
     private Device device;
@@ -73,22 +58,6 @@ public abstract class AbstractLogin implements Serializable {
         this.device = device;
     }
 
-    public String getNickName() {
-        return nickName;
-    }
-
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
-    }
-
-    public Integer getRoleId() {
-        return roleId;
-    }
-
-    public void setRoleId(Integer roleId) {
-        this.roleId = roleId;
-    }
-
     public String getUsername() {
         return username;
     }
@@ -104,15 +73,6 @@ public abstract class AbstractLogin implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
 
     /**
      * 默认登陆实现
