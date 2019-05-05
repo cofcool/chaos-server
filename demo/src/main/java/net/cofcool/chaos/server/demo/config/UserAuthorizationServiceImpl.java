@@ -49,7 +49,7 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService, I
     @Override
     public void afterPropertiesSet() throws Exception {
         User user = buildDefaultUser();
-        userMap.put(user.getUserName(), user);
+        userMap.put(user.getUsername(), user);
     }
 
     private User<? extends Auth, Long> buildDefaultUser() {
@@ -75,9 +75,8 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService, I
             }
 
         });
-        defaultUser.setUserName("root");
+        defaultUser.setUsername("root");
         defaultUser.setPassword("000000");
-        defaultUser.setNickName("Root");
         defaultUser.setUserId(0L);
         defaultUser.setRegisterTime(new Date(0));
         defaultUser.setLatestLoginTime(new Date());

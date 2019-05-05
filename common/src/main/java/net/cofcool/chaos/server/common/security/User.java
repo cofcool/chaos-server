@@ -7,8 +7,9 @@ import java.util.Date;
 import java.util.HashSet;
 
 /**
- * 用户信息
+ * 用户信息, 包括账号, 密码, 角色等, 可通过 {@link AuthService#readCurrentUser()} 读取已登录用户数据
  * @param <T> 用户具体数据, 通过{@link #getDetail()}获取
+ * @param <ID> 用户ID
  * @author CofCool
  *
  * @see UserRole
@@ -18,42 +19,81 @@ public class User <T extends Auth, ID extends Serializable> implements Serializa
 
     private static final long serialVersionUID = -7130929029282810791L;
 
+    /**
+     * 用户ID
+     */
     private ID userId;
 
+    /**
+     * 用户手机号码
+     */
     private String mobile;
 
-    private String userName;
+    /**
+     * 用户名
+     */
+    private String username;
 
-    private String nickName;
-
+    /**
+     * 用户头像
+     */
     private String avatar;
 
+    /**
+     * 用户密码
+     */
     private String password;
 
+    /**
+     * 用户角色
+     */
     private Collection<UserRole> roles = new HashSet<>();
 
+    /**
+     * 注册时间
+     */
     private Date registerTime;
 
+    /**
+     * 最后登录时间
+     */
     private Date latestLoginTime;
 
+    /**
+     * 访问设备
+     */
     private Device device;
 
+    /**
+     * 用户状态
+     */
     private Collection<UserStatus> userStatuses = new HashSet<>();
 
     /**
-     * 用户具体数据
+     * 用户详细数据
      */
     private T detail;
 
     public User() {
     }
 
-    public User(String userName, String password) {
-        this(userName, password, SimpleDevice.BROWSER);
+    /**
+     * 创建用户, {@link #device} 默认为 {@linkplain SimpleDevice#BROWSER 浏览器}
+     * @param username 用户名
+     * @param password 密码
+     */
+    public User(String username, String password) {
+        this(username, password, SimpleDevice.BROWSER);
     }
 
-    public User(String userName, String password, Device device) {
-        this.userName = userName;
+    /**
+     * 创建用户
+     * @param username 用户名
+     * @param password 密码
+     * @param device 访问设备
+     */
+    public User(String username, String password, Device device) {
+        this.username = username;
         this.password = password;
         this.device = device;
     }
@@ -68,14 +108,6 @@ public class User <T extends Auth, ID extends Serializable> implements Serializa
 
     public void setDetail(T detail) {
         this.detail = detail;
-    }
-
-    public String getNickName() {
-        return nickName;
-    }
-
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
     }
 
     public void addUserStatus(UserStatus status) {
@@ -106,12 +138,12 @@ public class User <T extends Auth, ID extends Serializable> implements Serializa
         this.mobile = mobile;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getAvatar() {
@@ -185,8 +217,7 @@ public class User <T extends Auth, ID extends Serializable> implements Serializa
         newUser.setAvatar(avatar);
         newUser.setUserId(userId);
         newUser.setMobile(mobile);
-        newUser.setNickName(nickName);
-        newUser.setUserName(userName);
+        newUser.setUsername(username);
         newUser.setPassword(password);
         newUser.setRoles(roles);
         newUser.setRegisterTime(registerTime);
@@ -201,14 +232,14 @@ public class User <T extends Auth, ID extends Serializable> implements Serializa
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof User) {
-            return userName.equals(((User) obj).userName);
+            return username.equals(((User) obj).username);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return userName.hashCode();
+        return username.hashCode();
     }
 
     @Override
@@ -216,8 +247,7 @@ public class User <T extends Auth, ID extends Serializable> implements Serializa
         return "User{" +
             "userId=" + userId +
             ", mobile=" + mobile +
-            ", userName='" + userName + '\'' +
-            ", nickName='" + nickName + '\'' +
+            ", username='" + username + '\'' +
             ", avatar='" + avatar + '\'' +
             ", roles=" + roles +
             ", registerTime=" + registerTime +

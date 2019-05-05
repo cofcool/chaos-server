@@ -35,11 +35,6 @@ public class UserDetail extends User implements
     }
 
     @Override
-    public String getUsername() {
-        return getUserName();
-    }
-
-    @Override
     public boolean isAccountNonExpired() {
         return isAccountNonExpired;
     }
