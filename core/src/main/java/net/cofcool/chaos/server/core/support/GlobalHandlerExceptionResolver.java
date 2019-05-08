@@ -163,7 +163,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handleNullException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getExceptionMessage(ExceptionCodeDescriptor.OPERATION_ERR, ExceptionCodeDescriptor.OPERATION_ERR_DESC)
+            getExceptionMessage(ExceptionCodeDescriptor.DATA_ERROR, ExceptionCodeDescriptor.DATA_ERROR_DESC)
         );
 
         return EMPTY_MODEL_AND_VIEW;

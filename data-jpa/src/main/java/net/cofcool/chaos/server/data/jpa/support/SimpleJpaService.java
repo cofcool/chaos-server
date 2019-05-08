@@ -1,5 +1,9 @@
 package net.cofcool.chaos.server.data.jpa.support;
 
+import static net.cofcool.chaos.server.common.util.BeanUtils.getPropertyDescriptors;
+
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
@@ -7,7 +11,6 @@ import net.cofcool.chaos.server.common.core.ExecuteResult;
 import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.core.Result.ResultState;
 import net.cofcool.chaos.server.common.core.SimpleService;
-import net.cofcool.chaos.server.common.util.BeanUtils;
 import org.hibernate.event.spi.FlushEntityEvent;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +54,9 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
 
     @Override
     public ResultState delete(T entity) {
-        ExecuteResult<T> result = queryById(entity);
-        if (result.successful()) {
-            jpaRepository.delete(result.getEntity());
+        Optional<T> result = findById(entity);
+        if (result.isPresent()) {
+            jpaRepository.delete(result.get());
             return ResultState.SUCCESSFUL;
         } else {
             return ResultState.FAILURE;
@@ -61,7 +64,7 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc}, 方法返回值中的"entity"为传入的"entity"
      * <br>
      *
      * 除了手动更新数据外, 也可直接修改查询到的实体数据("set"操作), 当"Hibernate"执行"flush"操作时,
@@ -70,18 +73,55 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
      */
     @Override
     public ExecuteResult<T> update(T entity) {
-        ExecuteResult<T> result = queryById(entity);
-        if (!result.successful()) {
-            return result;
+        Optional<T> result = findById(entity);
+        if (!result.isPresent()) {
+            return ExecuteResult.of(
+                null,
+                ResultState.FAILURE,
+                getExceptionCodeManager().getCode(ExceptionCodeDescriptor.DATA_ERROR),
+                getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.DATA_ERROR_DESC)
+            );
         }
 
-        BeanUtils.overwriteNullProperties(entity, result.getEntity());
+        T dirtyEntity = result.get();
+
+        for (PropertyDescriptor descriptor : getPropertyDescriptors(dirtyEntity.getClass())) {
+            try {
+                if (descriptor.getReadMethod() != null
+                        && descriptor.getWriteMethod() != null
+                        && !isPropertyTransient(descriptor)
+                ) {
+                    Object val = descriptor.getReadMethod().invoke(entity);
+                    if (val != null) {
+                        descriptor.getWriteMethod().invoke(dirtyEntity, val);
+                    }
+                }
+            } catch (IllegalAccessException | InvocationTargetException ignore) {}
+        }
+
+        jpaRepository.save(dirtyEntity);
 
         return ExecuteResult.of(
-            jpaRepository.save(entity), ResultState.SUCCESSFUL,
+            entity,
+            ResultState.SUCCESSFUL,
             getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
             getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC)
         );
+    }
+
+    /**
+     * Indicates whether the feature is transient.
+     *
+     * @return {@code true} if the feature is transient,
+     *         {@code false} otherwise
+     *
+     * @see java.beans.FeatureDescriptor
+     */
+    protected boolean isPropertyTransient(PropertyDescriptor descriptor) {
+        Object value = descriptor.getValue("transient");
+        return (value instanceof Boolean)
+            ? (Boolean) value
+            : false;
     }
 
     @Override
@@ -96,7 +136,7 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
 
     @Override
     public ExecuteResult<T> queryById(T entity) {
-        Optional<T> data = jpaRepository.findById(getEntityId(entity));
+        Optional<T> data = findById(entity);
         return data
             .map(t ->
                 ExecuteResult.of(
@@ -110,9 +150,18 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
                 ExecuteResult.of(
                     null,
                     ResultState.FAILURE,
-                    getExceptionCodeManager().getCode(ExceptionCodeDescriptor.OPERATION_ERR),
-                    getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.OPERATION_ERR_DESC)
+                    getExceptionCodeManager().getCode(ExceptionCodeDescriptor.DATA_ERROR),
+                    getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.DATA_ERROR_DESC)
                 ));
+    }
+
+    /**
+     * 根据实体的"ID"查询数据
+     * @param entity 实体
+     * @return 查询结果
+     */
+    protected Optional<T> findById(T entity) {
+        return jpaRepository.findById(getEntityId(entity));
     }
 
     /**
