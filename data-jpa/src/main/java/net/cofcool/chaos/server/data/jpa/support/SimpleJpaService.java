@@ -6,6 +6,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
+import javax.persistence.Transient;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExecuteResult;
 import net.cofcool.chaos.server.common.core.Page;
@@ -89,7 +90,7 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
             try {
                 if (descriptor.getReadMethod() != null
                         && descriptor.getWriteMethod() != null
-                        && !isPropertyTransient(descriptor)
+                        && !descriptor.getReadMethod().isAnnotationPresent(Transient.class)
                 ) {
                     Object val = descriptor.getReadMethod().invoke(entity);
                     if (val != null) {
@@ -107,21 +108,6 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
             getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
             getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC)
         );
-    }
-
-    /**
-     * Indicates whether the feature is transient.
-     *
-     * @return {@code true} if the feature is transient,
-     *         {@code false} otherwise
-     *
-     * @see java.beans.FeatureDescriptor
-     */
-    protected boolean isPropertyTransient(PropertyDescriptor descriptor) {
-        Object value = descriptor.getValue("transient");
-        return (value instanceof Boolean)
-            ? (Boolean) value
-            : false;
     }
 
     @Override
