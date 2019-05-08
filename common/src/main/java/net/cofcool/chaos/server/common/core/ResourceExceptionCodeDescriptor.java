@@ -7,7 +7,11 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
- * ExceptionCodeDescriptor 的实现, 通过 {@link MessageSource} 获取异常描述信息
+ * ExceptionCodeDescriptor 的实现, 通过 {@link MessageSource} 获取异常描述信息。国际化拦截器可参考"<b>net.cofcool.chaos.server.core.i18n.RequestLocaleChangeInterceptor</b>"
+ *
+ * @see org.springframework.web.servlet.i18n.LocaleChangeInterceptor
+ * @see org.springframework.web.servlet.LocaleResolver
+ * @see SessionLocaleResolver
  */
 public class ResourceExceptionCodeDescriptor implements ExceptionCodeDescriptor {
 

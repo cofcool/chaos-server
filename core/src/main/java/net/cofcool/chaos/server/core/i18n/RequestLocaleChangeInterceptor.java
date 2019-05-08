@@ -9,7 +9,7 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
- * 国际化拦截器
+ * 国际化拦截器, 扩展了 {@link LocaleChangeInterceptor}, 可根据请求头中的"Accept-Language"获取区域信息
  *
  * @author CofCool
  */

@@ -25,6 +25,7 @@ import net.cofcool.chaos.server.core.aop.ScannedMethodInterceptor;
 import net.cofcool.chaos.server.core.aop.ScannedResourceAdvisor;
 import net.cofcool.chaos.server.core.aop.ValidateInterceptor;
 import net.cofcool.chaos.server.core.support.GlobalHandlerExceptionResolver;
+import net.cofcool.chaos.server.core.support.ResponseBodyMessageConverter;
 import net.cofcool.chaos.server.security.shiro.access.AccountCredentialsMatcher;
 import net.cofcool.chaos.server.security.shiro.access.AuthRealm;
 import net.cofcool.chaos.server.security.shiro.access.ExceptionAuthenticationStrategy;
@@ -63,6 +64,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -197,6 +199,16 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
         @ConditionalOnMissingBean
         public LocaleResolver localeResolver() {
             return new SessionLocaleResolver();
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public MappingJackson2HttpMessageConverter responseBodyMessageConverter(ObjectMapper objectMapper, ExceptionCodeManager exceptionCodeManager) {
+            ResponseBodyMessageConverter converter = new ResponseBodyMessageConverter();
+            converter.setObjectMapper(objectMapper);
+            converter.setExceptionCodeManager(exceptionCodeManager);
+
+            return converter;
         }
 
         @Configuration
