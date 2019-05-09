@@ -24,8 +24,10 @@ import net.cofcool.chaos.server.core.aop.ScannedCompositeMethodInterceptor;
 import net.cofcool.chaos.server.core.aop.ScannedMethodInterceptor;
 import net.cofcool.chaos.server.core.aop.ScannedResourceAdvisor;
 import net.cofcool.chaos.server.core.aop.ValidateInterceptor;
+import net.cofcool.chaos.server.core.i18n.ResourceExceptionCodeDescriptor;
 import net.cofcool.chaos.server.core.support.GlobalHandlerExceptionResolver;
 import net.cofcool.chaos.server.core.support.ResponseBodyMessageConverter;
+import net.cofcool.chaos.server.core.support.SimpleExceptionCodeDescriptor;
 import net.cofcool.chaos.server.security.shiro.access.AccountCredentialsMatcher;
 import net.cofcool.chaos.server.security.shiro.access.AuthRealm;
 import net.cofcool.chaos.server.security.shiro.access.ExceptionAuthenticationStrategy;
@@ -134,13 +136,16 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
      * @param exceptionCodeDescriptor 异常描述
      * @return ExceptionCodeManager
      *
-     * @see net.cofcool.chaos.server.common.core.SimpleExceptionCodeDescriptor
-     * @see net.cofcool.chaos.server.common.core.ResourceExceptionCodeDescriptor
+     * @see SimpleExceptionCodeDescriptor
+     * @see ResourceExceptionCodeDescriptor
      */
     @Bean
     @ConditionalOnMissingBean
     public ExceptionCodeManager exceptionCodeManager(@Autowired(required = false) ExceptionCodeDescriptor exceptionCodeDescriptor) {
-        return new ExceptionCodeManager(exceptionCodeDescriptor);
+        return new ExceptionCodeManager(
+            exceptionCodeDescriptor == null
+                ? SimpleExceptionCodeDescriptor.DEFAULT_DESCRIPTOR : exceptionCodeDescriptor
+        );
     }
 
     @Configuration
@@ -210,6 +215,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
             return converter;
         }
+
 
         @Configuration
         @ConditionalOnClass(AuthService.class)

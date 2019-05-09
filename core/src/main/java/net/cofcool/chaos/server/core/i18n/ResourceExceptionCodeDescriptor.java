@@ -1,13 +1,15 @@
-package net.cofcool.chaos.server.common.core;
+package net.cofcool.chaos.server.core.i18n;
 
 import java.util.Locale;
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.util.WebUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
- * ExceptionCodeDescriptor 的实现, 通过 {@link MessageSource} 获取异常描述信息。国际化拦截器可参考"<b>net.cofcool.chaos.server.core.i18n.RequestLocaleChangeInterceptor</b>"
+ * ExceptionCodeDescriptor 的实现, 通过 {@link MessageSource} 获取异常描述信息。
+ * 国际化拦截器可参考 {@linkplain RequestLocaleChangeInterceptor localeChangeInterceptor}
  *
  * @see org.springframework.web.servlet.i18n.LocaleChangeInterceptor
  * @see org.springframework.web.servlet.LocaleResolver
@@ -45,7 +47,7 @@ public class ResourceExceptionCodeDescriptor implements ExceptionCodeDescriptor 
 
     @Override
     public String getCode(String type) {
-        return type;
+        return resolve(type);
     }
 
     @Override

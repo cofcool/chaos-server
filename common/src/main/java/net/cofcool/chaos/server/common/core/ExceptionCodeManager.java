@@ -1,5 +1,7 @@
 package net.cofcool.chaos.server.common.core;
 
+import java.util.Objects;
+
 /**
  * 异常描述管理, 建议应用维护一个实例
  *
@@ -11,12 +13,13 @@ public class ExceptionCodeManager {
 
     private final ExceptionCodeDescriptor descriptor;
 
+    /**
+     * 创建异常描述管理器
+     * @param descriptor ExceptionCodeDescriptor 实例，不能为"NULL"
+     */
     public ExceptionCodeManager(ExceptionCodeDescriptor descriptor) {
-        if (descriptor == null) {
-            this.descriptor = SimpleExceptionCodeDescriptor.DEFAULT_DESCRIPTOR;
-        } else {
-            this.descriptor = descriptor;
-        }
+        Objects.requireNonNull(descriptor);
+        this.descriptor = descriptor;
     }
 
     /**

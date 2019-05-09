@@ -1,7 +1,9 @@
-package net.cofcool.chaos.server.common.core;
+package net.cofcool.chaos.server.core.support;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
+import net.cofcool.chaos.server.core.i18n.ResourceExceptionCodeDescriptor;
 
 /**
  * ExceptionCodeDescriptor 的默认实现, 处理默认信息, 包括 {@link ExceptionCodeDescriptor#SERVER_ERR} 等,
@@ -126,7 +128,7 @@ public class SimpleExceptionCodeDescriptor implements ExceptionCodeDescriptor {
     /**
      * 获取默认的 ExceptionCodeDescriptor
      */
-    protected static final ExceptionCodeDescriptor DEFAULT_DESCRIPTOR = new SimpleExceptionCodeDescriptor();
+    public static final ExceptionCodeDescriptor DEFAULT_DESCRIPTOR = new SimpleExceptionCodeDescriptor();
 
     private static final Map<String, String> DEFAULT_EXCEPTION_MESSAGES = new HashMap<>();
 
@@ -184,7 +186,6 @@ public class SimpleExceptionCodeDescriptor implements ExceptionCodeDescriptor {
 
         DEFAULT_EXCEPTION_MESSAGES.put(DATA_ERROR, DATA_ERROR_VAL);
         DEFAULT_EXCEPTION_MESSAGES.put(DATA_ERROR_DESC, DATA_ERROR_DESC_VAL);
-
     }
 
     @Override
