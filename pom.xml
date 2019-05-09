@@ -38,7 +38,7 @@
         <module>data-redis</module>
         <module>actuator</module>
         <module>component-processor</module>
-        <module>autoconfigure</module>
+        <module>boot-starter</module>
     </modules>
 
     <profiles>

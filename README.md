@@ -71,7 +71,7 @@ fi
 7. security-spring
 8. actuator
 9. component-processor
-10. auto-configure
+10. boot-starter
 
 ### 配置 
 
