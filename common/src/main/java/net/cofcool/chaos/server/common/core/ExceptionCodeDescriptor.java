@@ -1,16 +1,16 @@
 package net.cofcool.chaos.server.common.core;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 /**
- * 异常描述信息, 包括异常描述码和异常描述信息, 应用可自行定义, 通过 {@link ExceptionCodeManager} 处理应用的状态码及状态描述等
+ * 异常描述信息, 包括异常描述码和异常描述信息, 应用可自行定义, 通过 {@link ExceptionCodeManager} 处理应用的状态码及状态描述等, 实现可参考:
+ *
+ * <ul>
+ *     <li>net.cofcool.chaos.server.core.support.SimpleExceptionCodeDescriptor</li>
+ *     <li>net.cofcool.chaos.server.core.i18n.ResourceExceptionCodeDescriptor</li>
+ * </ul>
  *
  * @author CofCool
  *
  * @see ExceptionCodeManager
- * @see SimpleExceptionCodeDescriptor
- * @see ResourceExceptionCodeDescriptor
  */
 public interface ExceptionCodeDescriptor {
 
@@ -141,24 +141,5 @@ public interface ExceptionCodeDescriptor {
      * @return 异常描述信息
      */
     String getDescription(String type);
-
-    /**
-     * 创建 ExceptionCode 实例, {@link ExceptionCode} 封装了异常描述信息, 包含"code"和"description"
-     * @param type 异常类型
-     * @return ExceptionCode 实例
-     */
-    default ExceptionCode wrap(String type) {
-        return new ExceptionCode(getCode(type), getDescription(type));
-    }
-
-    @Data
-    @AllArgsConstructor
-    class ExceptionCode {
-
-        String code;
-
-        String description;
-
-    }
 
 }
