@@ -141,7 +141,7 @@ public final class WebUtils {
         //                mode: 'cors',
         //                credentials: 'include',
         //                headers: {
-        //                    'Content-Type': 'application/json','authorize':'authorize'
+        //                    'Content-Type': 'application/json'
         //                },
         //                body: data
         //            }
@@ -151,7 +151,7 @@ public final class WebUtils {
         allowedDomain = allowedDomain != null ? allowedDomain : "*";
 
         servletResponse.setHeader("Access-Control-Allow-Origin", allowedDomain);
-        servletResponse.setHeader("Access-Control-Allow-Headers", "Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, Authorization, authorize");
+        servletResponse.setHeader("Access-Control-Allow-Headers", "Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, Authorization");
         servletResponse.setHeader("Access-Control-Allow-Methods", "GET, POST, HEAD, OPTIONS");
         servletResponse.setHeader("Access-Control-ALLOW-Credentials", "true");
         servletResponse.setHeader("Access-Control-Max-Age", "43200");

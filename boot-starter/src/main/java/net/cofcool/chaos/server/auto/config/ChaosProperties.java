@@ -59,8 +59,6 @@ public class ChaosProperties {
 
     public static final class Auth {
 
-        public static final String AUTHORIZE_KEY = "authorization";
-
         /**
          * 注入数据key配置, 多个时以","分隔
          */
@@ -196,6 +194,27 @@ public class ChaosProperties {
     public static final class Development {
 
         /**
+         * 是否创建日志拦截器
+         *
+         * @see net.cofcool.chaos.server.core.aop.LoggingInterceptor
+         */
+        private Boolean loggingEnabled = false;
+
+        /**
+         * 是否创建参数验证拦截器
+         *
+         * @see net.cofcool.chaos.server.core.aop.ValidateInterceptor
+         */
+        private Boolean validatingEnabled = false;
+
+        /**
+         * 是否创建参数注入(数据隔离)拦截器
+         *
+         * @see net.cofcool.chaos.server.core.aop.ApiProcessingInterceptor
+         */
+        private Boolean injectingEnabled = false;
+
+        /**
          * 项目运行模式
          */
         private DevelopmentMode mode = DevelopmentMode.DEV;
@@ -211,6 +230,30 @@ public class ChaosProperties {
          * 定义扫描 Scanned 注解的路径
          */
         private String annotationPath;
+
+        public Boolean getLoggingEnabled() {
+            return loggingEnabled;
+        }
+
+        public void setLoggingEnabled(Boolean loggingEnabled) {
+            this.loggingEnabled = loggingEnabled;
+        }
+
+        public Boolean getValidatingEnabled() {
+            return validatingEnabled;
+        }
+
+        public void setValidatingEnabled(Boolean validatingEnabled) {
+            this.validatingEnabled = validatingEnabled;
+        }
+
+        public Boolean getInjectingEnabled() {
+            return injectingEnabled;
+        }
+
+        public void setInjectingEnabled(Boolean injectingEnabled) {
+            this.injectingEnabled = injectingEnabled;
+        }
 
         /**
          * 项目运行模式

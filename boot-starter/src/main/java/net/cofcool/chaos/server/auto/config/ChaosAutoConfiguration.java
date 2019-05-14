@@ -58,6 +58,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
@@ -170,6 +171,8 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
         }
 
         @Bean
+        @ConditionalOnProperty(prefix = "chaos.development", value = "logging-enabled",
+            havingValue = "true", matchIfMissing = false)
         @ConditionalOnMissingBean
         public LoggingInterceptor loggingInterceptor(ObjectMapper objectMapper) {
             LoggingInterceptor interceptor = new LoggingInterceptor();
@@ -179,12 +182,16 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
         }
 
         @Bean
+        @ConditionalOnProperty(prefix = "chaos.development", value = "validating-enabled",
+            havingValue = "true", matchIfMissing = false)
         @ConditionalOnMissingBean
         public ValidateInterceptor validateInterceptor() {
             return new ValidateInterceptor();
         }
 
         @Bean
+        @ConditionalOnProperty(prefix = "chaos.development", value = "injecting-enabled",
+            havingValue = "true", matchIfMissing = false)
         @ConditionalOnMissingBean
         public ApiProcessingInterceptor apiInterceptor(AuthService authService, ExceptionCodeManager exceptionCodeManager) {
             ApiProcessingInterceptor interceptor = new ApiProcessingInterceptor();
