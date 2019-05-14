@@ -22,9 +22,9 @@ import javax.annotation.Nullable;
 public final class BeanUtils {
 
     /**
-     * 根据参数顺序作为优先级选择不为NULL的值
+     * 根据参数顺序作为优先级选择不为 {@literal null} 的值
      * @param args 参数
-     * @return 不为NULL的值
+     * @return 不为 {@literal null} 的值
      */
     @SafeVarargs
     public static  <T> T chooseNotNullData(@Nonnull T... args) {
@@ -39,7 +39,7 @@ public final class BeanUtils {
     }
 
     /**
-     * 拷贝source实例的属性到target中, 并返回
+     * 拷贝 {@code source} 实例的属性到 {@code target} 中, 并返回
      * @param source 源对象
      * @param targetClass 目标类
      * @param <T> 目标类类型
@@ -58,7 +58,7 @@ public final class BeanUtils {
     }
 
     /**
-     * 把data对象属性的值赋给target对象的值为null的属性
+     * 把data对象属性的值赋给 {@code target} 对象的值为 {@literal null} 的属性
      * @param target 目标对象
      * @param data 数据对象
      * @param <T> 类型
@@ -78,9 +78,9 @@ public final class BeanUtils {
     }
 
     /**
-     * Getter方法名转为Setter方法名
-     * @param getter Getter方法名
-     * @return Setter方法名
+     * Getter 方法名转为 Setter 方法名
+     * @param getter Getter 方法名
+     * @return Setter 方法名
      */
     @Nullable
     public static String getterToSetter(@Nonnull String getter) {
@@ -94,14 +94,14 @@ public final class BeanUtils {
     }
 
     /**
-     * target 非null时执行 function
+     * {@code target} 非 {@literal null} 时执行 {@code function}
      */
     public static <T, R> R applyNonnull(T target, Function<T, R> function) {
         return target != null ? function.apply(target) : null;
     }
 
     /**
-     * 检查输入值是否为NULL或0
+     * 检查输入值是否为 {@literal null} 或 0
      */
     public static <T> Optional<T> checkNullOrZero(T value) {
         if (value == null || "0".equals(value.toString())) {

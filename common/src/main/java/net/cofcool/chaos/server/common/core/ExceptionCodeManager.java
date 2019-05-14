@@ -15,7 +15,7 @@ public class ExceptionCodeManager {
 
     /**
      * 创建异常描述管理器
-     * @param descriptor ExceptionCodeDescriptor 实例，不能为"NULL"
+     * @param descriptor ExceptionCodeDescriptor 实例，不能为 {@literal null}
      */
     public ExceptionCodeManager(ExceptionCodeDescriptor descriptor) {
         Objects.requireNonNull(descriptor);

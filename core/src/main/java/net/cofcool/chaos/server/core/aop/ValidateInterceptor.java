@@ -52,7 +52,7 @@ public class ValidateInterceptor extends AbstractScannedMethodInterceptor {
     }
 
     /**
-     * 从 <code>BindingResult</code> 中读取验证信息, 如果没有, 则返回 "NULL"
+     * 从 {@code BindingResult} 中读取验证信息, 如果没有, 则返回 {@literal null}
      * @param result BindingResult 实例
      * @return 验证信息
      */

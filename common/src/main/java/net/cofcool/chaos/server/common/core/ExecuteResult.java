@@ -5,7 +5,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 /**
- * 执行结果, 如果 {@link #successful()} 为 "true", 那"entity"必须有值
+ * 执行结果, 如果 {@link #successful()} 为 {@code true}, 那 {@code entity} 必须有值
  *
  * @author CofCool
  */
@@ -30,14 +30,14 @@ public interface ExecuteResult<T> extends Result<T> {
     }
 
     /**
-     * 获取结果数据, 如果为"NULL", 则返回"newVal"
+     * 获取结果数据, 如果为 {@literal null}, 则返回 {@code newVal}
      * @param newVal 替代数据
      * @return 结果数据
      */
     T orElse(T newVal);
 
     /**
-     * 如果 <b>Entity</b> 不为"NULL", 则执行"fn", 否则返回"NULL"
+     * 如果 <b>Entity</b> 不为 {@literal null}, 则执行 {@code fn}, 否则返回 {@literal null}
      *
      * @param fn 需要执行的 Function
      * @param <R> 返回数据类型
@@ -53,7 +53,7 @@ public interface ExecuteResult<T> extends Result<T> {
     }
 
     /**
-     * 创建 ExecuteResult 实例的方便方法, 推荐应用封装该方法，简化使用, 例如:
+     * 创建 {@code ExecuteResult} 实例的方便方法, 推荐应用封装该方法，简化使用, 例如:
      *
      * <pre class="code">
      * public interface MyExecuteResult {
@@ -83,7 +83,7 @@ public interface ExecuteResult<T> extends Result<T> {
     }
 
     /**
-     * 创建 ExecuteResult 实例的方便方法
+     * 创建 {@code ExecuteResult} 实例的方便方法
      *
      * @param state 执行状态
      * @param msg 描述信息
