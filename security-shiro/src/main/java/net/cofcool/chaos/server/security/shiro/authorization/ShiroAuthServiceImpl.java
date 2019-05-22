@@ -75,11 +75,11 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
                 setupBaseDataOfUser(currentUser, loginUser);
 
                 Message<Boolean> checkedMessage = getUserAuthorizationService().checkUser(currentUser);
-                if (checkedMessage.getData()) {
+                if (checkedMessage.data()) {
                     getUserAuthorizationService().setupUserData(currentUser);
                 } else {
                     user.logout();
-                    return Message.of(checkedMessage.getCode(), checkedMessage.getMessage());
+                    return Message.of(checkedMessage.code(), checkedMessage.message());
                 }
 
                 isOk = true;

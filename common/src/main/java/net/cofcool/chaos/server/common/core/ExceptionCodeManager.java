@@ -31,11 +31,11 @@ public class ExceptionCodeManager {
     }
 
     public String getCode(String type) {
-        return descriptor.getCode(type);
+        return descriptor.code(type);
     }
 
     public String getDescription(String type) {
-        return descriptor.getDescription(type);
+        return descriptor.description(type);
     }
 
 }

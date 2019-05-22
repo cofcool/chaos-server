@@ -189,12 +189,12 @@ public class SimpleExceptionCodeDescriptor implements ExceptionCodeDescriptor {
     }
 
     @Override
-    public String getCode(String type) {
+    public String code(String type) {
         return DEFAULT_EXCEPTION_MESSAGES.getOrDefault(type, type);
     }
 
     @Override
-    public String getDescription(String type) {
+    public String description(String type) {
         return DEFAULT_EXCEPTION_MESSAGES.getOrDefault(type, type);
     }
 

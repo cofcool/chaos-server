@@ -20,7 +20,7 @@ public interface UserRole extends Comparable<UserRole>, Serializable {
      * @return UserRole
      */
     @Nullable
-    UserRole getParent();
+    UserRole parent();
 
     /**
      * 获取子角色
@@ -28,21 +28,21 @@ public interface UserRole extends Comparable<UserRole>, Serializable {
      * @return Collection<UserRole>
      */
     @Nullable
-    Collection<UserRole> getChildren();
+    Collection<UserRole> children();
 
     /**
      * 角色代码
      *
      * @return 角色代码
      */
-    int getRoleId();
+    int roleId();
 
     /**
      * 角色名称
      * @return 角色名称
      */
-    default String getName() {
-        return String.valueOf(getRoleId());
+    default String roleName() {
+        return String.valueOf(roleId());
     }
 
     /**
@@ -50,7 +50,7 @@ public interface UserRole extends Comparable<UserRole>, Serializable {
      */
     @Override
     default int compareTo(@Nonnull UserRole userRole) {
-        return Integer.compare(getRoleId(), userRole.getRoleId());
+        return Integer.compare(roleId(), userRole.roleId());
     }
 
     /**
@@ -63,10 +63,10 @@ public interface UserRole extends Comparable<UserRole>, Serializable {
 
         int i = 0;
         while (i < roles.length && !flag) {
-            if (roles[i] == getRoleId()) {
+            if (roles[i] == roleId()) {
                 flag = true;
-            } else if (getChildren()!= null){
-                Iterator<UserRole> roleIterator = getChildren().iterator();
+            } else if (children()!= null){
+                Iterator<UserRole> roleIterator = children().iterator();
                 while (roleIterator.hasNext() && !flag) {
                     flag = roleIterator.next().contains(roles);
                 }

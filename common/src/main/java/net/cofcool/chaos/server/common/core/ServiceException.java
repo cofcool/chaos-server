@@ -37,7 +37,7 @@ public class ServiceException extends RuntimeException implements ExceptionLevel
     }
 
     @Override
-    public int getLevel() {
+    public int level() {
         return level;
     }
 }

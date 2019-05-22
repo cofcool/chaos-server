@@ -12,17 +12,17 @@ public interface Message<T> extends Serializable {
     /**
      * 状态码
      */
-    String getCode();
+    String code();
 
     /**
      * 描述信息
      */
-    String getMessage();
+    String message();
 
     /**
      * 携带数据
      */
-    T getData();
+    T data();
 
 
     /**

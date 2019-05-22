@@ -15,12 +15,12 @@ public interface Device extends Serializable {
     /**
      * 设备惟一标识
      */
-    String getIdentifier();
+    String identifier();
 
     /**
      * 描述
      */
-    String getDesc();
+    String desc();
 
     /**
      * 是否需要安全检查
@@ -37,7 +37,7 @@ public interface Device extends Serializable {
 
         int i = 0;
         while (i < identifiers.length && !flag) {
-            flag = getIdentifier().equals(identifiers[i]);
+            flag = identifier().equals(identifiers[i]);
             i++;
         }
 

@@ -21,12 +21,12 @@ public abstract class AbstractDevice implements Device {
     }
 
     @Override
-    public String getIdentifier() {
+    public String identifier() {
         return identifier;
     }
 
     @Override
-    public String getDesc() {
+    public String desc() {
         return desc;
     }
 

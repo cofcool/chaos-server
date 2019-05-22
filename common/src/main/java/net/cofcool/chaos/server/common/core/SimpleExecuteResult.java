@@ -20,13 +20,13 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
 
 
     public SimpleExecuteResult(ResultState state, Message<T> message) {
-        this.entity = message.getData();
+        this.entity = message.data();
         this.state = state;
         this.message = message;
     }
 
     @Override
-    public T getEntity() {
+    public T entity() {
         if (!successful() || entity == null) {
             throw new NoSuchElementException("No value present");
         }
@@ -35,7 +35,7 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
     }
 
     @Override
-    public ResultState getState() {
+    public ResultState state() {
         return state;
     }
 
@@ -47,11 +47,11 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
     public void setMessage(Message<T> message) {
         Objects.requireNonNull(message);
         this.message = message;
-        this.entity = message.getData();
+        this.entity = message.data();
     }
 
     @Override
-    public Message<T> getResult() {
+    public Message<T> result() {
         return message;
     }
 }

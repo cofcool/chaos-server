@@ -46,12 +46,12 @@ public class ResourceExceptionCodeDescriptor implements ExceptionCodeDescriptor 
 
 
     @Override
-    public String getCode(String type) {
+    public String code(String type) {
         return resolve(type);
     }
 
     @Override
-    public String getDescription(String type) {
+    public String description(String type) {
         return resolve(type);
     }
 }

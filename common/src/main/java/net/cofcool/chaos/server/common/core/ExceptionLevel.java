@@ -22,14 +22,14 @@ public interface ExceptionLevel {
      */
     int NORMAL_LEVEL = 0;
 
-    int getLevel();
+    int level();
 
     /**
      * 是否输出日志, true则表示输出日志
      * @return 是否输出日志
      */
     default boolean showable() {
-        return getLevel() < NORMAL_LEVEL;
+        return level() < NORMAL_LEVEL;
     }
 
 }

@@ -59,18 +59,18 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService, I
 
             @Nullable
             @Override
-            public UserRole getParent() {
+            public UserRole parent() {
                 return null;
             }
 
             @Nullable
             @Override
-            public Collection<UserRole> getChildren() {
+            public Collection<UserRole> children() {
                 return null;
             }
 
             @Override
-            public int getRoleId() {
+            public int roleId() {
                 return 0;
             }
 

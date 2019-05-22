@@ -133,13 +133,13 @@ public interface ExceptionCodeDescriptor {
      * @param type 异常类型
      * @return 异常描述码
      */
-    String getCode(String type);
+    String code(String type);
 
     /**
      * 获取异常描述信息
      * @param type 异常类型
      * @return 异常描述信息
      */
-    String getDescription(String type);
+    String description(String type);
 
 }

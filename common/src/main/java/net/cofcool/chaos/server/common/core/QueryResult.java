@@ -14,14 +14,14 @@ public interface QueryResult<T, R> extends Result<R> {
      * 分页数据
      * @return {@link Page}
      */
-    Page<T> getPage();
+    Page<T> page();
 
     /**
      * QueryResult 携带的额外数据
      *
      * @return 扩展数据
      */
-    Object getExt();
+    Object ext();
 
     /**
      * 创建 QueryResult 实例的方便方法

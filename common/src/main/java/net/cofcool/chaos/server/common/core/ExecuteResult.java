@@ -16,17 +16,17 @@ public interface ExecuteResult<T> extends Result<T> {
      *
      * @throws NoSuchElementException 执行未成功或数据不存在时抛出异常
      */
-    T getEntity();
+    T entity();
 
     /**
      * 执行状态, 参考 {@link net.cofcool.chaos.server.common.core.Result.ResultState}
      */
-    ResultState getState();
+    ResultState state();
 
 
     @Override
     default boolean successful() {
-        return getState() == ResultState.SUCCESSFUL;
+        return state() == ResultState.SUCCESSFUL;
     }
 
     /**
@@ -46,7 +46,7 @@ public interface ExecuteResult<T> extends Result<T> {
     @Nullable
     default <R> R apply(Function<T, R> fn) {
         if (orElse(null) != null) {
-            return fn.apply(getEntity());
+            return fn.apply(entity());
         }
 
         return null;

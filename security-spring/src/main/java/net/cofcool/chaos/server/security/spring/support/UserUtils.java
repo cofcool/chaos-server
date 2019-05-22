@@ -18,7 +18,7 @@ public class UserUtils {
 
             @Override
             public String getAuthority() {
-                return userRole.getName();
+                return userRole.roleName();
             }
         }));
 

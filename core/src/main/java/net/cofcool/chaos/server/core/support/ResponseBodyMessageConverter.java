@@ -44,7 +44,7 @@ public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConv
     }
 
     private Message handleResult(Result result) {
-        return result.getResult();
+        return result.result();
     }
 
 }

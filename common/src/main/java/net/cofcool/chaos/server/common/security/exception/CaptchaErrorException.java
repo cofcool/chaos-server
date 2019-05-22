@@ -12,7 +12,7 @@ public class CaptchaErrorException extends AuthorizationException {
     }
 
     @Override
-    public int getLevel() {
+    public int level() {
         return LOWEST_LEVEL;
     }
 }

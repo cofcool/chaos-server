@@ -47,16 +47,16 @@ public class SimpleQueryResult<T> implements QueryResult<T, Map<String, Object>>
 
         this.page = page;
         this.ext = ext;
-        this.message = Message.of(code, msg, getResultMap(page));
+        this.message = Message.of(code, msg, createResultMap(page));
     }
 
     @Override
-    public Page<T> getPage() {
+    public Page<T> page() {
         return page;
     }
 
     @Override
-    public Object getExt() {
+    public Object ext() {
         return ext;
     }
 
@@ -64,7 +64,7 @@ public class SimpleQueryResult<T> implements QueryResult<T, Map<String, Object>>
         this.ext = ext;
     }
 
-    private Map<String, Object> getResultMap(Page<T> page) {
+    private Map<String, Object> createResultMap(Page<T> page) {
         Map<String, Object> result = new HashMap<>();
         result.put("totalRow", page.getTotal());
         result.put("list", page.getList());
@@ -79,7 +79,7 @@ public class SimpleQueryResult<T> implements QueryResult<T, Map<String, Object>>
     }
 
     @Override
-    public Message<Map<String, Object>> getResult() {
+    public Message<Map<String, Object>> result() {
         return message;
     }
 

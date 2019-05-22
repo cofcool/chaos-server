@@ -11,7 +11,7 @@ public class LoginException extends AuthorizationException {
     }
 
     @Override
-    public int getLevel() {
+    public int level() {
         return ExceptionLevel.LOWEST_LEVEL;
     }
 }

@@ -26,12 +26,7 @@ public class SimpleMessage<T> implements Message<T> {
         this.data = data;
     }
 
-    @Override
-    public String getCode() {
-        return code;
-    }
 
-    @Override
     public String getMessage() {
         return message;
     }
@@ -40,17 +35,35 @@ public class SimpleMessage<T> implements Message<T> {
         this.message = message;
     }
 
+    public String getCode() {
+        return code;
+    }
+
     public void setCode(String code) {
         this.code = code;
     }
 
-    @Override
     public T getData() {
         return data;
     }
 
     public void setData(T data) {
         this.data = data;
+    }
+
+    @Override
+    public String code() {
+        return code;
+    }
+
+    @Override
+    public String message() {
+        return message;
+    }
+
+    @Override
+    public T data() {
+        return data;
     }
 
 }

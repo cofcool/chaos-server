@@ -39,7 +39,7 @@ public interface Result<T> extends Serializable {
      *
      * @see Message
      */
-    Message<T> getResult();
+    Message<T> result();
 
     /**
      * 执行是否成功
