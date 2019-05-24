@@ -1,8 +1,5 @@
 package net.cofcool.chaos.server.common.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * 自定义异常, Service层异常
  *
@@ -10,13 +7,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ServiceException extends RuntimeException implements ExceptionLevel {
 
-    public static final Logger log = LoggerFactory.getLogger(ServiceException.class);
-
     private static final long serialVersionUID = 3055975161234192313L;
 
-    private String code;
+    private final String code;
 
-    private int level;
+    private final int level;
 
     public ServiceException(String message) {
         this(message, null, HIGHEST_LEVEL);
