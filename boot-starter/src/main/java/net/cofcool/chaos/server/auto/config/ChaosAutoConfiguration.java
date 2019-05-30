@@ -174,11 +174,8 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
         @ConditionalOnProperty(prefix = "chaos.development", value = "logging-enabled",
             havingValue = "true", matchIfMissing = false)
         @ConditionalOnMissingBean
-        public LoggingInterceptor loggingInterceptor(ObjectMapper objectMapper) {
-            LoggingInterceptor interceptor = new LoggingInterceptor();
-            interceptor.setObjectMapper(objectMapper);
-
-            return interceptor;
+        public LoggingInterceptor loggingInterceptor() {
+            return new LoggingInterceptor();
         }
 
         @Bean

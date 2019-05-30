@@ -1,7 +1,5 @@
 package net.cofcool.chaos.server.core.aop;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 import javax.servlet.ServletRequest;
@@ -24,26 +22,12 @@ public class LoggingInterceptor extends AbstractScannedMethodInterceptor {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    private ObjectMapper objectMapper;
-
-    public void setObjectMapper(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
-
-    public ObjectMapper getObjectMapper() {
-        return objectMapper;
-    }
 
     protected StringBuilder appendAfterLog(StringBuilder sb, Object returnValue) {
-        sb.append(";result=[");
-
-        try {
-            sb.append(getObjectMapper().writeValueAsString(returnValue));
-        } catch (JsonProcessingException ignore) {
-
-        }
-
-        sb.append("]");
+        sb
+            .append(";result=[")
+            .append(returnValue.toString())
+            .append("]");
 
         return sb;
     }
@@ -71,15 +55,12 @@ public class LoggingInterceptor extends AbstractScannedMethodInterceptor {
             if (obj instanceof ServletRequest || obj instanceof ServletResponse) {
                 continue;
             }
-            try {
-                String value = getObjectMapper().writeValueAsString(obj);
-                if (i == length - 1) {
-                    builder.append(value);
-                } else {
-                    builder.append(value).append(" ");
-                }
-            } catch (Exception ignored) {
 
+            String value = obj.toString();
+            if (i == length - 1) {
+                builder.append(value);
+            } else {
+                builder.append(value).append(" ");
             }
         }
         builder.append("]");
