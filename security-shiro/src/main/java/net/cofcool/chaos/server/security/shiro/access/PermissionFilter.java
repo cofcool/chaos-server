@@ -1,10 +1,6 @@
 package net.cofcool.chaos.server.security.shiro.access;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
-import net.cofcool.chaos.server.common.util.WebUtils;
 import org.apache.shiro.web.filter.AccessControlFilter;
 
 /**
@@ -56,11 +52,6 @@ public class PermissionFilter extends AccessControlFilter {
     protected boolean onAccessDenied(javax.servlet.ServletRequest servletRequest,
                                      javax.servlet.ServletResponse servletResponse) {
         return false;
-    }
-
-    @Override
-    protected boolean preHandle(ServletRequest request, ServletResponse response) throws Exception {
-        return super.preHandle(request, WebUtils.setupCorsHeader((HttpServletResponse) response));
     }
 
 }
