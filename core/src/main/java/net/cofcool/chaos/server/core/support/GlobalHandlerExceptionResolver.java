@@ -42,14 +42,14 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
 
     protected static final ModelAndView EMPTY_MODEL_AND_VIEW = new ModelAndView();
 
-    private static Class<?> springDuplicateKeyException;
+    private static Class<?> springDataAccessException;
 
     static {
         try {
-            springDuplicateKeyException = ClassUtils
-                .resolveClassName("org.springframework.dao.DuplicateKeyException", GlobalHandlerExceptionResolver.class.getClassLoader());
+            springDataAccessException = ClassUtils
+                .resolveClassName("org.springframework.dao.DataAccessException", GlobalHandlerExceptionResolver.class.getClassLoader());
         } catch (Exception e) {
-            springDuplicateKeyException = null;
+            springDataAccessException = null;
         }
     }
 
@@ -115,8 +115,8 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
             return handle5xxException(response, ex);
         } else if (ex instanceof MethodArgumentNotValidException) {
             return resolveValidException(response, (MethodArgumentNotValidException) ex);
-        } else if (springDuplicateKeyException != null && ex.getClass().isAssignableFrom(springDuplicateKeyException)) {
-            return handleSqlIntegrityViolationException(response, ex);
+        } else if (springDataAccessException != null && springDataAccessException.isAssignableFrom(ex.getClass())) {
+            return handleSqlException(response, ex);
         } else {
             return resolveOthersException(request, response, handler, ex);
         }
@@ -178,10 +178,20 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         return EMPTY_MODEL_AND_VIEW;
     }
 
-    private ModelAndView handleSqlIntegrityViolationException(HttpServletResponse response, Exception ex) {
+    /**
+     * 处理 SQL 异常, 即 <code>org.springframework.dao.DataAccessException</code>
+     * @param response HttpServletResponse
+     * @param ex 异常
+     * @return ModelAndView, 返回 {@link #EMPTY_MODEL_AND_VIEW}
+     */
+    protected ModelAndView handleSqlException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getExceptionMessage(ExceptionCodeDescriptor.DATA_EXISTS, ExceptionCodeDescriptor.DATA_EXISTS_DESC)
+            getMessage(
+                exceptionCodeManager.getCode(ExceptionCodeDescriptor.DATA_ERROR),
+                developmentMode.isDebugMode() ? ex.getMessage() : exceptionCodeManager.getDescription(
+                    ExceptionCodeDescriptor.DATA_ERROR_DESC)
+            )
         );
 
         return EMPTY_MODEL_AND_VIEW;

@@ -329,4 +329,4 @@ public interface Result<T> extends Serializable {
 * HttpMessageNotReadableException
 * UnsupportedOperationException
 * MethodArgumentNotValidException
-* DuplicateKeyException
+* DataAccessException

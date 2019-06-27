@@ -10,10 +10,19 @@ public class SimpleMessage<T> implements Message<T> {
 
     private static final long serialVersionUID = -5993515594721000852L;
 
+    /**
+     * 状态码
+     */
     private String code;
 
+    /**
+     * 描述信息
+     */
     private String message;
 
+    /**
+     * 携带数据
+     */
     private T data;
 
     public SimpleMessage() {
