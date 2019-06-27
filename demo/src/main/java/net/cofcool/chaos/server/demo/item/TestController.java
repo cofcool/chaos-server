@@ -1,8 +1,8 @@
 package net.cofcool.chaos.server.demo.item;
 
 import javax.annotation.Resource;
+import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.core.Page;
-import net.cofcool.chaos.server.common.core.QueryResult;
 import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.core.annotation.Api;
@@ -36,8 +36,8 @@ public class TestController {
     }
 
     @RequestMapping("/query")
-    public QueryResult<Person, ?> query(@RequestBody Page<Person> condition) {
-        return personService.query(condition, condition.getCondition());
+    public Message query(@RequestBody Page<Person> condition) {
+        return personService.query(condition, condition.getCondition()).result();
     }
 
 }

@@ -34,8 +34,6 @@ import net.cofcool.chaos.server.security.shiro.access.ExceptionAuthenticationStr
 import net.cofcool.chaos.server.security.shiro.access.JsonAuthenticationFilter;
 import net.cofcool.chaos.server.security.shiro.access.PermissionFilter;
 import net.cofcool.chaos.server.security.shiro.authorization.ShiroAuthServiceImpl;
-import net.cofcool.chaos.server.security.spring.authorization.SpringAuthServiceImpl;
-import net.cofcool.chaos.server.security.spring.authorization.UserDetail;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.Authenticator;
@@ -65,15 +63,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
@@ -186,11 +178,14 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
             return new ValidateInterceptor();
         }
 
+        /**
+         * <code>AuthService</code> 可能回导致某些组件提早创建从而影响项目正常运行
+         */
         @Bean
         @ConditionalOnProperty(prefix = "chaos.development", value = "injecting-enabled",
             havingValue = "true", matchIfMissing = false)
         @ConditionalOnMissingBean
-        public ApiProcessingInterceptor apiInterceptor(AuthService authService, ExceptionCodeManager exceptionCodeManager) {
+        public ApiProcessingInterceptor apiInterceptor(@Lazy AuthService authService, ExceptionCodeManager exceptionCodeManager) {
             ApiProcessingInterceptor interceptor = new ApiProcessingInterceptor();
             interceptor.setAuthService(authService);
             interceptor.setDefinedCheckedKeys(
@@ -222,7 +217,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
 
         @Configuration
-        @ConditionalOnClass(AuthService.class)
+        @ConditionalOnClass(ShiroFilterFactoryBean.class)
         public class ShiroAutoConfiguration {
 
             /**

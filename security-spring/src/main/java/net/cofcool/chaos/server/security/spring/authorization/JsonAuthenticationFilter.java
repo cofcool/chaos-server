@@ -6,11 +6,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
+import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin.DefaultLogin;
 import net.cofcool.chaos.server.common.security.AuthConstant;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -27,14 +29,25 @@ import org.springframework.util.Assert;
  */
 public class JsonAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    private HttpMessageConverter messageConverter;
+    private MappingJackson2HttpMessageConverter messageConverter;
+
+    private ExceptionCodeManager exceptionCodeManager;
 
     public HttpMessageConverter getMessageConverter() {
         return messageConverter;
     }
 
-    public void setMessageConverter(HttpMessageConverter  messageConverter) {
+    public void setMessageConverter(MappingJackson2HttpMessageConverter  messageConverter) {
         this.messageConverter = messageConverter;
+    }
+
+    public ExceptionCodeManager getExceptionCodeManager() {
+        return exceptionCodeManager;
+    }
+
+    public void setExceptionCodeManager(
+        ExceptionCodeManager exceptionCodeManager) {
+        this.exceptionCodeManager = exceptionCodeManager;
     }
 
     @Override
@@ -100,9 +113,9 @@ public class JsonAuthenticationFilter extends UsernamePasswordAuthenticationFilt
 
         String errorCode;
         if (failed instanceof UsernameNotFoundException) {
-            errorCode = ExceptionCodeDescriptor.NO_LOGIN;
+            errorCode = getExceptionCodeManager().getCode(ExceptionCodeDescriptor.NO_LOGIN);
         } else {
-            errorCode = ExceptionCodeDescriptor.DENIAL_AUTH;
+            errorCode = getExceptionCodeManager().getCode(ExceptionCodeDescriptor.DENIAL_AUTH);
         }
 
         messageConverter.write(Message.of(errorCode, failed.getMessage()), MediaType.APPLICATION_JSON, new ServletServerHttpResponse(response));
