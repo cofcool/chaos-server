@@ -6,6 +6,7 @@ import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.core.annotation.Api;
+import net.cofcool.chaos.server.demo.api.UserData;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

@@ -9,12 +9,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
-import net.cofcool.chaos.server.common.security.Auth;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
 import net.cofcool.chaos.server.common.security.UserRole;
 import net.cofcool.chaos.server.common.security.UserStatus;
-import net.cofcool.chaos.server.demo.item.UserData;
+import net.cofcool.chaos.server.demo.api.UserData;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
@@ -22,12 +21,12 @@ import org.springframework.stereotype.Service;
  * @author CofCool
  */
 @Service
-public class UserAuthorizationServiceImpl implements UserAuthorizationService, InitializingBean {
+public class UserAuthorizationServiceImpl implements UserAuthorizationService<UserData, Long>, InitializingBean {
 
-    private Map<String, User> userMap = new HashMap<>();
+    private Map<String, User<UserData, Long>> userMap = new HashMap<>();
 
     @Override
-    public User queryUser(AbstractLogin loginUser) {
+    public User<UserData, Long> queryUser(AbstractLogin loginUser) {
         return userMap.get(loginUser.getUsername());
     }
 
@@ -48,11 +47,11 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService, I
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        User user = buildDefaultUser();
+        User<UserData, Long> user = buildDefaultUser();
         userMap.put(user.getUsername(), user);
     }
 
-    private User<? extends Auth, Long> buildDefaultUser() {
+    private User<UserData, Long> buildDefaultUser() {
         User<UserData, Long>defaultUser = new User<>();
         defaultUser.addRole(new UserRole() {
             private static final long serialVersionUID = 5571835917896222870L;
