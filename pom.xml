@@ -7,7 +7,7 @@
     <groupId>net.cofcool.chaos</groupId>
     <artifactId>chaos-server</artifactId>
     <packaging>pom</packaging>
-    <version>0.4.0.2019.04.18-SNAPSHOT</version>
+    <version>0.4.0.2019.06.27-SNAPSHOT</version>
     <description>Chaos Web Server</description>
     <url>https://github.com/cofcool/chaos-server</url>
 
