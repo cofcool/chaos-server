@@ -49,7 +49,6 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
 
     public void setUserAuthorizationService(UserAuthorizationService<T, ID> userAuthorizationService) {
         this.userAuthorizationService = userAuthorizationService;
-        this.userAuthorizationService.setUserProcessor(this::storageUser);
     }
 
     @Override

@@ -30,3 +30,4 @@
 * `ValidateInterceptor`等配置改为可选项，默认不创建接口参数验证, 日志打印等拦截器
 * `LoggingInterceptor`移除对`Jackson`的依赖, 改为调用对象的`toString`方法
 * 接口类的`getXxx()`风格代码改为`xxx()`
+* `UserAuthorizationService` 删除 `setUserProcessor` 方法

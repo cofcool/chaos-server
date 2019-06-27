@@ -52,15 +52,6 @@ public interface UserAuthorizationService<T extends Auth, ID extends Serializabl
     boolean checkPermission(ServletRequest servletRequest, ServletResponse servletResponse);
 
     /**
-     * 配置用户数据处理器
-     *
-     * @param userProcessor 用户数据处理器
-     */
-    default void setUserProcessor(UserProcessor userProcessor) {
-
-    }
-
-    /**
      * 报告授权验证异常信息
      * <br>
      * <b>TODO</b>: 使用事件监听方式替代, 参考<code>org.springframework.security.authentication.event.AuthenticationSuccessEvent</code>等
