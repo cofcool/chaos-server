@@ -64,8 +64,7 @@ public class JsonAuthenticationFilter extends UsernamePasswordAuthenticationFilt
             loginUser = new DefaultLogin("", "");
         }
 
-        JsonAuthenticationToken authRequest = new JsonAuthenticationToken(
-                loginUser.getUsername(), loginUser.getPassword());
+        JsonAuthenticationToken authRequest = new JsonAuthenticationToken(loginUser);
 
         setDetails(request, authRequest);
 
