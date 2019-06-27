@@ -50,7 +50,6 @@ public class JsonAuthenticationFilter extends UsernamePasswordAuthenticationFilt
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         if (!request.getMethod().equals("POST")) {
             throw new AuthenticationServiceException(
@@ -72,7 +71,6 @@ public class JsonAuthenticationFilter extends UsernamePasswordAuthenticationFilt
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         if (logger.isDebugEnabled()) {
             logger.debug("Authentication success. Updating SecurityContextHolder to contain: "
@@ -94,7 +92,6 @@ public class JsonAuthenticationFilter extends UsernamePasswordAuthenticationFilt
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     protected void unsuccessfulAuthentication(HttpServletRequest request,
         HttpServletResponse response, AuthenticationException failed)
         throws IOException, ServletException {

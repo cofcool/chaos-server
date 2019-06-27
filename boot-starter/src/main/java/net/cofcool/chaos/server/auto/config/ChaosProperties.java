@@ -80,7 +80,12 @@ public class ChaosProperties {
         private String defaultPassword;
 
         /**
-         * shiro授权路径配置
+         * 授权路径配置
+         * <br>
+         * "Shiro" 项目为 <code>/login\=anon\n/**\=authc</code><br>
+         * "Spring Security" 为 <code>/login,/api/**</code>
+         * <br>
+         * <b>注意</b>: "Spring Security" 项目用","分割, 该配置为匿名访问路径
          */
         private String urls;
 

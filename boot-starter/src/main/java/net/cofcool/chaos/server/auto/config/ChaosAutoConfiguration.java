@@ -1,5 +1,7 @@
 package net.cofcool.chaos.server.auto.config;
 
+import static org.springframework.util.StringUtils.delimitedListToStringArray;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInterceptor;
 import java.io.IOException;
@@ -34,6 +36,9 @@ import net.cofcool.chaos.server.security.shiro.access.ExceptionAuthenticationStr
 import net.cofcool.chaos.server.security.shiro.access.JsonAuthenticationFilter;
 import net.cofcool.chaos.server.security.shiro.access.PermissionFilter;
 import net.cofcool.chaos.server.security.shiro.authorization.ShiroAuthServiceImpl;
+import net.cofcool.chaos.server.security.spring.authorization.SpringAuthServiceImpl;
+import net.cofcool.chaos.server.security.spring.authorization.SpringDaoAuthenticationProvider;
+import net.cofcool.chaos.server.security.spring.authorization.SpringUserAuthorizationService;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.Authenticator;
@@ -66,6 +71,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.util.Assert;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
@@ -189,7 +202,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
             ApiProcessingInterceptor interceptor = new ApiProcessingInterceptor();
             interceptor.setAuthService(authService);
             interceptor.setDefinedCheckedKeys(
-                org.springframework.util.StringUtils.delimitedListToStringArray(
+                delimitedListToStringArray(
                     chaosProperties.getAuth().getCheckedKeys(),
                     ","
                 )
@@ -328,56 +341,77 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
         }
 
         @Configuration
-        @ConditionalOnClass(UserDetail.class)
-        public class SpringSecurityAutoConfiguration {
+        @EnableWebSecurity
+        @ConditionalOnClass(DefaultAuthenticationEventPublisher.class)
+        @ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
+        public class SpringSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
+
+            private AuthenticationProvider authenticationProvider;
+
+            private UsernamePasswordAuthenticationFilter authenticationFilter;
+
+            @Override
+            protected void configure(HttpSecurity http) throws Exception {
+                Assert.notNull(authenticationProvider, "authenticationProvider must be specified");
+                Assert.notNull(authenticationFilter, "authenticationFilter must be specified");
+
+                http
+                    .authenticationProvider(authenticationProvider)
+                    .addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                    .rememberMe()
+                    .and()
+                    .csrf().disable()
+                    .authorizeRequests()
+                    .antMatchers(
+                        delimitedListToStringArray(
+                            chaosProperties.getAuth().getUrls(), ","
+                        )
+                    ).anonymous()
+                    .antMatchers("/**").authenticated()
+                    .and()
+                    .formLogin().loginProcessingUrl(chaosProperties.getAuth().getLoginUrl())
+                    .and()
+                    .logout()
+                    .logoutUrl(chaosProperties.getAuth().getLogoutUrl())
+                    .permitAll()
+                    .and()
+                    .sessionManagement()
+                    .maximumSessions(10)
+                    .expiredUrl(chaosProperties.getAuth().getExpiredUrl());
+            }
 
             @Bean
-            public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordProcessor passwordProcessor) {
-                DaoAuthenticationProvider p = new DaoAuthenticationProvider();
-                p.setPasswordEncoder(new PasswordEncoderDelegate(passwordProcessor));
-                p.setUserDetailsService(userDetailsService);
+            public AuthenticationProvider authenticationProvider(
+                SpringUserAuthorizationService userAuthorizationService, PasswordProcessor passwordProcessor) {
+                SpringDaoAuthenticationProvider p = new SpringDaoAuthenticationProvider();
+                p.setPasswordProcessor(passwordProcessor);
+                p.setUserAuthorizationService(userAuthorizationService);
+
+                this.authenticationProvider = p;
+
                 return p;
             }
 
             @Bean
-            public Filter jsonAuthenticationFilter(HttpMessageConverter httpMessageConverter, AuthenticationManager authenticationManager)
+            public UsernamePasswordAuthenticationFilter jsonAuthenticationFilter(
+                MappingJackson2HttpMessageConverter httpMessageConverter, ExceptionCodeManager exceptionCodeManager)
                 throws Exception {
                 net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter filter = new net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter();
                 filter.setPostOnly(true);
+                filter.setExceptionCodeManager(exceptionCodeManager);
                 filter.setMessageConverter(httpMessageConverter);
-                filter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(chaosProperties.getAuth().getLoginUrl(), "POST"));
-                filter.setAuthenticationManager(authenticationManager);
+                filter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/auth/login", "POST"));
+                filter.setAuthenticationManager(authenticationManager());
+
+
+                this.authenticationFilter = filter;
 
                 return filter;
             }
 
             @Bean
-            public AuthService authService(UserAuthorizationService userAuthorizationService, ExceptionCodeManager exceptionCodeManager) {
-                SpringAuthServiceImpl authService = new SpringAuthServiceImpl();
-                authService.setUserAuthorizationService(userAuthorizationService);
-                authService.setExceptionCodeManager(exceptionCodeManager);
-
-                return authService;
-            }
-
-            class PasswordEncoderDelegate implements PasswordEncoder {
-
-                private PasswordProcessor passwordProcessor;
-
-                PasswordEncoderDelegate(
-                    PasswordProcessor passwordProcessor) {
-                    this.passwordProcessor = passwordProcessor;
-                }
-
-                @Override
-                public String encode(CharSequence rawPassword) {
-                    return passwordProcessor.process(rawPassword.toString());
-                }
-
-                @Override
-                public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                    return passwordProcessor.doMatch(rawPassword.toString(), encodedPassword);
-                }
+            public AuthService authService() {
+                return new SpringAuthServiceImpl();
             }
         }
 
