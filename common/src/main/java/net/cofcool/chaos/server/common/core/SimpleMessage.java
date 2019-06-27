@@ -66,4 +66,13 @@ public class SimpleMessage<T> implements Message<T> {
         return data;
     }
 
+    @Override
+    public String toString() {
+        return "SimpleMessage{" +
+            "code='" + code + '\'' +
+            ", message='" + message + '\'' +
+            ", data=" + data +
+            '}';
+    }
+
 }

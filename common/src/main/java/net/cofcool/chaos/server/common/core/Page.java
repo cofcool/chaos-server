@@ -261,4 +261,20 @@ public class Page<T> implements Serializable {
         authIdsMap.put(key, value);
     }
 
+    @Override
+    public String toString() {
+        return "Page{" +
+            "startDate=" + startDate +
+            ", endDate=" + endDate +
+            ", queryFlag=" + queryFlag +
+            ", pageNumber=" + pageNumber +
+            ", pageSize=" + pageSize +
+            ", total=" + total +
+            ", pages=" + pages +
+            ", isFirstPage=" + isFirstPage +
+            ", isLastPage=" + isLastPage +
+            ", wd='" + wd + '\'' +
+            ", condition=" + condition +
+            '}';
+    }
 }
