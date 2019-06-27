@@ -9,7 +9,6 @@ import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin.DefaultLogin;
-import net.cofcool.chaos.server.common.security.AuthConstant;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -92,7 +91,6 @@ public class JsonAuthenticationFilter extends UsernamePasswordAuthenticationFilt
         }
 
         // 直接返回数据, 如重定向到“/”路径可调用父类方法
-        request.getSession(true).setAttribute(AuthConstant.LOGINED_USER_KEY, authResult.getPrincipal());
          messageConverter.write(authResult.getPrincipal(), MediaType.APPLICATION_JSON, new ServletServerHttpResponse(response));
     }
 

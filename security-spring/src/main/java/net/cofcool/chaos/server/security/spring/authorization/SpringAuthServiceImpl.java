@@ -11,12 +11,12 @@ import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.security.AbstractLogin.DefaultLogin;
 import net.cofcool.chaos.server.common.security.Auth;
-import net.cofcool.chaos.server.common.security.AuthConstant;
 import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
-import net.cofcool.chaos.server.common.util.WebUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.provisioning.UserDetailsManager;
@@ -49,11 +49,8 @@ public class SpringAuthServiceImpl<T extends Auth, ID extends Serializable> impl
     @SuppressWarnings("unchecked")
     public void setUserAuthorizationService(UserAuthorizationService authUserService) {
         this.userAuthorizationService = authUserService;
-        this.userAuthorizationService.setUserProcessor(this::storageUser);
-    }
-
-    protected void storageUser(User currentUser) {
-        WebUtils.getRequest().getSession().setAttribute(AuthConstant.LOGINED_USER_KEY, currentUser);
+        // note: 在 Spring Security 中如何配置
+        this.userAuthorizationService.setUserProcessor(null);
     }
 
     @Override
@@ -75,7 +72,15 @@ public class SpringAuthServiceImpl<T extends Auth, ID extends Serializable> impl
     @Nullable
     @Override
     public User<T, ID> readCurrentUser() {
-        return (User<T, ID>) WebUtils.getRequest().getSession().getAttribute(AuthConstant.LOGINED_USER_KEY);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            Object principal = authentication.getPrincipal();
+            if (authentication.isAuthenticated() && principal instanceof User) {
+                return (User<T, ID>) principal;
+            }
+        }
+
+        return null;
     }
 
     @Override
