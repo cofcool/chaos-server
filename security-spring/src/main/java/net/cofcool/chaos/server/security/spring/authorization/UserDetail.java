@@ -4,6 +4,7 @@ import java.util.Collection;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.UserStatus;
 import net.cofcool.chaos.server.security.spring.support.UserUtils;
+import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -13,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
  * @author CofCool
  */
 public class UserDetail extends User implements
-    UserDetails {
+    UserDetails, CredentialsContainer {
 
     private static final long serialVersionUID = -634235060622704818L;
 
@@ -67,4 +68,10 @@ public class UserDetail extends User implements
 
         return userDetail;
     }
+
+    @Override
+    public void eraseCredentials() {
+        setPassword(null);
+    }
+
 }
