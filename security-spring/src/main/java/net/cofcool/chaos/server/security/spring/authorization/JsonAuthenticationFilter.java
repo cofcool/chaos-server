@@ -88,7 +88,15 @@ public class JsonAuthenticationFilter extends UsernamePasswordAuthenticationFilt
         }
 
         // 直接返回数据, 如重定向到“/”路径可调用父类方法
-         messageConverter.write(authResult.getPrincipal(), MediaType.APPLICATION_JSON, new ServletServerHttpResponse(response));
+         messageConverter.write(
+             Message.of(
+                 getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
+                 getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC),
+                 authResult.getPrincipal()
+             ),
+             MediaType.APPLICATION_JSON,
+             new ServletServerHttpResponse(response)
+         );
     }
 
     @Override
