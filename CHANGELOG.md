@@ -20,8 +20,8 @@
 **0.4.0-SNAPSHOT**:
 
 * 简化`User`结构
-* 修改`ExecuteResult.getEntity`实现, 如果执行失败, 调用时会抛出异常
-* `ExecuteResult`添加`orElse`方法, 简化`getResult`方法
+* 修改`ExecuteResult.entity`实现, 如果执行失败, 调用时会抛出异常
+* `ExecuteResult`添加`orElse`方法, 简化`result`方法
 * 优化`AbstractApiInterceptor`, 移除`ExcludeType`
 * 移除`security-shiro`模块对的`data-redis`依赖
 * 优化验证码处理逻辑
