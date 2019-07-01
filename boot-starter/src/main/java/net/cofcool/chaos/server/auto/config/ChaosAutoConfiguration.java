@@ -370,11 +370,18 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
                 net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter authenticationFilter = new net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter();
 
+                if (chaosProperties.getAuth().getCorsEnabled()) {
+                    http.cors();
+                }
+
+                if (!chaosProperties.getAuth().getCsrfEnabled()) {
+                    http.csrf().disable();
+                }
+
                 http
                     .authenticationProvider(authenticationProvider)
                     .rememberMe()
                     .and()
-                    .csrf().disable()
                     .authorizeRequests()
                     .antMatchers(
                         delimitedListToStringArray(

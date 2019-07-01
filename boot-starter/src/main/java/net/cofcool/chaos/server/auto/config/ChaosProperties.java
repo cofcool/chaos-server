@@ -114,6 +114,34 @@ public class ChaosProperties {
          */
         private String unLoginUrl = expiredUrl;
 
+        /**
+         * 是否启用 {@link  org.springframework.web.filter.CorsFilter}
+         */
+        private Boolean corsEnabled = false;
+
+
+        /**
+         * 是否启用 CSRF, 默认启用
+         */
+        private Boolean csrfEnabled = true;
+
+
+        public Boolean getCorsEnabled() {
+            return corsEnabled;
+        }
+
+        public void setCorsEnabled(Boolean corsEnabled) {
+            this.corsEnabled = corsEnabled;
+        }
+
+        public Boolean getCsrfEnabled() {
+            return csrfEnabled;
+        }
+
+        public void setCsrfEnabled(Boolean csrfEnabled) {
+            this.csrfEnabled = csrfEnabled;
+        }
+
         public String getCheckedKeys() {
             return checkedKeys;
         }
