@@ -107,7 +107,7 @@ chaos.auth.checked-keys=id
 
 #### 授权处理
 
-封装了`Apache Shiro`和`Spring Security`, 应用可依赖`security-shiro`模块或`security-spring`模块来实现授权管理("security-spring"还未完成)。
+封装了`Apache Shiro`和`Spring Security`, 应用可依赖`security-shiro`模块或`security-spring`模块来实现授权管理。
 
 登录:
 

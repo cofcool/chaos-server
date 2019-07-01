@@ -12,7 +12,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
- * 配置 {@link JsonAuthenticationFilter}
+ * 配置 {@link JsonAuthenticationFilter}, 需要 {@link ExceptionCodeManager} 和 {@link MappingJackson2HttpMessageConverter}
  *
  * @author CofCool
  *
@@ -23,6 +23,9 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
 
     private ExceptionCodeManager exceptionCodeManager;
     private MappingJackson2HttpMessageConverter messageConverter;
+
+    private boolean usingDefaultFailureHandler = true;
+    private boolean usingDefaultSuccessHandler = true;
 
     public JsonLoginConfigure() {
         this(new JsonAuthenticationFilter());
@@ -46,8 +49,12 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
     }
 
     private void createHandler() {
-        this.failureHandler(new JsonAuthenticationFailureHandler(exceptionCodeManager, messageConverter));
-        this.successHandler(new JsonAuthenticationSuccessHandler(exceptionCodeManager, messageConverter));
+        if (usingDefaultFailureHandler) {
+            this.failureHandler(new JsonAuthenticationFailureHandler(exceptionCodeManager, messageConverter));
+        }
+        if (usingDefaultSuccessHandler) {
+            this.successHandler(new JsonAuthenticationSuccessHandler(exceptionCodeManager, messageConverter));
+        }
     }
 
     @Override
@@ -57,11 +64,13 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
 
     public JsonLoginConfigure<H> failureHandler(JsonAuthenticationFailureHandler failureHandler) {
         super.failureHandler(failureHandler);
+        this.usingDefaultFailureHandler = false;
         return this;
     }
 
     public JsonLoginConfigure<H> successHandler(JsonAuthenticationSuccessHandler successHandler) {
         super.successHandler(successHandler);
+        this.usingDefaultSuccessHandler = false;
         return this;
     }
 

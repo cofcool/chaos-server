@@ -15,7 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 
 /**
- *
+ * 实现 {@link org.springframework.security.authentication.AuthenticationProvider}, 处理 {@link UsernamePasswordAuthenticationToken}, 通过调用 {@link SpringUserAuthorizationService} 实现
+ * 
  * @see DaoAuthenticationProvider
  */
 public class SpringDaoAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
