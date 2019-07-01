@@ -14,6 +14,7 @@ import javax.servlet.Filter;
 import javax.sql.DataSource;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
+import net.cofcool.chaos.server.common.security.AbstractLogin.DefaultLogin;
 import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.PasswordProcessor;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
@@ -39,6 +40,7 @@ import net.cofcool.chaos.server.security.shiro.authorization.ShiroAuthServiceImp
 import net.cofcool.chaos.server.security.spring.authorization.SpringAuthServiceImpl;
 import net.cofcool.chaos.server.security.spring.authorization.SpringDaoAuthenticationProvider;
 import net.cofcool.chaos.server.security.spring.authorization.SpringUserAuthorizationService;
+import net.cofcool.chaos.server.security.spring.config.JsonLoginConfigure;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.Authenticator;
@@ -77,7 +79,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
@@ -348,16 +349,29 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
             private AuthenticationProvider authenticationProvider;
 
-            private UsernamePasswordAuthenticationFilter authenticationFilter;
+            private MappingJackson2HttpMessageConverter messageConverter;
+            private ExceptionCodeManager exceptionCodeManager;
+
+            @Autowired
+            public void setMessageConverter(MappingJackson2HttpMessageConverter messageConverter) {
+                this.messageConverter = messageConverter;
+            }
+
+            @Autowired
+            public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
+                this.exceptionCodeManager = exceptionCodeManager;
+            }
 
             @Override
             protected void configure(HttpSecurity http) throws Exception {
                 Assert.notNull(authenticationProvider, "authenticationProvider must be specified");
-                Assert.notNull(authenticationFilter, "authenticationFilter must be specified");
+                Assert.notNull(messageConverter, "messageConverter must be specified");
+                Assert.notNull(exceptionCodeManager, "exceptionCodeManager must be specified");
+
+                net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter authenticationFilter = new net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter();
 
                 http
                     .authenticationProvider(authenticationProvider)
-                    .addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
                     .rememberMe()
                     .and()
                     .csrf().disable()
@@ -369,7 +383,12 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                     ).anonymous()
                     .antMatchers("/**").authenticated()
                     .and()
-                    .formLogin().loginProcessingUrl(chaosProperties.getAuth().getLoginUrl())
+                    .addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                    .apply(new JsonLoginConfigure<>(authenticationFilter))
+                    .loginProcessingUrl(chaosProperties.getAuth().getLoginUrl())
+                    .exceptionCodeManager(exceptionCodeManager)
+                    .messageConverter(messageConverter)
+                    .filterSupportsLoginType(DefaultLogin.class)
                     .and()
                     .logout()
                     .logoutUrl(chaosProperties.getAuth().getLogoutUrl())
@@ -390,23 +409,6 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                 this.authenticationProvider = p;
 
                 return p;
-            }
-
-            @Bean
-            public UsernamePasswordAuthenticationFilter jsonAuthenticationFilter(
-                MappingJackson2HttpMessageConverter httpMessageConverter, ExceptionCodeManager exceptionCodeManager)
-                throws Exception {
-                net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter filter = new net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter();
-                filter.setPostOnly(true);
-                filter.setExceptionCodeManager(exceptionCodeManager);
-                filter.setMessageConverter(httpMessageConverter);
-                filter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/auth/login", "POST"));
-                filter.setAuthenticationManager(authenticationManager());
-
-
-                this.authenticationFilter = filter;
-
-                return filter;
             }
 
             @Bean
