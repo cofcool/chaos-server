@@ -32,7 +32,7 @@ public class UserDetail extends User implements
     @SuppressWarnings("unchecked")
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return UserUtils.convertUserRolesForSpring(getRoles());
+        return getRoles();
     }
 
     @Override
@@ -60,9 +60,12 @@ public class UserDetail extends User implements
      * @param user user 实例
      * @return UserDetail
      */
+    @SuppressWarnings("unchecked")
     public static UserDetail of(User user) {
         UserDetail userDetail = new UserDetail();
         user.cloneUser(userDetail);
+        // 转换角色为 Spring 的 GrantedAuthority 类型
+        userDetail.setRoles(UserUtils.convertUserRolesForSpring(user.getRoles()));
         userDetail.setAccountNonExpired(true);
         userDetail.setCredentialsNonExpired(true);
 
