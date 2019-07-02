@@ -1,6 +1,8 @@
 package net.cofcool.chaos.server.security.shiro.access;
 
+import javax.servlet.http.HttpServletRequest;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
+import net.cofcool.chaos.server.common.util.WebUtils;
 import org.apache.shiro.web.filter.AccessControlFilter;
 
 /**
@@ -40,7 +42,15 @@ public class PermissionFilter extends AccessControlFilter {
     @Override
     protected boolean isAccessAllowed(javax.servlet.ServletRequest servletRequest,
                                       javax.servlet.ServletResponse servletResponse, Object o) throws Exception {
-        if (!getAuthorizationService().checkPermission(servletRequest, servletResponse)) {
+        try {
+            getAuthorizationService()
+                .checkPermission(
+                    servletRequest,
+                    servletResponse,
+                    getSubject(servletRequest, servletResponse),
+                    WebUtils.getRealRequestPath((HttpServletRequest) servletRequest)
+                );
+        } catch (Exception e) {
             servletRequest.getRequestDispatcher(getUnAuthUrl()).forward(servletRequest, servletResponse);
             return false;
         }

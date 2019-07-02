@@ -40,6 +40,7 @@ import net.cofcool.chaos.server.security.shiro.authorization.ShiroAuthServiceImp
 import net.cofcool.chaos.server.security.spring.authorization.SpringAuthServiceImpl;
 import net.cofcool.chaos.server.security.spring.authorization.SpringDaoAuthenticationProvider;
 import net.cofcool.chaos.server.security.spring.authorization.SpringUserAuthorizationService;
+import net.cofcool.chaos.server.security.spring.authorization.UrlBased;
 import net.cofcool.chaos.server.security.spring.config.JsonLoginConfigure;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.shiro.SecurityUtils;
@@ -352,6 +353,8 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
             private MappingJackson2HttpMessageConverter messageConverter;
             private ExceptionCodeManager exceptionCodeManager;
 
+            private SpringUserAuthorizationService userAuthorizationService;
+
             @Autowired
             public void setMessageConverter(MappingJackson2HttpMessageConverter messageConverter) {
                 this.messageConverter = messageConverter;
@@ -360,6 +363,12 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
             @Autowired
             public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
                 this.exceptionCodeManager = exceptionCodeManager;
+            }
+
+            @Autowired
+            public void setUserAuthorizationService(
+                SpringUserAuthorizationService userAuthorizationService) {
+                this.userAuthorizationService = userAuthorizationService;
             }
 
             @Override
@@ -383,6 +392,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                     .rememberMe()
                     .and()
                     .authorizeRequests()
+                    .accessDecisionManager(new UrlBased(userAuthorizationService))
                     .antMatchers(
                         delimitedListToStringArray(
                             chaosProperties.getAuth().getUrls(), ","
@@ -407,8 +417,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
             }
 
             @Bean
-            public AuthenticationProvider authenticationProvider(
-                SpringUserAuthorizationService userAuthorizationService, PasswordProcessor passwordProcessor) {
+            public AuthenticationProvider authenticationProvider(PasswordProcessor passwordProcessor) {
                 SpringDaoAuthenticationProvider p = new SpringDaoAuthenticationProvider();
                 p.setPasswordProcessor(passwordProcessor);
                 p.setUserAuthorizationService(userAuthorizationService);

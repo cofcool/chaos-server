@@ -47,9 +47,12 @@ public interface UserAuthorizationService<T extends Auth, ID extends Serializabl
      * 检查权限
      * @param servletRequest 请求
      * @param servletResponse 响应
-     * @return 是否通过验证
+     * @param authenticationInfo 授权信息
+     * @param requestPath 请求路径
+     *
+     * @throws RuntimeException 抛出相关权限异常
      */
-    boolean checkPermission(ServletRequest servletRequest, ServletResponse servletResponse);
+    void checkPermission(ServletRequest servletRequest, ServletResponse servletResponse, Object authenticationInfo, String requestPath);
 
     /**
      * 报告授权验证异常信息

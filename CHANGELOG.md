@@ -31,4 +31,5 @@
 * `LoggingInterceptor`移除对`Jackson`的依赖, 改为调用对象的`toString`方法
 * 接口类的`getXxx()`风格代码改为`xxx()`
 * `UserAuthorizationService` 删除 `setUserProcessor` 方法
+* 修改`UserAuthorizationService.checkPermission()`的参数
 * `security-spring`模块基本完成

@@ -35,9 +35,10 @@ public interface SpringUserAuthorizationService<T extends Auth, ID extends Seria
 
     /**
      * 当 <code>authRequest</code> 为 {@link JsonAuthenticationToken} 时调用
-     * @param login
-     * @return
-     * @throws UsernameNotFoundException
+     * @param login {@link AbstractLogin} 实例
+     * @return UserDetails
+     * @throws UsernameNotFoundException 当用户不存在时
+     * @throws LoginException 如果 {@link #checkUser(User)} 返回 <code>false</code>
      */
     default UserDetails loadUserByUsername(AbstractLogin login) throws UsernameNotFoundException {
         User<T, ID> user = queryUser(login);
@@ -51,7 +52,10 @@ public interface SpringUserAuthorizationService<T extends Auth, ID extends Seria
 
         Message<Boolean> userState = checkUser(user);
         if (!userState.data()) {
-            throw new LoginException(userState.message(), userState.code());
+            LoginException exception = new LoginException(userState.message(), userState.code());
+            reportAuthenticationExceptionInfo(login, exception);
+
+            throw exception;
         }
 
         return UserDetail.of(user);
