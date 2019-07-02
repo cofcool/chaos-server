@@ -3,6 +3,7 @@ package net.cofcool.chaos.server.auto.config;
 import static net.cofcool.chaos.server.auto.config.ChaosAutoConfiguration.PROJECT_CONFIGURE_PREFIX;
 
 import java.util.Map;
+import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.core.annotation.ApiVersion;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import net.cofcool.chaos.server.core.config.DevelopmentMode;
@@ -125,6 +126,19 @@ public class ChaosProperties {
          */
         private Boolean csrfEnabled = true;
 
+        /**
+         * 配置 {@link net.cofcool.chaos.server.common.security.UserAuthorizationService#queryUser(AbstractLogin)} 参数的类型
+         */
+        private Class<? extends AbstractLogin> loginObjectType;
+
+        public Class<? extends AbstractLogin> getLoginObjectType() {
+            return loginObjectType;
+        }
+
+        public void setLoginObjectType(
+            Class<? extends AbstractLogin> loginObjectType) {
+            this.loginObjectType = loginObjectType;
+        }
 
         public Boolean getCorsEnabled() {
             return corsEnabled;

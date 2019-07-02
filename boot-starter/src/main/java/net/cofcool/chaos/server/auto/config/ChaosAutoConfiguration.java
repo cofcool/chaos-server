@@ -14,7 +14,6 @@ import javax.servlet.Filter;
 import javax.sql.DataSource;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
-import net.cofcool.chaos.server.common.security.AbstractLogin.DefaultLogin;
 import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.PasswordProcessor;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
@@ -405,7 +404,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                     .loginProcessingUrl(chaosProperties.getAuth().getLoginUrl())
                     .exceptionCodeManager(exceptionCodeManager)
                     .messageConverter(messageConverter)
-                    .filterSupportsLoginType(DefaultLogin.class)
+                    .filterSupportsLoginType(chaosProperties.getAuth().getLoginObjectType())
                     .and()
                     .logout()
                     .logoutUrl(chaosProperties.getAuth().getLogoutUrl())
