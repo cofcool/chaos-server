@@ -3,6 +3,7 @@ package net.cofcool.chaos.server.security.spring.authorization;
 import java.io.Serializable;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.util.Assert;
 
 /**
  * 适配 {@link AbstractLogin}
@@ -17,6 +18,9 @@ public class JsonAuthenticationToken extends UsernamePasswordAuthenticationToken
 
     public JsonAuthenticationToken(AbstractLogin login) {
         super(login.getUsername(), login.getPassword());
+
+        Assert.notNull(login, "login - this argument is required; it must not be null");
+        Assert.notNull(login.getDevice(), "login.getDevice() - this argument is required; it must not be nul");
         this.login = login;
     }
 

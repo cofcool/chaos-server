@@ -74,7 +74,10 @@ public class JsonAuthenticationFilter extends AbstractAuthenticationProcessingFi
             throw new AuthenticationServiceException("cannot parse the json request", e);
         }
 
-        JsonAuthenticationToken authRequest = new JsonAuthenticationToken((AbstractLogin) loginUser);
+        AbstractLogin login = (AbstractLogin) loginUser;
+        login.parseDevice(request);
+
+        JsonAuthenticationToken authRequest = new JsonAuthenticationToken(login);
 
         setDetails(request, authRequest);
 
