@@ -61,7 +61,11 @@ public class UserDetail extends User implements
      * @return UserDetail
      */
     @SuppressWarnings("unchecked")
-    public static UserDetail of(User user) {
+    public static UserDetails of(User user) {
+        if (user instanceof UserDetails) {
+            return (UserDetails) user;
+        }
+
         UserDetail userDetail = new UserDetail();
         user.cloneUser(userDetail);
         // 转换角色为 Spring 的 GrantedAuthority 类型
