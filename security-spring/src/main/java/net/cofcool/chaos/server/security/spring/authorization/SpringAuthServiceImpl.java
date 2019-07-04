@@ -17,8 +17,7 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 /**
- * Spring Security 授权管理相关处理, 不支持 {@link #login(AbstractLogin)}, 可通过
- * {@link SpringUserAuthorizationService} 实现
+ * Spring Security 授权管理相关处理, 不支持 {@link #login(HttpServletRequest, HttpServletResponse, AbstractLogin)}, 登录操作由 {@link JsonAuthenticationFilter} 完成
  *
  * @author CofCool
  *
@@ -31,7 +30,7 @@ public class SpringAuthServiceImpl<T extends Auth, ID extends Serializable> impl
 
 
     @Override
-    public Message<User<T, ID>> login(AbstractLogin loginUser) {
+    public Message<User<T, ID>> login(HttpServletRequest request, HttpServletResponse response, AbstractLogin loginUser) {
         throw new UnsupportedOperationException();
     }
 

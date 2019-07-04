@@ -21,7 +21,7 @@ public interface AuthService<T extends Auth, ID extends Serializable> {
      * @param loginUser 登陆时携带的参数
      * @return 登陆数据
      */
-    Message<User<T, ID>> login(AbstractLogin loginUser);
+    Message<User<T, ID>> login(HttpServletRequest request, HttpServletResponse response, AbstractLogin loginUser);
 
     /**
      * 退出登陆

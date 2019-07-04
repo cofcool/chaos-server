@@ -53,7 +53,8 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
 
     @Override
     @SuppressWarnings("unchecked")
-    public Message<User<T, ID>> login(AbstractLogin loginUser) {
+    public Message<User<T, ID>> login(HttpServletRequest request, HttpServletResponse response, AbstractLogin loginUser) {
+        loginUser.parseDevice(request);
         CaptchaUsernamePasswordToken token = new CaptchaUsernamePasswordToken(loginUser);
 
         Subject user = SecurityUtils.getSubject();
