@@ -73,11 +73,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.access.expression.SecurityExpressionHandler;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
+import org.springframework.security.web.FilterInvocation;
+import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
+import org.springframework.security.web.access.expression.WebExpressionVoter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.LocaleResolver;
@@ -391,13 +400,13 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                     .rememberMe()
                     .and()
                     .authorizeRequests()
-                    .accessDecisionManager(new UrlBased(userAuthorizationService))
                     .antMatchers(
-                        delimitedListToStringArray(
-                            chaosProperties.getAuth().getUrls(), ","
-                        )
+                        delimitedListToStringArray(chaosProperties.getAuth().excludeUrl(), ",")
                     ).anonymous()
                     .antMatchers("/**").authenticated()
+                    .accessDecisionManager(
+                        new UrlBased(getDecisionVoters(http), userAuthorizationService, true)
+                    )
                     .and()
                     .addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
                     .apply(new JsonLoginConfigure<>(authenticationFilter))
@@ -405,6 +414,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                     .exceptionCodeManager(exceptionCodeManager)
                     .messageConverter(messageConverter)
                     .filterSupportsLoginType(chaosProperties.getAuth().getLoginObjectType())
+                    .unAuthUrl(chaosProperties.getAuth().getUnauthUrl())
                     .and()
                     .logout()
                     .logoutUrl(chaosProperties.getAuth().getLogoutUrl())
@@ -413,6 +423,48 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                     .sessionManagement()
                     .maximumSessions(10)
                     .expiredUrl(chaosProperties.getAuth().getExpiredUrl());
+            }
+
+            private List<AccessDecisionVoter<? extends Object>> getDecisionVoters(HttpSecurity http) {
+                List<AccessDecisionVoter<? extends Object>> decisionVoters = new ArrayList<AccessDecisionVoter<? extends Object>>();
+
+                WebExpressionVoter expressionVoter = new WebExpressionVoter();
+                expressionVoter.setExpressionHandler(getExpressionHandler(http));
+                decisionVoters.add(expressionVoter);
+
+
+
+                return decisionVoters;
+            }
+
+            private SecurityExpressionHandler<FilterInvocation> getExpressionHandler(HttpSecurity http) {
+                DefaultWebSecurityExpressionHandler defaultHandler = new DefaultWebSecurityExpressionHandler();
+                AuthenticationTrustResolver trustResolver = http
+                    .getSharedObject(AuthenticationTrustResolver.class);
+                if (trustResolver != null) {
+                    defaultHandler.setTrustResolver(trustResolver);
+                }
+                ApplicationContext context = http.getSharedObject(ApplicationContext.class);
+                if (context != null) {
+                    String[] roleHiearchyBeanNames = context.getBeanNamesForType(RoleHierarchy.class);
+                    if (roleHiearchyBeanNames.length == 1) {
+                        defaultHandler.setRoleHierarchy(context.getBean(roleHiearchyBeanNames[0], RoleHierarchy.class));
+                    }
+                    String[] grantedAuthorityDefaultsBeanNames = context.getBeanNamesForType(
+                        GrantedAuthorityDefaults.class);
+                    if (grantedAuthorityDefaultsBeanNames.length == 1) {
+                        GrantedAuthorityDefaults grantedAuthorityDefaults = context.getBean(grantedAuthorityDefaultsBeanNames[0], GrantedAuthorityDefaults.class);
+                        defaultHandler.setDefaultRolePrefix(grantedAuthorityDefaults.getRolePrefix());
+                    }
+                    String[] permissionEvaluatorBeanNames = context.getBeanNamesForType(
+                        PermissionEvaluator.class);
+                    if (permissionEvaluatorBeanNames.length == 1) {
+                        PermissionEvaluator permissionEvaluator = context.getBean(permissionEvaluatorBeanNames[0], PermissionEvaluator.class);
+                        defaultHandler.setPermissionEvaluator(permissionEvaluator);
+                    }
+                }
+
+                return defaultHandler;
             }
 
             @Bean

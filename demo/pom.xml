@@ -8,21 +8,30 @@
     <artifactId>chaos-server-demo</artifactId>
     <version>0.1.0</version>
 
+    <modules>
+        <module>common</module>
+        <module>shiro-jpa</module>
+        <module>shiro-mybatis</module>
+        <module>security-jpa</module>
+        <module>security-mybatis</module>
+    </modules>
+
     <dependencies>
+
         <dependency>
             <groupId>net.cofcool.chaos</groupId>
             <artifactId>chaos-server-core</artifactId>
-            <version>0.4.0.2019.06.27-SNAPSHOT</version>
+            <version>${chaos-server.version}</version>
         </dependency>
         <dependency>
             <groupId>net.cofcool.chaos</groupId>
             <artifactId>chaos-server-security-shiro</artifactId>
-            <version>0.4.0.2019.06.27-SNAPSHOT</version>
+            <version>${chaos-server.version}</version>
         </dependency>
         <dependency>
             <groupId>net.cofcool.chaos</groupId>
             <artifactId>chaos-server-data-jpa</artifactId>
-            <version>0.4.0.2019.06.27-SNAPSHOT</version>
+            <version>${chaos-server.version}</version>
         </dependency>
         <dependency>
             <groupId>de.codecentric</groupId>
@@ -32,17 +41,17 @@
         <dependency>
             <groupId>net.cofcool.chaos</groupId>
             <artifactId>chaos-server-actuator</artifactId>
-            <version>0.4.0.2019.06.27-SNAPSHOT</version>
+            <version>${chaos-server.version}</version>
         </dependency>
         <dependency>
             <groupId>net.cofcool.chaos</groupId>
             <artifactId>chaos-server-component-processor</artifactId>
-            <version>0.4.0.2019.06.27-SNAPSHOT</version>
+            <version>${chaos-server.version}</version>
         </dependency>
         <dependency>
             <groupId>net.cofcool.chaos</groupId>
             <artifactId>chaos-server-boot-starter</artifactId>
-            <version>0.4.0.2019.06.27-SNAPSHOT</version>
+            <version>${chaos-server.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -54,6 +63,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <chaos-server.version>0.4.0.2019.06.27-SNAPSHOT</chaos-server.version>
     </properties>
 
     <profiles>
@@ -141,6 +151,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.1.6.RELEASE</version>
                 <configuration>
                     <mainClass>net.cofcool.chaos.server.demo.config.TestApplicationConfig</mainClass>
                     <layout>JAR</layout>

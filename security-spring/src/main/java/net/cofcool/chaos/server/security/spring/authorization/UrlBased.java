@@ -1,15 +1,15 @@
 package net.cofcool.chaos.server.security.spring.authorization;
 
 import java.util.Collection;
+import java.util.List;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
-import net.cofcool.chaos.server.common.security.exception.AuthorizationException;
-import org.springframework.security.access.AccessDecisionManager;
+import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.ConfigAttribute;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.access.vote.UnanimousBased;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.util.Assert;
@@ -20,45 +20,64 @@ import org.springframework.util.Assert;
  * @see org.springframework.security.access.AccessDecisionManager
  */
 @Slf4j
-public class UrlBased implements AccessDecisionManager {
+public class UrlBased extends UnanimousBased {
 
-    private final UserAuthorizationService userAuthorizationService;
 
     public UrlBased(
-        UserAuthorizationService userAuthorizationService) {
+        List<AccessDecisionVoter<? extends Object>> decisionVoters,
+        UserAuthorizationService userAuthorizationService,
+        boolean usingUserAuthorizationService) {
+        super(decisionVoters);
+
         Assert.notNull(userAuthorizationService, "userAuthorizationService is required");
-        this.userAuthorizationService = userAuthorizationService;
+        getDecisionVoters().add(new PermissionVoter<>(userAuthorizationService, usingUserAuthorizationService));
     }
 
-    @Override
-    public void decide(Authentication authentication, Object object,
-        Collection<ConfigAttribute> configAttributes)
-        throws AccessDeniedException, InsufficientAuthenticationException {
-        FilterInvocation invocation = (FilterInvocation) object;
+    class PermissionVoter<S> implements AccessDecisionVoter<S> {
 
-        log.debug("decide {}'s request access: {}", authentication.getPrincipal().toString(), invocation.getRequestUrl());
+        private final UserAuthorizationService userAuthorizationService;
 
-        try {
-            userAuthorizationService
-                .checkPermission(invocation.getRequest(), invocation.getResponse(), authentication,
-                    invocation.getRequestUrl());
-        } catch (AccessDeniedException e) {
-            userAuthorizationService.reportAuthenticationExceptionInfo(authentication, e);
-            throw e;
-        } catch (AuthorizationException e) {
-            userAuthorizationService.reportAuthenticationExceptionInfo(authentication, e);
+        private final boolean usingUserAuthorizationService;
 
-            throw new AccessDeniedException("Access is denied", e);
+        PermissionVoter(
+            UserAuthorizationService userAuthorizationService,
+            boolean usingUserAuthorizationService) {
+            this.userAuthorizationService = userAuthorizationService;
+            this.usingUserAuthorizationService = usingUserAuthorizationService;
         }
-    }
 
-    @Override
-    public boolean supports(ConfigAttribute attribute) {
-        return true;
-    }
+        @Override
+        public boolean supports(ConfigAttribute attribute) {
+            return usingUserAuthorizationService;
+        }
 
-    @Override
-    public boolean supports(Class<?> clazz) {
-        return true;
+        @Override
+        public boolean supports(Class<?> clazz) {
+            return true;
+        }
+
+        @Override
+        public int vote(Authentication authentication, S object,
+            Collection<ConfigAttribute> attributes) {
+            if (authentication == null) {
+                return ACCESS_DENIED;
+            }
+
+            FilterInvocation invocation = (FilterInvocation) object;
+
+            log.debug("vote {}'s request access: {}", authentication.getPrincipal().toString(), invocation.getRequestUrl());
+
+            try {
+                userAuthorizationService
+                    .checkPermission(invocation.getRequest(), invocation.getResponse(), authentication,
+                        invocation.getRequestUrl());
+
+                return ACCESS_GRANTED;
+            } catch (AccessDeniedException ignore) {
+
+            }
+
+            return ACCESS_DENIED;
+        }
     }
 }

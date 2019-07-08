@@ -235,6 +235,17 @@ public class ChaosProperties {
         public void setUnLoginUrl(String unLoginUrl) {
             this.unLoginUrl = unLoginUrl;
         }
+
+        public String excludeUrl() {
+            return String.join(
+                ",",
+                getUrls(),
+                getUnauthUrl(),
+                getExpiredUrl(),
+                getUnLoginUrl(),
+                getLogoutUrl()
+            );
+        }
     }
 
 

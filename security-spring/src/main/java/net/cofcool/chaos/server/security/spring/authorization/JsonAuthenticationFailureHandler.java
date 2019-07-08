@@ -20,7 +20,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
  *
  * @author CofCool
  */
-public class JsonAuthenticationFailureHandler extends AbstractAuthenticationHandler implements AuthenticationFailureHandler {
+public class JsonAuthenticationFailureHandler extends AbstractAuthenticationConfigure implements AuthenticationFailureHandler {
 
     public JsonAuthenticationFailureHandler(
         ExceptionCodeManager exceptionCodeManager,

@@ -5,9 +5,12 @@ import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFailureHandler;
 import net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter;
 import net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationSuccessHandler;
+import net.cofcool.chaos.server.security.spring.authorization.JsonUnAuthEntryPoint;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
+import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -23,6 +26,8 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
 
     private ExceptionCodeManager exceptionCodeManager;
     private MappingJackson2HttpMessageConverter messageConverter;
+
+    private String unAuthUrl = "/unauth";
 
     private boolean usingDefaultFailureHandler = true;
     private boolean usingDefaultSuccessHandler = true;
@@ -65,12 +70,14 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
     public JsonLoginConfigure<H> failureHandler(JsonAuthenticationFailureHandler failureHandler) {
         super.failureHandler(failureHandler);
         this.usingDefaultFailureHandler = false;
+
         return this;
     }
 
     public JsonLoginConfigure<H> successHandler(JsonAuthenticationSuccessHandler successHandler) {
         super.successHandler(successHandler);
         this.usingDefaultSuccessHandler = false;
+
         return this;
     }
 
@@ -80,11 +87,31 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
         return this;
     }
 
+    public JsonLoginConfigure<H> unAuthUrl(String unAuthUrl) {
+        this.unAuthUrl = unAuthUrl;
+
+        return this;
+    }
+
     @Override
     public void init(H http) throws Exception {
-        super.init(http);
+        updateAuthenticationDefaults();
+        updateAccessDefaults(http);
 
         createHandler();
+
+        registerJsonAuthenticationEntryPoint(http, new JsonUnAuthEntryPoint(exceptionCodeManager, messageConverter, unAuthUrl));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void registerJsonAuthenticationEntryPoint(H http, AuthenticationEntryPoint authenticationEntryPoint) {
+        ExceptionHandlingConfigurer<H> exceptionHandling = http
+            .getConfigurer(ExceptionHandlingConfigurer.class);
+        if (exceptionHandling == null) {
+            return;
+        }
+        exceptionHandling.defaultAuthenticationEntryPointFor(
+            postProcess(authenticationEntryPoint), getAuthenticationEntryPointMatcher(http));
     }
 
 }

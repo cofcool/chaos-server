@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
  *
  * @author CofCool
  */
-public class JsonAuthenticationSuccessHandler extends AbstractAuthenticationHandler implements AuthenticationSuccessHandler {
+public class JsonAuthenticationSuccessHandler extends AbstractAuthenticationConfigure implements AuthenticationSuccessHandler {
 
 
     public JsonAuthenticationSuccessHandler(
