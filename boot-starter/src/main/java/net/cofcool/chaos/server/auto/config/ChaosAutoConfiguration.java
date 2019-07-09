@@ -415,6 +415,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                     .messageConverter(messageConverter)
                     .filterSupportsLoginType(chaosProperties.getAuth().getLoginObjectType())
                     .unAuthUrl(chaosProperties.getAuth().getUnauthUrl())
+                    .unLoginUrl(chaosProperties.getAuth().getUnLoginUrl())
                     .and()
                     .logout()
                     .logoutUrl(chaosProperties.getAuth().getLogoutUrl())

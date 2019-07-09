@@ -28,6 +28,7 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
     private MappingJackson2HttpMessageConverter messageConverter;
 
     private String unAuthUrl = "/unauth";
+    private String unLoginUrl = "/unlogin";
 
     private boolean usingDefaultFailureHandler = true;
     private boolean usingDefaultSuccessHandler = true;
@@ -93,6 +94,12 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
         return this;
     }
 
+    public JsonLoginConfigure<H> unLoginUrl(String unLoginUrl) {
+        this.unLoginUrl = unLoginUrl;
+
+        return this;
+    }
+
     @Override
     public void init(H http) throws Exception {
         updateAuthenticationDefaults();
@@ -100,7 +107,7 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
 
         createHandler();
 
-        registerJsonAuthenticationEntryPoint(http, new JsonUnAuthEntryPoint(exceptionCodeManager, messageConverter, unAuthUrl));
+        registerJsonAuthenticationEntryPoint(http, new JsonUnAuthEntryPoint(exceptionCodeManager, messageConverter, unAuthUrl, unLoginUrl));
     }
 
     @SuppressWarnings("unchecked")

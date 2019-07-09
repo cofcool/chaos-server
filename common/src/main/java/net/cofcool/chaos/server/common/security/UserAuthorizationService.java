@@ -50,7 +50,7 @@ public interface UserAuthorizationService<T extends Auth, ID extends Serializabl
      * @param authenticationInfo 授权信息
      * @param requestPath 请求路径
      *
-     * @throws RuntimeException 抛出相关权限异常
+     * @throws net.cofcool.chaos.server.common.security.exception.AuthorizationException 抛出相关权限异常
      */
     void checkPermission(ServletRequest servletRequest, ServletResponse servletResponse, Object authenticationInfo, String requestPath);
 

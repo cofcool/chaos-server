@@ -6,6 +6,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
+import net.cofcool.chaos.server.common.security.exception.AuthorizationException;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.ConfigAttribute;
@@ -73,8 +74,8 @@ public class UrlBased extends UnanimousBased {
                         invocation.getRequestUrl());
 
                 return ACCESS_GRANTED;
-            } catch (AccessDeniedException ignore) {
-
+            } catch (AccessDeniedException | AuthorizationException e) {
+                log.debug("vote error when invoke the userAuthorizationService.checkPermission", e);
             }
 
             return ACCESS_DENIED;
