@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.NoSuchElementException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -105,18 +106,23 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
                                               HttpServletResponse response, Object handler, Exception ex) {
         printExceptionLog(request, handler, ex);
 
-        if (ex instanceof ServiceException) {
-            return handleServiceException(response, (ServiceException) ex);
-        } else if (ex instanceof NullPointerException || ex instanceof IndexOutOfBoundsException || ex instanceof NoSuchElementException) {
-            return handleNullException(response, ex);
-        } else if (ex instanceof HttpMessageNotReadableException) {
-            return handle4xxException(response, ex);
-        } else if (ex instanceof UnsupportedOperationException) {
-            return handle5xxException(response, ex);
-        } else if (ex instanceof MethodArgumentNotValidException) {
-            return resolveValidException(response, (MethodArgumentNotValidException) ex);
-        } else if (springDataAccessException != null && springDataAccessException.isAssignableFrom(ex.getClass())) {
-            return handleSqlException(response, ex);
+        Exception throwable = ex;
+        if (ex instanceof UndeclaredThrowableException) {
+            throwable = (Exception) ((UndeclaredThrowableException) ex).getUndeclaredThrowable();
+        }
+
+        if (throwable instanceof ServiceException) {
+            return handleServiceException(response, (ServiceException) throwable);
+        } else if (throwable instanceof NullPointerException || throwable instanceof IndexOutOfBoundsException || throwable instanceof NoSuchElementException) {
+            return handleNullException(response, throwable);
+        } else if (throwable instanceof HttpMessageNotReadableException) {
+            return handle4xxException(response, throwable);
+        } else if (throwable instanceof UnsupportedOperationException) {
+            return handle5xxException(response, throwable);
+        } else if (throwable instanceof MethodArgumentNotValidException) {
+            return resolveValidException(response, (MethodArgumentNotValidException) throwable);
+        } else if (springDataAccessException != null && springDataAccessException.isAssignableFrom(throwable.getClass())) {
+            return handleSqlException(response, throwable);
         } else {
             return resolveOthersException(request, response, handler, ex);
         }
