@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.springframework.beans.factory.BeanCreationException;
 
 /**
  * Bean相关工具类
@@ -44,17 +45,18 @@ public final class BeanUtils {
      * @param targetClass 目标类
      * @param <T> 目标类类型
      * @return 目标类实例
+     *
+     * @throws org.springframework.beans.BeansException 拷贝失败时抛出
      */
     public static <T> T copyProperties(Object source, Class<T> targetClass) {
-        T parent = null;
         try {
-            parent = targetClass.newInstance();
+            T parent = targetClass.getConstructor().newInstance();
             org.springframework.beans.BeanUtils.copyProperties(source, parent);
-        } catch (InstantiationException | IllegalAccessException ignore) {
 
+            return parent;
+        }  catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
+            throw new BeanCreationException("creating failed", e);
         }
-
-        return parent;
     }
 
     /**
