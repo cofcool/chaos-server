@@ -26,4 +26,12 @@ public class SimpleDevice extends AbstractDevice {
         super(identifier, desc);
     }
 
+    public String getIdentifier() {
+        return identifier();
+    }
+
+    public String getDescription() {
+        return desc();
+    }
+
 }
