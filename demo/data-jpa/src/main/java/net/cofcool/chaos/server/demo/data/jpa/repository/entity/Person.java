@@ -1,7 +1,20 @@
-package net.cofcool.chaos.server.demo.item;
+package net.cofcool.chaos.server.demo.data.jpa.repository.entity;
 
-public class Person {
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 
+/**
+ * @author CofCool
+ */
+@Entity
+@Table(name = "person")
+public class Person extends net.cofcool.chaos.server.demo.item.Person {
+
+    @Id
+    @Generated(GenerationTime.INSERT)
     private Long id;
 
     private String username;

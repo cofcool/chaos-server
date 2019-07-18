@@ -7,40 +7,21 @@
     <groupId>net.cofcool.chaos</groupId>
     <artifactId>chaos-server-demo</artifactId>
     <version>0.1.0</version>
+    <packaging>pom</packaging>
 
     <modules>
         <module>common</module>
-        <module>shiro-jpa</module>
-        <module>shiro-mybatis</module>
-        <module>security-jpa</module>
-        <module>security-mybatis</module>
+        <module>data-jpa</module>
+        <module>data-mybatis</module>
+        <module>security-shiro</module>
+        <module>security-spring</module>
+        <module>boot</module>
     </modules>
 
     <dependencies>
-
         <dependency>
             <groupId>net.cofcool.chaos</groupId>
             <artifactId>chaos-server-core</artifactId>
-            <version>${chaos-server.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.cofcool.chaos</groupId>
-            <artifactId>chaos-server-security-shiro</artifactId>
-            <version>${chaos-server.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.cofcool.chaos</groupId>
-            <artifactId>chaos-server-data-jpa</artifactId>
-            <version>${chaos-server.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.codecentric</groupId>
-            <artifactId>spring-boot-admin-starter-client</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>net.cofcool.chaos</groupId>
-            <artifactId>chaos-server-actuator</artifactId>
             <version>${chaos-server.version}</version>
         </dependency>
         <dependency>
@@ -80,90 +61,4 @@
             </properties>
         </profile>
     </profiles>
-
-    <build>
-        <finalName>chaos-server-demo</finalName>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <includes>
-                    <include>**/*.xml</include>
-                    <include>**/*.properties</include>
-                </includes>
-                <filtering>false</filtering>
-            </resource>
-        </resources>
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-            </testResource>
-        </testResources>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>${project.artifactId}-${project.version}</finalName>
-                            <outputDirectory>${project.build.directory}</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <packaging>jar</packaging>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <groupId>${project.groupId}</groupId>
-                            <version>${project.version}</version>
-                            <file>
-                                ${project.build.directory}/${project.artifactId}-${project.version}.jar
-                            </file>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.1.6.RELEASE</version>
-                <configuration>
-                    <mainClass>net.cofcool.chaos.server.demo.config.TestApplicationConfig</mainClass>
-                    <layout>JAR</layout>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

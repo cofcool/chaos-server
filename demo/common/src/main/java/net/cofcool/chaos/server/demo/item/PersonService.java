@@ -7,6 +7,6 @@ import net.cofcool.chaos.server.common.core.DataAccess;
  * @author CofCool
  */
 @BaseComponent
-public interface PersonService extends DataAccess<Person> {
+public interface PersonService<T extends Person> extends DataAccess<T> {
 
 }

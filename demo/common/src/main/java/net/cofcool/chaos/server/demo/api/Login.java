@@ -14,9 +14,6 @@ public class Login extends AbstractLogin {
 
     @NotNull
     private String password;
-    private String newPassword;
-
-    private String code;
 
     @Override
     public String getUsername() {
@@ -38,27 +35,7 @@ public class Login extends AbstractLogin {
         this.password = password;
     }
 
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getNewPassword() {
-        return newPassword;
-    }
-
-    public void setNewPassword(String newPassword) {
-        this.newPassword = newPassword;
-    }
-
     protected net.cofcool.chaos.server.common.security.Device checkRequestAgent(HttpServletRequest servletRequest) {
-        if (Device.IDENTIFIER_WECHAT.equals(getCode())) {
-            return Device.WECHAT;
-        } else {
-            return Device.BROWSER;
-        }
+       return Device.BROWSER;
     }
 }
