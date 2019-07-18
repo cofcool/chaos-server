@@ -81,12 +81,9 @@ public class ChaosProperties {
         private String defaultPassword;
 
         /**
-         * 授权路径配置
+         * 授权路径配置, 用","分割
          * <br>
-         * "Shiro" 项目为 <code>/login\=anon\n/**\=authc</code><br>
-         * "Spring Security" 为 <code>/login,/api/**</code>
-         * <br>
-         * <b>注意</b>: "Spring Security" 项目用","分割, 该配置为匿名访问路径
+         * <b>注意</b>: "Spring Security" 项目, 该配置为匿名访问路径; "Shiro" 为授权路径配置, 即"filterChainDefinitions"
          */
         private String urls;
 
@@ -236,7 +233,11 @@ public class ChaosProperties {
             this.unLoginUrl = unLoginUrl;
         }
 
-        public String excludeUrl() {
+        /**
+         * 为 "Spring Security" 配置匿名访问路径
+         * @return 匿名访问路径
+         */
+        public String springExcludeUrl() {
             return String.join(
                 ",",
                 getUrls(),
@@ -245,6 +246,20 @@ public class ChaosProperties {
                 getUnLoginUrl(),
                 getLogoutUrl()
             );
+        }
+
+        /**
+         * 为 "Shiro" 配置授权路径, 即"filterChainDefinitions"
+         * @return 授权路径字符串
+         */
+        public String shiroUrls() {
+            StringBuilder urlStr = new StringBuilder();
+            String[] urls = getUrls().split(",");
+            for (String url : urls) {
+                urlStr.append(url).append("\n");
+            }
+
+            return urlStr.toString();
         }
     }
 

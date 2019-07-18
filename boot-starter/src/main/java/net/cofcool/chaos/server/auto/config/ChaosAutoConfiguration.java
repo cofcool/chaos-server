@@ -274,7 +274,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                 factoryBean.setSecurityManager(createSecurityManager(sessionManager, createDefaultAuthenticator(userAuthorizationService, passwordProcessor, chaosProperties.getAuth(), exceptionCodeManager), shiroCacheManager));
                 factoryBean.setLoginUrl(chaosProperties.getAuth().getLoginUrl());
                 factoryBean.setUnauthorizedUrl(chaosProperties.getAuth().getUnauthUrl());
-                factoryBean.setFilterChainDefinitions(chaosProperties.getAuth().getUrls());
+                factoryBean.setFilterChainDefinitions(chaosProperties.getAuth().shiroUrls());
 
                 return factoryBean;
             }
@@ -354,7 +354,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
         @EnableWebSecurity
         @ConditionalOnClass(DefaultAuthenticationEventPublisher.class)
         @ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
-        public class SpringSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
+        public class SpringSecurityConfig {
 
             private AuthenticationProvider authenticationProvider;
 
@@ -379,93 +379,98 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                 this.userAuthorizationService = userAuthorizationService;
             }
 
-            @Override
-            protected void configure(HttpSecurity http) throws Exception {
-                Assert.notNull(authenticationProvider, "authenticationProvider must be specified");
-                Assert.notNull(messageConverter, "messageConverter must be specified");
-                Assert.notNull(exceptionCodeManager, "exceptionCodeManager must be specified");
+            @Configuration
+            public class SpringSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
 
-                net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter authenticationFilter = new net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter();
+                @Override
+                protected void configure(HttpSecurity http) throws Exception {
+                    Assert.notNull(authenticationProvider, "authenticationProvider must be specified");
+                    Assert.notNull(messageConverter, "messageConverter must be specified");
+                    Assert.notNull(exceptionCodeManager, "exceptionCodeManager must be specified");
 
-                if (chaosProperties.getAuth().getCorsEnabled()) {
-                    http.cors();
-                }
+                    net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter authenticationFilter = new net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter();
 
-                if (!chaosProperties.getAuth().getCsrfEnabled()) {
-                    http.csrf().disable();
-                }
-
-                http
-                    .authenticationProvider(authenticationProvider)
-                    .rememberMe()
-                    .and()
-                    .authorizeRequests()
-                    .antMatchers(
-                        delimitedListToStringArray(chaosProperties.getAuth().excludeUrl(), ",")
-                    ).anonymous()
-                    .antMatchers("/**").authenticated()
-                    .accessDecisionManager(
-                        new UrlBased(getDecisionVoters(http), userAuthorizationService, true)
-                    )
-                    .and()
-                    .addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                    .apply(new JsonLoginConfigure<>(authenticationFilter))
-                    .loginProcessingUrl(chaosProperties.getAuth().getLoginUrl())
-                    .exceptionCodeManager(exceptionCodeManager)
-                    .messageConverter(messageConverter)
-                    .filterSupportsLoginType(chaosProperties.getAuth().getLoginObjectType())
-                    .unAuthUrl(chaosProperties.getAuth().getUnauthUrl())
-                    .unLoginUrl(chaosProperties.getAuth().getUnLoginUrl())
-                    .and()
-                    .logout()
-                    .logoutUrl(chaosProperties.getAuth().getLogoutUrl())
-                    .permitAll()
-                    .and()
-                    .sessionManagement()
-                    .maximumSessions(10)
-                    .expiredUrl(chaosProperties.getAuth().getExpiredUrl());
-            }
-
-            private List<AccessDecisionVoter<? extends Object>> getDecisionVoters(HttpSecurity http) {
-                List<AccessDecisionVoter<? extends Object>> decisionVoters = new ArrayList<AccessDecisionVoter<? extends Object>>();
-
-                WebExpressionVoter expressionVoter = new WebExpressionVoter();
-                expressionVoter.setExpressionHandler(getExpressionHandler(http));
-                decisionVoters.add(expressionVoter);
-
-
-
-                return decisionVoters;
-            }
-
-            private SecurityExpressionHandler<FilterInvocation> getExpressionHandler(HttpSecurity http) {
-                DefaultWebSecurityExpressionHandler defaultHandler = new DefaultWebSecurityExpressionHandler();
-                AuthenticationTrustResolver trustResolver = http
-                    .getSharedObject(AuthenticationTrustResolver.class);
-                if (trustResolver != null) {
-                    defaultHandler.setTrustResolver(trustResolver);
-                }
-                ApplicationContext context = http.getSharedObject(ApplicationContext.class);
-                if (context != null) {
-                    String[] roleHiearchyBeanNames = context.getBeanNamesForType(RoleHierarchy.class);
-                    if (roleHiearchyBeanNames.length == 1) {
-                        defaultHandler.setRoleHierarchy(context.getBean(roleHiearchyBeanNames[0], RoleHierarchy.class));
+                    if (chaosProperties.getAuth().getCorsEnabled()) {
+                        http.cors();
                     }
-                    String[] grantedAuthorityDefaultsBeanNames = context.getBeanNamesForType(
-                        GrantedAuthorityDefaults.class);
-                    if (grantedAuthorityDefaultsBeanNames.length == 1) {
-                        GrantedAuthorityDefaults grantedAuthorityDefaults = context.getBean(grantedAuthorityDefaultsBeanNames[0], GrantedAuthorityDefaults.class);
-                        defaultHandler.setDefaultRolePrefix(grantedAuthorityDefaults.getRolePrefix());
+
+                    if (!chaosProperties.getAuth().getCsrfEnabled()) {
+                        http.csrf().disable();
                     }
-                    String[] permissionEvaluatorBeanNames = context.getBeanNamesForType(
-                        PermissionEvaluator.class);
-                    if (permissionEvaluatorBeanNames.length == 1) {
-                        PermissionEvaluator permissionEvaluator = context.getBean(permissionEvaluatorBeanNames[0], PermissionEvaluator.class);
-                        defaultHandler.setPermissionEvaluator(permissionEvaluator);
-                    }
+
+                    http
+                        .authenticationProvider(authenticationProvider)
+                        .rememberMe()
+                        .and()
+                        .authorizeRequests()
+                        .antMatchers(
+                            delimitedListToStringArray(chaosProperties.getAuth().springExcludeUrl(), ",")
+                        ).anonymous()
+                        .antMatchers("/**").authenticated()
+                        .accessDecisionManager(
+                            new UrlBased(getDecisionVoters(http), userAuthorizationService, true)
+                        )
+                        .and()
+                        .addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                        .apply(new JsonLoginConfigure<>(authenticationFilter))
+                        .loginProcessingUrl(chaosProperties.getAuth().getLoginUrl())
+                        .exceptionCodeManager(exceptionCodeManager)
+                        .messageConverter(messageConverter)
+                        .filterSupportsLoginType(chaosProperties.getAuth().getLoginObjectType())
+                        .unAuthUrl(chaosProperties.getAuth().getUnauthUrl())
+                        .unLoginUrl(chaosProperties.getAuth().getUnLoginUrl())
+                        .and()
+                        .logout()
+                        .logoutUrl(chaosProperties.getAuth().getLogoutUrl())
+                        .permitAll()
+                        .and()
+                        .sessionManagement()
+                        .maximumSessions(10)
+                        .expiredUrl(chaosProperties.getAuth().getExpiredUrl());
                 }
 
-                return defaultHandler;
+                private List<AccessDecisionVoter<? extends Object>> getDecisionVoters(HttpSecurity http) {
+                    List<AccessDecisionVoter<? extends Object>> decisionVoters = new ArrayList<AccessDecisionVoter<? extends Object>>();
+
+                    WebExpressionVoter expressionVoter = new WebExpressionVoter();
+                    expressionVoter.setExpressionHandler(getExpressionHandler(http));
+                    decisionVoters.add(expressionVoter);
+
+
+
+                    return decisionVoters;
+                }
+
+                private SecurityExpressionHandler<FilterInvocation> getExpressionHandler(HttpSecurity http) {
+                    DefaultWebSecurityExpressionHandler defaultHandler = new DefaultWebSecurityExpressionHandler();
+                    AuthenticationTrustResolver trustResolver = http
+                        .getSharedObject(AuthenticationTrustResolver.class);
+                    if (trustResolver != null) {
+                        defaultHandler.setTrustResolver(trustResolver);
+                    }
+                    ApplicationContext context = http.getSharedObject(ApplicationContext.class);
+                    if (context != null) {
+                        String[] roleHiearchyBeanNames = context.getBeanNamesForType(RoleHierarchy.class);
+                        if (roleHiearchyBeanNames.length == 1) {
+                            defaultHandler.setRoleHierarchy(context.getBean(roleHiearchyBeanNames[0], RoleHierarchy.class));
+                        }
+                        String[] grantedAuthorityDefaultsBeanNames = context.getBeanNamesForType(
+                            GrantedAuthorityDefaults.class);
+                        if (grantedAuthorityDefaultsBeanNames.length == 1) {
+                            GrantedAuthorityDefaults grantedAuthorityDefaults = context.getBean(grantedAuthorityDefaultsBeanNames[0], GrantedAuthorityDefaults.class);
+                            defaultHandler.setDefaultRolePrefix(grantedAuthorityDefaults.getRolePrefix());
+                        }
+                        String[] permissionEvaluatorBeanNames = context.getBeanNamesForType(
+                            PermissionEvaluator.class);
+                        if (permissionEvaluatorBeanNames.length == 1) {
+                            PermissionEvaluator permissionEvaluator = context.getBean(permissionEvaluatorBeanNames[0], PermissionEvaluator.class);
+                            defaultHandler.setPermissionEvaluator(permissionEvaluator);
+                        }
+                    }
+
+                    return defaultHandler;
+                }
+
             }
 
             @Bean
