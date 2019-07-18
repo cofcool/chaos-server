@@ -78,12 +78,12 @@ public class User <T extends Auth, ID extends Serializable> implements Serializa
     }
 
     /**
-     * 创建用户, {@link #device} 默认为 {@linkplain SimpleDevice#BROWSER 浏览器}
+     * 创建用户
      * @param username 用户名
      * @param password 密码
      */
     public User(String username, String password) {
-        this(username, password, SimpleDevice.BROWSER);
+        this(username, password, null);
     }
 
     /**

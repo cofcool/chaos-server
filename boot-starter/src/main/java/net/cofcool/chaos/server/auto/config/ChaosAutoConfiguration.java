@@ -70,7 +70,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.AccessDecisionVoter;
@@ -166,7 +165,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
     @Configuration
     @EnableConfigurationProperties(value = ChaosProperties.class)
-    static class PropertiesConfiguration {
+    class PropertiesConfiguration {
 
         private final ChaosProperties chaosProperties;
 
@@ -201,16 +200,13 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
             return new ValidateInterceptor();
         }
 
-        /**
-         * <code>AuthService</code> 可能回导致某些组件提早创建从而影响项目正常运行
-         */
         @Bean
         @ConditionalOnProperty(prefix = "chaos.development", value = "injecting-enabled",
             havingValue = "true", matchIfMissing = false)
         @ConditionalOnMissingBean
-        public ApiProcessingInterceptor apiInterceptor(@Lazy AuthService authService, ExceptionCodeManager exceptionCodeManager) {
+        public ApiProcessingInterceptor apiInterceptor(ExceptionCodeManager exceptionCodeManager) {
             ApiProcessingInterceptor interceptor = new ApiProcessingInterceptor();
-            interceptor.setAuthService(authService);
+            interceptor.setApplicationContext(ChaosAutoConfiguration.this.applicationContext);
             interceptor.setDefinedCheckedKeys(
                 delimitedListToStringArray(
                     chaosProperties.getAuth().getCheckedKeys(),
@@ -241,7 +237,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
         @Configuration
         @ConditionalOnClass(ShiroFilterFactoryBean.class)
-        public class ShiroAutoConfiguration {
+        class ShiroAutoConfiguration {
 
             /**
              * 创建 <code>shiroFilter</code>
@@ -351,10 +347,9 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
         }
 
         @Configuration
-        @EnableWebSecurity
         @ConditionalOnClass(DefaultAuthenticationEventPublisher.class)
         @ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
-        public class SpringSecurityConfig {
+        class SpringSecurityConfig {
 
             private AuthenticationProvider authenticationProvider;
 
@@ -380,6 +375,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
             }
 
             @Configuration
+            @EnableWebSecurity
             public class SpringSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
 
                 @Override
@@ -492,7 +488,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
         @Configuration
         @ConditionalOnClass(SqlSessionFactoryBean.class)
-        public class MybatisConfig {
+        class MybatisConfig {
 
             @Bean
             public org.apache.ibatis.session.Configuration configuration() {

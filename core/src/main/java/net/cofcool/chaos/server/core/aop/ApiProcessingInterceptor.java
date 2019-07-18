@@ -21,6 +21,9 @@ import net.cofcool.chaos.server.core.annotation.scanner.BeanResourceHolder;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -34,10 +37,12 @@ import org.springframework.stereotype.Controller;
  *
  * @author CofCool
  */
-public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor {
+public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor implements
+    ApplicationContextAware {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
+    private ApplicationContext applicationContext;
     private AuthService authService;
 
     private ExceptionCodeManager exceptionCodeManager;
@@ -90,6 +95,14 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor {
      * @return user
      */
     protected User getUser() {
+        if (authService == null) {
+            if (applicationContext != null && applicationContext.containsBean("authService")) {
+                authService = applicationContext.getBean(AuthService.class);
+            } else {
+                return null;
+            }
+        }
+
         return authService.readCurrentUser();
     }
 
@@ -218,4 +231,8 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor {
         checkApi(invocation);
     }
 
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 }

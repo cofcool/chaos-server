@@ -34,4 +34,5 @@
   * 简化`User`结构
   * 移除`security-shiro`模块对的`data-redis`依赖
   * 优化验证码处理逻辑
+  * `Shiro`的`url`配置由"\n"改为","分割
   * `security-spring`模块基本完成
