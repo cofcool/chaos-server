@@ -4,13 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.core.i18n.ResourceExceptionCodeDescriptor;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * ExceptionCodeDescriptor 的默认实现, 处理默认信息, 包括 {@link ExceptionCodeDescriptor#SERVER_ERR} 等,
  *  应用可使用 {@link ResourceExceptionCodeDescriptor}, 该类可读取"Spring"配置的"message"信息
  * @author CofCool
  */
-public class SimpleExceptionCodeDescriptor implements ExceptionCodeDescriptor {
+public class SimpleExceptionCodeDescriptor implements ExceptionCodeDescriptor, InitializingBean {
 
     /**
      * 成功
@@ -198,4 +199,19 @@ public class SimpleExceptionCodeDescriptor implements ExceptionCodeDescriptor {
         return DEFAULT_EXCEPTION_MESSAGES.getOrDefault(type, type);
     }
 
+    /**
+     * 添加自定义描述信息
+     * @return 描述信息
+     */
+    protected Map<String, String> customize() {
+        return null;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Map<String, String> customizeMap = customize();
+        if (customizeMap != null) {
+            customizeMap.forEach(DEFAULT_EXCEPTION_MESSAGES::put);
+        }
+    }
 }
