@@ -10,6 +10,7 @@ import net.cofcool.chaos.server.common.core.Message;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -32,20 +33,26 @@ public class JsonAuthenticationFailureHandler extends AbstractAuthenticationConf
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
         AuthenticationException exception) throws IOException, ServletException {
-        String errorCode;
+        Message message;
         if (exception instanceof UsernameNotFoundException) {
-            errorCode = getExceptionCodeManager().getCode(ExceptionCodeDescriptor.NO_LOGIN);
+            message = getMessage(ExceptionCodeDescriptor.NO_LOGIN, ExceptionCodeDescriptor.NO_LOGIN_DESC);
+        } else if (exception instanceof BadCredentialsException) {
+            message = getMessage(ExceptionCodeDescriptor.USER_PASSWORD_ERROR, ExceptionCodeDescriptor.USER_PASSWORD_ERROR_DESC);
         } else {
-            errorCode = getExceptionCodeManager().getCode(ExceptionCodeDescriptor.DENIAL_AUTH);
+            message = getMessage(ExceptionCodeDescriptor.DENIAL_AUTH, ExceptionCodeDescriptor.DENIAL_AUTH_DESC);
         }
 
         getMessageConverter().write(
-            Message.of(
-                errorCode,
-                exception.getMessage()
-            ),
+            message,
             MediaType.APPLICATION_JSON,
             new ServletServerHttpResponse(response)
+        );
+    }
+
+    private Message getMessage(String codeKey, String descKey) {
+        return Message.of(
+            getExceptionCodeManager().getCode(codeKey),
+            getExceptionCodeManager().getDescription(descKey)
         );
     }
 }
