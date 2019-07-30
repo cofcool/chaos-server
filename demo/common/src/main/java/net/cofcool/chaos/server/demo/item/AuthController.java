@@ -1,23 +1,19 @@
 package net.cofcool.chaos.server.demo.item;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.Message;
-import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.core.annotation.Api;
 import net.cofcool.chaos.server.demo.api.Login;
 import net.cofcool.chaos.server.demo.api.UserData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -51,7 +47,10 @@ public class AuthController {
 
     @RequestMapping("/user")
     public Message<User> test(User user) {
-        return Message.of("00", "OK", user);
+        return Message.of(
+            exceptionCodeManager.getCode(ExceptionCodeDescriptor.SERVER_OK),
+            exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC),
+            user);
     }
 
     @RequestMapping("/unauth")
