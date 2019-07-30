@@ -1,22 +1,26 @@
 package net.cofcool.chaos.server.core.i18n;
 
+import java.util.Locale;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.util.Assert;
-import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 /**
  * ExceptionCodeDescriptor 的实现, 通过 {@link MessageSource} 获取异常描述信息。
  * 国际化拦截器可参考 {@linkplain RequestLocaleChangeInterceptor localeChangeInterceptor}
+ * <br>
+ * 注意: 当描述信息不存在且调用 {@link MessageSource#getMessage(String, Object[], Locale)}
+ * 未抛出 {@link NoSuchMessageException} 异常, 则默认配置并不会生效, 是否抛出异常由
+ * {@link AbstractMessageSource#setUseCodeAsDefaultMessage(boolean)} 控制
  *
  * @see org.springframework.web.servlet.i18n.LocaleChangeInterceptor
  * @see org.springframework.web.servlet.LocaleResolver
- * @see SessionLocaleResolver
  */
 public class ResourceExceptionCodeDescriptor implements ExceptionCodeDescriptor,
     MessageSourceAware {
