@@ -5,4 +5,7 @@ package net.cofcool.chaos.server.demo.api;
  */
 public interface Constant {
 
+    String PASSWORD_ERROR_VAL = "A22";
+    String PASSWORD_ERROR_DESC_VAL = "password error";
+
 }
