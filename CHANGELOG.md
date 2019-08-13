@@ -17,7 +17,7 @@
 * Shiro 升级到`1.4.0`, 并移除"shiro-ehcache"(Ehcache 版本过低, 与 Spring 监控不兼容)
 * 其它问题修复
 
-**0.4.0-SNAPSHOT**:
+**0.4.0**:
 
 * 修改`ExecuteResult.entity`实现, 如果执行失败, 调用时会抛出异常
 * `ExecuteResult`添加`orElse`方法, 简化`result`方法
@@ -27,6 +27,7 @@
 * `ValidateInterceptor`等配置改为可选项，默认不创建接口参数验证, 日志打印等拦截器
 * `LoggingInterceptor`移除对`Jackson`的依赖, 改为调用对象的`toString`方法
 * 接口类的`getXxx()`风格代码改为`xxx()`
+* `Page`改为接口类，移除`public T getCondition(Class<T> clazz)`方法, `wd`改为`words`, 优化`Page`的参数注入
 * 授权模块优化
   * 修改`AuthService.login()`的参数
   * `UserAuthorizationService` 删除 `setUserProcessor` 方法

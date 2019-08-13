@@ -16,7 +16,6 @@
 
 package net.cofcool.chaos.server.data.jpa.support;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -29,18 +28,23 @@ import javax.annotation.Nonnull;
 import javax.persistence.Transient;
 import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.core.PageProcessor;
+import net.cofcool.chaos.server.common.core.SimplePage;
 import net.cofcool.chaos.server.common.util.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 /**
+ * 适配 {@link org.springframework.data.domain.Page}
+ *
  * @author CofCool
  */
-public class Paging<T> extends Page<T> {
+public class Paging<T> extends SimplePage<T> {
 
     private static final long serialVersionUID = -1288144366898317311L;
 
-    @SuppressWarnings("deprecation")
+    /**
+     * 不推荐直接使用该构造方法
+     */
     public Paging() {}
 
     private Paging(List<T> content) {
@@ -84,7 +88,7 @@ public class Paging<T> extends Page<T> {
     @SuppressWarnings("unchecked")
     public static <T> Page<T> of(org.springframework.data.domain.Page<List<T>> page, Class<T> primaryBean) {
         Paging mPage = createPaging(page);
-        List mPageList = mPage.getList();
+        List mPageList = mPage.getContent();
         if (mPageList.isEmpty()) {
             return mPage;
         }
@@ -127,7 +131,7 @@ public class Paging<T> extends Page<T> {
             classValueMap.clear();
         }
 
-        mPage.setList(Collections.unmodifiableList(mutableList));
+        mPage.setContent(Collections.unmodifiableList(mutableList));
 
         return mPage;
     }
@@ -138,7 +142,6 @@ public class Paging<T> extends Page<T> {
      *
      * @see JpaPage
      */
-    @JsonIgnore
     public Pageable getPageable() {
         return new JpaPage(getPageNumber(), getPageSize());
     }
@@ -146,7 +149,6 @@ public class Paging<T> extends Page<T> {
     /**
      * 获取 Pageable 实例
      */
-    @JsonIgnore
     public Pageable getPageable(Sort sort) {
         return getPageable(getPageNumber(), getPageSize(), sort);
     }
@@ -154,7 +156,6 @@ public class Paging<T> extends Page<T> {
     /**
      * 获取 Pageable 实例
      */
-    @JsonIgnore
     public Pageable getPageable(Integer pageNumber, Integer pageSize, Sort sort) {
         return new JpaPage(getPageNumber(), getPageSize(), sort);
     }
@@ -162,7 +163,6 @@ public class Paging<T> extends Page<T> {
     /**
      * 获取 Pageable 实例
      */
-    @JsonIgnore
     public static Pageable getPageable(Page page, Sort sort) {
         return new JpaPage(page.getPageNumber(), page.getPageSize(), sort);
     }
@@ -170,7 +170,6 @@ public class Paging<T> extends Page<T> {
     /**
      * 获取 Pageable 实例
      */
-    @JsonIgnore
     public static Pageable getPageable(Page page) {
         return new JpaPage(page.getPageNumber(), page.getPageSize());
     }

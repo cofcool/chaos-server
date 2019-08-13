@@ -52,7 +52,7 @@ public abstract class SimpleService<T> implements DataAccess<T> {
 
     @Override
     public QueryResult<T, ?> query(Page<T> condition, T entity) {
-        Page<T> page = PageSupport.checkPage(condition);
+        Page<T> page = Page.checkPage(condition);
 
         Objects.requireNonNull(getPageProcessor());
         return QueryResult.of(

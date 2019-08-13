@@ -24,15 +24,20 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.core.PageProcessor;
+import net.cofcool.chaos.server.common.core.SimplePage;
 
 /**
+ * 适配 {@link PageHelper}
+ *
  * @author CofCool
  */
-public class Paging<T> extends Page<T> {
+public class Paging<T> extends SimplePage<T> {
 
     private static final long serialVersionUID = 6040593186072235603L;
 
-    @SuppressWarnings("deprecation")
+    /**
+     * 不推荐直接使用该构造方法
+     */
     public Paging() {}
 
     private Paging(List<T> content) {
@@ -47,7 +52,7 @@ public class Paging<T> extends Page<T> {
      */
     @Nonnull
     public static <T> Page<T> of(@Nonnull PageInfo<T> page) {
-        Page<T> mPage = new Paging<>(page.getList());
+        Paging<T> mPage = new Paging<>(page.getList());
         mPage.setFirstPage(page.isIsFirstPage());
         mPage.setLastPage(page.isIsLastPage());
         mPage.setTotal(page.getTotal());

@@ -16,9 +16,9 @@
 
 package net.cofcool.chaos.server.core.aop;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import javax.annotation.Nullable;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.Page;
@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -133,7 +134,7 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
 
             checkRole(api.userRoles(), user);
 
-            setupAuth(user, invocation.getArguments(), api.authExclude());
+            setupAuth(user, invocation, api.authExclude());
         } else {
             ApiVersion apiVersion = BeanResourceHolder
                 .getAnnotation(invocation.getMethod(), ApiVersion.class, true);
@@ -141,7 +142,7 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
 
             DataAuthExclude authExclude = BeanResourceHolder
                 .getAnnotation(invocation.getMethod(), DataAuthExclude.class, true);
-            setupAuth(user, invocation.getArguments(), authExclude);
+            setupAuth(user, invocation, authExclude);
         }
     }
 
@@ -186,10 +187,12 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
         return version > apiVersion.value();
     }
 
-    protected void setupAuth(User user, Object[] args, DataAuthExclude authExclude) {
+    protected void setupAuth(User user, MethodInvocation invocation, DataAuthExclude authExclude) {
+        Object[] args = invocation.getArguments();
         if (user != null && user.getDetail() != null) {
             Auth data = user.getDetail();
-            for (Object arg : args) {
+            for (int i = 0; i < args.length; i++) {
+                Object arg = args[i];
                 // inject user
                 if (arg instanceof User) {
                     user.cloneUser((User) arg);
@@ -204,8 +207,8 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
                         }
 
                         try {
-                            setTheId(arg, data, property);
-                        } catch (Exception e) {
+                            setTheId(arg, data, ResolvableType.forMethodParameter(invocation.getMethod(), i).getGeneric(0), property);
+                        } catch (Throwable e) {
                             log.debug(e.getMessage());
                         }
                     }
@@ -214,15 +217,40 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
         }
     }
 
-    protected void setTheId(Object obj, Auth authData, String property) throws IllegalAccessException, NullPointerException, InvocationTargetException {
+    protected void setTheId(Object obj, Auth authData, ResolvableType type, String property) throws Throwable {
         Object value = BeanUtils.getPropertyDescriptor(authData.getClass(), property).getReadMethod().invoke(authData);
         if (BeanUtils.checkNullOrZero(value).isPresent()) {
             if (obj instanceof Page) {
-                ((Page) obj).putMappedValue(property, value);
+                copyIdsToCondition(
+                    (Page) obj,
+                    type == ResolvableType.NONE ? null : (Class<?>) type.getType(),
+                    property,
+                    value
+                );
             } else {
                 BeanUtils.getPropertyDescriptor(obj.getClass(), property).getWriteMethod().invoke(obj, value);
             }
         }
+    }
+
+    /**
+     * 把 {@link User#getDetail()} 数据注入到 <code>condition</code> 对象中,
+     * 如果 {@link Page#getCondition()} 为 <code>null</code> 则会创建该实例
+     * @param clazz T
+     */
+    @SuppressWarnings("unchecked")
+    protected void copyIdsToCondition(Page page, @Nullable Class<?> clazz, String key, Object val) throws Throwable {
+        Object condition = page.getCondition();
+        if (condition == null && clazz != null) {
+            condition = org.springframework.beans.BeanUtils.instantiateClass(clazz);
+            page.setCondition(condition);
+        }
+
+        if (condition == null) {
+            return;
+        }
+
+        BeanUtils.getPropertyDescriptor(clazz, key).getWriteMethod().invoke(condition, val);
     }
 
     private boolean checkExclude(DataAuthExclude originExclude, String excludeProperty) {

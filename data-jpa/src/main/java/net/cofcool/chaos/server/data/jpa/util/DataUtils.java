@@ -35,7 +35,7 @@ public class DataUtils {
      */
     @SuppressWarnings("unchecked")
     public static <T> Optional<T> mergeJoinResult(List<T> result, Class<T> primaryBean) {
-        List<T> resultData = Paging.of(new PageImpl<>((List<List<T>>) result), primaryBean).getList();
+        List<T> resultData = Paging.of(new PageImpl<>((List<List<T>>) result), primaryBean).getContent();
         if (resultData.isEmpty()) {
             return Optional.empty();
         } else {
@@ -52,7 +52,7 @@ public class DataUtils {
      */
     @SuppressWarnings("unchecked")
     public static <T> List<T> mergeMultiJoinResult(List<T> result, Class<T> primaryBean) {
-        return Paging.of(new PageImpl<>((List<List<T>>) result), primaryBean).getList();
+        return Paging.of(new PageImpl<>((List<List<T>>) result), primaryBean).getContent();
     }
 
 }

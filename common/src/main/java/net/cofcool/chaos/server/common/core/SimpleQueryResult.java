@@ -59,7 +59,7 @@ public class SimpleQueryResult<T> implements QueryResult<T, Map<String, Object>>
      */
     public SimpleQueryResult(Page<T> page, Object ext, String code, String msg) {
         Objects.requireNonNull(page);
-        Objects.requireNonNull(page.getList());
+        Objects.requireNonNull(page.getContent());
 
         this.page = page;
         this.ext = ext;
@@ -83,7 +83,7 @@ public class SimpleQueryResult<T> implements QueryResult<T, Map<String, Object>>
     private Map<String, Object> createResultMap(Page<T> page) {
         Map<String, Object> result = new HashMap<>();
         result.put("totalRow", page.getTotal());
-        result.put("list", page.getList());
+        result.put("list", page.getContent());
         result.put("firstPage", page.isFirstPage());
         result.put("lastPage", page.isLastPage());
         result.put("pageNumber", page.getPageNumber());
