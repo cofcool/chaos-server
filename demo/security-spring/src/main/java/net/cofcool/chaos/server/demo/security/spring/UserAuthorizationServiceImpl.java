@@ -93,8 +93,8 @@ public class UserAuthorizationServiceImpl implements SpringUserAuthorizationServ
             chaosProperties.getAuth().getDefaultUsername(),
             chaosProperties.getAuth().getDefaultPassword()
         );
-        user.setDetail(new UserData(user.getUsername()));
         user.setUserId(1L);
+        user.setDetail(new UserData(user.getUsername(), user.getUserId()));
         user.addUserStatus(UserStatus.NORMAL);
 
         users.put(user.getUsername(), user);

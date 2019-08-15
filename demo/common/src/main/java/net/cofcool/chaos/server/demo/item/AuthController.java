@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.Message;
+import net.cofcool.chaos.server.common.core.SimplePage;
 import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.core.annotation.Api;
@@ -43,6 +44,13 @@ public class AuthController {
     private AuthService<UserData, Long> authService;
 
     private ExceptionCodeManager exceptionCodeManager;
+
+    private PersonService<Person> personService;
+
+    @Autowired
+    public void setPersonService(PersonService<Person> personService) {
+        this.personService = personService;
+    }
 
     @Autowired
     public void setExceptionCodeManager(
@@ -84,5 +92,10 @@ public class AuthController {
             exceptionCodeManager.getCode(ExceptionCodeDescriptor.NO_LOGIN),
             ex
         );
+    }
+
+    @RequestMapping("/query")
+    public Message query(@RequestBody SimplePage<Person> page) {
+        return personService.query(page, page.getCondition()).result();
     }
 }

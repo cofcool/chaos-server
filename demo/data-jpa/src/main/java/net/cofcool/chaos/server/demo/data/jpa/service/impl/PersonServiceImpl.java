@@ -22,6 +22,7 @@ import net.cofcool.chaos.server.demo.api.BaseServiceImpl;
 import net.cofcool.chaos.server.demo.data.jpa.repository.PersonRepository;
 import net.cofcool.chaos.server.demo.data.jpa.repository.entity.Person;
 import net.cofcool.chaos.server.demo.item.PersonService;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
  * @author CofCool
  */
 @Service
+@Primary
 public class PersonServiceImpl extends BaseServiceImpl<Person, Long, PersonRepository> implements
     PersonService<Person> {
 

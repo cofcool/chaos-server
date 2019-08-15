@@ -26,12 +26,22 @@ public class UserData implements Auth {
     private static final long serialVersionUID = 3901205826786356567L;
 
     private String username;
+    private Long userId;
 
     public UserData() {
     }
 
-    public UserData(String username) {
+    public UserData(String username, Long userId) {
         this.username = username;
+        this.userId = userId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public String getUsername() {

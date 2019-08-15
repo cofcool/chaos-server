@@ -236,7 +236,11 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
     /**
      * 把 {@link User#getDetail()} 数据注入到 <code>condition</code> 对象中,
      * 如果 {@link Page#getCondition()} 为 <code>null</code> 则会创建该实例
+     * 。 注意: 如果没有在方法参数中指定 {@link Page#getCondition()} 的类型，则不会创建
+     * @param page 分页对象
      * @param clazz T
+     * @param key 属性名
+     * @param val 属性值
      */
     @SuppressWarnings("unchecked")
     protected void copyIdsToCondition(Page page, @Nullable Class<?> clazz, String key, Object val) throws Throwable {
