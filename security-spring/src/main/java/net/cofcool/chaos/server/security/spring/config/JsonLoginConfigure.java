@@ -1,26 +1,82 @@
+/*
+ * Copyright 2019 cofcool
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.cofcool.chaos.server.security.spring.config;
 
+import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
+import net.cofcool.chaos.server.common.security.AbstractLogin;
+import net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFailureHandler;
+import net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter;
+import net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationSuccessHandler;
+import net.cofcool.chaos.server.security.spring.authorization.JsonUnAuthEntryPoint;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
-import org.springframework.security.web.authentication.ForwardAuthenticationFailureHandler;
-import org.springframework.security.web.authentication.ForwardAuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
+import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
+ * 配置 {@link JsonAuthenticationFilter}, 需要 {@link ExceptionCodeManager} 和 {@link MappingJackson2HttpMessageConverter}
+ *
  * @author CofCool
  *
  * @see org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer
  */
 public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
-        AbstractAuthenticationFilterConfigurer<H, JsonLoginConfigure<H>, UsernamePasswordAuthenticationFilter> {
+        AbstractAuthenticationFilterConfigurer<H, JsonLoginConfigure<H>, JsonAuthenticationFilter> {
+
+    private ExceptionCodeManager exceptionCodeManager;
+    private MappingJackson2HttpMessageConverter messageConverter;
+
+    private String unAuthUrl = "/unauth";
+    private String unLoginUrl = "/unlogin";
+
+    private boolean usingDefaultFailureHandler = true;
+    private boolean usingDefaultSuccessHandler = true;
 
     public JsonLoginConfigure() {
-        super(new UsernamePasswordAuthenticationFilter(), null);
-        usernameParameter("username");
-        passwordParameter("password");
+        this(new JsonAuthenticationFilter());
+    }
+
+    public JsonLoginConfigure(JsonAuthenticationFilter authenticationFilter) {
+        super(authenticationFilter, "/login");
+    }
+
+    public JsonLoginConfigure<H> exceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
+        this.exceptionCodeManager = exceptionCodeManager;
+
+        return this;
+    }
+
+    public JsonLoginConfigure<H> messageConverter(MappingJackson2HttpMessageConverter messageConverter) {
+        this.messageConverter = messageConverter;
+        getAuthenticationFilter().setMessageConverter(messageConverter);
+
+        return this;
+    }
+
+    private void createHandler() {
+        if (usingDefaultFailureHandler) {
+            this.failureHandler(new JsonAuthenticationFailureHandler(exceptionCodeManager, messageConverter));
+        }
+        if (usingDefaultSuccessHandler) {
+            this.successHandler(new JsonAuthenticationSuccessHandler(exceptionCodeManager, messageConverter));
+        }
     }
 
     @Override
@@ -28,56 +84,57 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
         return new AntPathRequestMatcher(loginProcessingUrl, "POST");
     }
 
-    public JsonLoginConfigure<H> usernameParameter(String usernameParameter) {
-        getAuthenticationFilter().setUsernameParameter(usernameParameter);
+    public JsonLoginConfigure<H> failureHandler(JsonAuthenticationFailureHandler failureHandler) {
+        super.failureHandler(failureHandler);
+        this.usingDefaultFailureHandler = false;
+
         return this;
     }
 
-    public JsonLoginConfigure<H> passwordParameter(String passwordParameter) {
-        getAuthenticationFilter().setPasswordParameter(passwordParameter);
+    public JsonLoginConfigure<H> successHandler(JsonAuthenticationSuccessHandler successHandler) {
+        super.successHandler(successHandler);
+        this.usingDefaultSuccessHandler = false;
+
         return this;
     }
 
-    @Override
-    protected JsonLoginConfigure<H> loginPage(String loginPage) {
-        return super.loginPage(loginPage);
-    }
+    public JsonLoginConfigure<H> filterSupportsLoginType(Class<? extends AbstractLogin> loginType) {
+        getAuthenticationFilter().setLoginType(loginType);
 
-    public JsonLoginConfigure<H> failureForwardUrl(String forwardUrl) {
-        failureHandler(new ForwardAuthenticationFailureHandler(forwardUrl));
         return this;
     }
 
-    public JsonLoginConfigure<H> successForwardUrl(String forwardUrl) {
-        successHandler(new ForwardAuthenticationSuccessHandler(forwardUrl));
+    public JsonLoginConfigure<H> unAuthUrl(String unAuthUrl) {
+        this.unAuthUrl = unAuthUrl;
+
         return this;
     }
 
-    private String getUsernameParameter() {
-        return getAuthenticationFilter().getUsernameParameter();
-    }
+    public JsonLoginConfigure<H> unLoginUrl(String unLoginUrl) {
+        this.unLoginUrl = unLoginUrl;
 
-    private String getPasswordParameter() {
-        return getAuthenticationFilter().getPasswordParameter();
+        return this;
     }
 
     @Override
     public void init(H http) throws Exception {
-        super.init(http);
+        updateAuthenticationDefaults();
+        updateAccessDefaults(http);
 
-        initDefaultLoginFilter(http);
+        createHandler();
+
+        registerJsonAuthenticationEntryPoint(http, new JsonUnAuthEntryPoint(exceptionCodeManager, messageConverter, unAuthUrl, unLoginUrl));
     }
 
-    private void initDefaultLoginFilter(H http) {
-        DefaultLoginPageGeneratingFilter loginPageGeneratingFilter = http
-                .getSharedObject(DefaultLoginPageGeneratingFilter.class);
-        if (loginPageGeneratingFilter != null && !isCustomLoginPage()) {
-            loginPageGeneratingFilter.setFormLoginEnabled(false);
-            loginPageGeneratingFilter.setUsernameParameter(getUsernameParameter());
-            loginPageGeneratingFilter.setPasswordParameter(getPasswordParameter());
-            loginPageGeneratingFilter.setLoginPageUrl(getLoginPage());
-            loginPageGeneratingFilter.setFailureUrl(getFailureUrl());
-            loginPageGeneratingFilter.setAuthenticationUrl(getLoginProcessingUrl());
+    @SuppressWarnings("unchecked")
+    private void registerJsonAuthenticationEntryPoint(H http, AuthenticationEntryPoint authenticationEntryPoint) {
+        ExceptionHandlingConfigurer<H> exceptionHandling = http
+            .getConfigurer(ExceptionHandlingConfigurer.class);
+        if (exceptionHandling == null) {
+            return;
         }
+        exceptionHandling.defaultAuthenticationEntryPointFor(
+            postProcess(authenticationEntryPoint), getAuthenticationEntryPointMatcher(http));
     }
+
 }

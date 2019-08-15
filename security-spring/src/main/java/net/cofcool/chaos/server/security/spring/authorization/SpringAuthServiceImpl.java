@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 cofcool
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.cofcool.chaos.server.security.spring.authorization;
 
 import java.io.Serializable;
@@ -5,64 +21,33 @@ import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
-import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
-import net.cofcool.chaos.server.common.security.AbstractLogin.DefaultLogin;
 import net.cofcool.chaos.server.common.security.Auth;
-import net.cofcool.chaos.server.common.security.AuthConstant;
 import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.User;
-import net.cofcool.chaos.server.common.security.UserAuthorizationService;
-import net.cofcool.chaos.server.common.util.WebUtils;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.util.Assert;
 
 /**
+ * Spring Security 授权管理相关处理, 不支持 {@link #login(HttpServletRequest, HttpServletResponse, AbstractLogin)}, 登录操作由 {@link JsonAuthenticationFilter} 完成
+ *
  * @author CofCool
+ *
+ * @see AuthService
+ * @see UserDetailsService
+ * @see UserDetailsManager
  */
 @Slf4j
-public class SpringAuthServiceImpl<T extends Auth, ID extends Serializable> implements AuthService<T, ID>, UserDetailsManager, InitializingBean {
+public class SpringAuthServiceImpl<T extends Auth, ID extends Serializable> implements AuthService<T, ID> {
 
-    private UserAuthorizationService<T, ID> userAuthorizationService;
-
-    private ExceptionCodeManager exceptionCodeManager;
-
-    public ExceptionCodeManager getExceptionCodeManager() {
-        return exceptionCodeManager;
-    }
-
-    public void setExceptionCodeManager(
-        ExceptionCodeManager exceptionCodeManager) {
-        this.exceptionCodeManager = exceptionCodeManager;
-    }
-
-    public UserAuthorizationService<T, ID> getUserAuthorizationService() {
-        return userAuthorizationService;
-    }
-
-    @SuppressWarnings("unchecked")
-    public void setUserAuthorizationService(UserAuthorizationService authUserService) {
-        this.userAuthorizationService = authUserService;
-        this.userAuthorizationService.setUserProcessor(this::storageUser);
-    }
-
-    protected void storageUser(User currentUser) {
-        WebUtils.getRequest().getSession().setAttribute(AuthConstant.LOGINED_USER_KEY, currentUser);
-    }
 
     @Override
-    public Message<User<T, ID>> login(AbstractLogin loginUser) {
-        return Message.of(
-            exceptionCodeManager.getCode(ExceptionCodeDescriptor.SERVER_OK),
-            exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC),
-            userAuthorizationService.queryUser(loginUser)
-        );
+    public Message<User<T, ID>> login(HttpServletRequest request, HttpServletResponse response, AbstractLogin loginUser) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -75,49 +60,15 @@ public class SpringAuthServiceImpl<T extends Auth, ID extends Serializable> impl
     @Nullable
     @Override
     public User<T, ID> readCurrentUser() {
-        return (User<T, ID>) WebUtils.getRequest().getSession().getAttribute(AuthConstant.LOGINED_USER_KEY);
-    }
-
-    @Override
-    public void createUser(UserDetails user) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void updateUser(UserDetails user) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void deleteUser(String username) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void changePassword(String oldPassword, String newPassword) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean userExists(String username) {
-        return userAuthorizationService.queryUser(new DefaultLogin(username, "")) != null;
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User<T, ID> user = userAuthorizationService.queryUser(new DefaultLogin(username, ""));
-
-        if (user == null) {
-            UsernameNotFoundException e = new UsernameNotFoundException(username);
-            userAuthorizationService.reportAuthenticationExceptionInfo(username, e);
-            throw e;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            Object principal = authentication.getPrincipal();
+            if (authentication.isAuthenticated() && principal instanceof User) {
+                return (User<T, ID>) principal;
+            }
         }
 
-        return UserDetail.of(user);
+        return null;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Assert.notNull(getUserAuthorizationService(), "userAuthorizationService - this argument is required; it must not be null");
-    }
 }

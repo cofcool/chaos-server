@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 cofcool
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.cofcool.chaos.server.core.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -5,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.NoSuchElementException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,14 +59,14 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
 
     protected static final ModelAndView EMPTY_MODEL_AND_VIEW = new ModelAndView();
 
-    private static Class<?> springDuplicateKeyException;
+    private static Class<?> springDataAccessException;
 
     static {
         try {
-            springDuplicateKeyException = ClassUtils
-                .resolveClassName("org.springframework.dao.DuplicateKeyException", GlobalHandlerExceptionResolver.class.getClassLoader());
+            springDataAccessException = ClassUtils
+                .resolveClassName("org.springframework.dao.DataAccessException", GlobalHandlerExceptionResolver.class.getClassLoader());
         } catch (Exception e) {
-            springDuplicateKeyException = null;
+            springDataAccessException = null;
         }
     }
 
@@ -105,18 +122,23 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
                                               HttpServletResponse response, Object handler, Exception ex) {
         printExceptionLog(request, handler, ex);
 
-        if (ex instanceof ServiceException) {
-            return handleServiceException(response, (ServiceException) ex);
-        } else if (ex instanceof NullPointerException || ex instanceof IndexOutOfBoundsException || ex instanceof NoSuchElementException) {
-            return handleNullException(response, ex);
-        } else if (ex instanceof HttpMessageNotReadableException) {
-            return handle4xxException(response, ex);
-        } else if (ex instanceof UnsupportedOperationException) {
-            return handle5xxException(response, ex);
-        } else if (ex instanceof MethodArgumentNotValidException) {
-            return resolveValidException(response, (MethodArgumentNotValidException) ex);
-        } else if (springDuplicateKeyException != null && ex.getClass().isAssignableFrom(springDuplicateKeyException)) {
-            return handleSqlIntegrityViolationException(response, ex);
+        Exception throwable = ex;
+        if (ex instanceof UndeclaredThrowableException) {
+            throwable = (Exception) ((UndeclaredThrowableException) ex).getUndeclaredThrowable();
+        }
+
+        if (throwable instanceof ServiceException) {
+            return handleServiceException(response, (ServiceException) throwable);
+        } else if (throwable instanceof NullPointerException || throwable instanceof IndexOutOfBoundsException || throwable instanceof NoSuchElementException) {
+            return handleNullException(response, throwable);
+        } else if (throwable instanceof HttpMessageNotReadableException) {
+            return handle4xxException(response, throwable);
+        } else if (throwable instanceof UnsupportedOperationException) {
+            return handle5xxException(response, throwable);
+        } else if (throwable instanceof MethodArgumentNotValidException) {
+            return resolveValidException(response, (MethodArgumentNotValidException) throwable);
+        } else if (springDataAccessException != null && springDataAccessException.isAssignableFrom(throwable.getClass())) {
+            return handleSqlException(response, throwable);
         } else {
             return resolveOthersException(request, response, handler, ex);
         }
@@ -126,7 +148,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         writeMessage(
             response,
             getMessage(
-                ExceptionCodeDescriptor.PARAM_NULL,
+                exceptionCodeManager.getCode(ExceptionCodeDescriptor.PARAM_NULL),
                 ValidateInterceptor.getFirstErrorString(ex.getBindingResult())
             )
         );
@@ -178,10 +200,20 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         return EMPTY_MODEL_AND_VIEW;
     }
 
-    private ModelAndView handleSqlIntegrityViolationException(HttpServletResponse response, Exception ex) {
+    /**
+     * 处理 SQL 异常, 即 <code>org.springframework.dao.DataAccessException</code>
+     * @param response HttpServletResponse
+     * @param ex 异常
+     * @return ModelAndView, 返回 {@link #EMPTY_MODEL_AND_VIEW}
+     */
+    protected ModelAndView handleSqlException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getExceptionMessage(ExceptionCodeDescriptor.DATA_EXISTS, ExceptionCodeDescriptor.DATA_EXISTS_DESC)
+            getMessage(
+                exceptionCodeManager.getCode(ExceptionCodeDescriptor.DATA_ERROR),
+                developmentMode.isDebugMode() ? ex.getMessage() : exceptionCodeManager.getDescription(
+                    ExceptionCodeDescriptor.DATA_ERROR_DESC)
+            )
         );
 
         return EMPTY_MODEL_AND_VIEW;

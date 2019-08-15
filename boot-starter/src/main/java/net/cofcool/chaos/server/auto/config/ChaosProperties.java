@@ -1,8 +1,25 @@
+/*
+ * Copyright 2019 cofcool
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.cofcool.chaos.server.auto.config;
 
 import static net.cofcool.chaos.server.auto.config.ChaosAutoConfiguration.PROJECT_CONFIGURE_PREFIX;
 
 import java.util.Map;
+import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.core.annotation.ApiVersion;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import net.cofcool.chaos.server.core.config.DevelopmentMode;
@@ -80,7 +97,9 @@ public class ChaosProperties {
         private String defaultPassword;
 
         /**
-         * shiro授权路径配置
+         * 授权路径配置, 用","分割
+         * <br>
+         * <b>注意</b>: "Spring Security" 项目, 该配置为匿名访问路径; "Shiro" 为授权路径配置, 即"filterChainDefinitions"
          */
         private String urls;
 
@@ -108,6 +127,47 @@ public class ChaosProperties {
          * 未登录时跳转路径
          */
         private String unLoginUrl = expiredUrl;
+
+        /**
+         * 是否启用 {@link  org.springframework.web.filter.CorsFilter}
+         */
+        private Boolean corsEnabled = false;
+
+
+        /**
+         * 是否启用 CSRF, 默认启用
+         */
+        private Boolean csrfEnabled = true;
+
+        /**
+         * 配置 {@link net.cofcool.chaos.server.common.security.UserAuthorizationService#queryUser(AbstractLogin)} 参数的类型
+         */
+        private Class<? extends AbstractLogin> loginObjectType;
+
+        public Class<? extends AbstractLogin> getLoginObjectType() {
+            return loginObjectType;
+        }
+
+        public void setLoginObjectType(
+            Class<? extends AbstractLogin> loginObjectType) {
+            this.loginObjectType = loginObjectType;
+        }
+
+        public Boolean getCorsEnabled() {
+            return corsEnabled;
+        }
+
+        public void setCorsEnabled(Boolean corsEnabled) {
+            this.corsEnabled = corsEnabled;
+        }
+
+        public Boolean getCsrfEnabled() {
+            return csrfEnabled;
+        }
+
+        public void setCsrfEnabled(Boolean csrfEnabled) {
+            this.csrfEnabled = csrfEnabled;
+        }
 
         public String getCheckedKeys() {
             return checkedKeys;
@@ -187,6 +247,35 @@ public class ChaosProperties {
 
         public void setUnLoginUrl(String unLoginUrl) {
             this.unLoginUrl = unLoginUrl;
+        }
+
+        /**
+         * 为 "Spring Security" 配置匿名访问路径
+         * @return 匿名访问路径
+         */
+        public String springExcludeUrl() {
+            return String.join(
+                ",",
+                getUrls(),
+                getUnauthUrl(),
+                getExpiredUrl(),
+                getUnLoginUrl(),
+                getLogoutUrl()
+            );
+        }
+
+        /**
+         * 为 "Shiro" 配置授权路径, 即"filterChainDefinitions"
+         * @return 授权路径字符串
+         */
+        public String shiroUrls() {
+            StringBuilder urlStr = new StringBuilder();
+            String[] urls = getUrls().split(",");
+            for (String url : urls) {
+                urlStr.append(url).append("\n");
+            }
+
+            return urlStr.toString();
         }
     }
 

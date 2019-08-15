@@ -1,228 +1,126 @@
+/*
+ * Copyright 2019 cofcool
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.cofcool.chaos.server.common.core;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.cofcool.chaos.server.common.util.BeanUtils;
 
 /**
  * 分页实体, 包含日期处理, 关键字等, 默认 pageNumber 为 0 时为第一页
  *
  * @author CofCool
  **/
-public class Page<T> implements Serializable {
+public interface Page<T> extends Serializable {
 
-    private static final long serialVersionUID = -76703640096908564L;
+    long MILLISECONDS_FLAG = Integer.MAX_VALUE;
+    long MILLISECONDS_RATIO = 1000;
 
-    private static final long MILLISECONDS_FLAG = Integer.MAX_VALUE;
-    private static final long MILLISECONDS_RATIO = 1000;
-
-    public static final int PAGE_SIZE = 15;
-
-    public static final int PAGE_MAX_SIZE = 200;
-
-    public static final int PAGE_MIN_SIZE = 1;
-
-    public static final int PAGE_NUMBER_FIRST_PAGE = 1;
-
-    private static final Page EMPTY_PAGE = new Page<>(Collections.emptyList());
-
-    private Long startDate;
-
-    private Long endDate;
-
-    private int queryFlag;
-
-    private int pageNumber;
-
-    private int pageSize;
-
-    private long total;
-    private int pages;
-
-    private boolean isFirstPage;
-    private boolean isLastPage;
-
-    private List<T> list;
-
-    private String wd;
-
-    private T condition;
+    int PAGE_SIZE = 15;
+    int PAGE_MAX_SIZE = 200;
+    int PAGE_MIN_SIZE = 1;
+    int PAGE_NUMBER_FIRST_PAGE = 0;
 
     /**
-     * 仅用数据权限拦截
-     */
-    private Map<String, Object> authIdsMap;
-
-    @Deprecated
-    public Page() {}
-
-    /**
-     * 创建空列表Page实例, 推荐使用, 不建议使用 {@link #Page()}
-     * @param <T> 类型
-     * @return Page
-     */
-    @SuppressWarnings("unchecked")
-    public static<T> Page<T> empty() {
-        return (Page<T>) EMPTY_PAGE;
-    }
-
-    public Page(Integer pageNumber, Integer pageSize) {
-        this(pageNumber, pageSize, null, null);
-    }
-
-    protected Page(List<T> content) {
-        this.list = content;
-    }
-
-    public Page(Integer pageNumber, Integer pageSize, Long startDate, Long endDate, int queryFlag) {
-        this(pageNumber, pageSize, startDate, endDate, queryFlag, null);
-    }
-
-    public Page(Integer pageNumber, Integer pageSize, Long startDate, Long endDate, int queryFlag, String wd) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.queryFlag = queryFlag;
-        this.wd = wd;
-    }
-
-    public Page(Integer pageNumber, Integer pageSize, Long startDate, Long endDate, String wd) {
-        this(pageNumber, pageSize, startDate, endDate, 0, wd);
-    }
-
-    public Page(Integer pageNumber, Integer pageSize, Long startDate, Long endDate) {
-        this(pageNumber, pageSize, startDate, endDate, null);
-    }
-
-    /**
-     * 获取T类型的condition实例
-     * @return condition实例
+     * 读取 <code>condition</code> 实例
+     * @return  <code>condition</code> 实例
      */
     @Nullable
-    public T getCondition() {
-        return condition;
-    }
-
-    private void setupConditionProps(T originCondition) {
-        if (authIdsMap != null) {
-            authIdsMap.forEach((key, value) -> {
-                try {
-                    BeanUtils.getPropertyDescriptor(originCondition.getClass(), key).getWriteMethod().invoke(originCondition, value);
-                } catch (Exception ignore) {
-
-                }
-            });
-        }
-    }
+    T getCondition();
 
     /**
-     * 获取T类型的condition实例, 如果为null, 则会创建
-     * @param clazz T
-     * @return condition实例
+     * 配置 <code>condition</code>
+     * @param val 新 <code>condition</code>
      */
-    public T getCondition(Class<T> clazz) {
-        if (condition == null) {
-            try {
-                condition = clazz.getConstructor().newInstance();
-            } catch (Exception ignore) {
-                throw new IllegalArgumentException("create condition instance failure");
-            }
-        }
+    void setCondition(T val);
 
-        setupConditionProps(condition);
+    /**
+     * 列表数据
+     * @return 列表数据
+     */
+    List<T> getContent();
 
-        return condition;
-    }
+    /**
+     * 搜索关键字
+     * @return 搜索关键字
+     */
+    String getWords();
 
-    public void setCondition(T condition) {
-        this.condition = condition;
-    }
+    /**
+     * 页码, 从 0 开始
+     * @return 页码
+     */
+    int getPageNumber();
 
-    public Integer getPageNumber() {
-        return this.pageNumber;
-    }
+    /**
+     * 每页数据数量
+     * @return 每页数据数量
+     */
+    int getPageSize();
 
-    public List<T> getList() {
-        return list;
-    }
+    /**
+     * 数据总数量
+     * @return 数据总数量
+     */
+    long getTotal();
 
-    protected void setList(List<T> list) {
-        this.list = list;
-    }
+    /**
+     * 数据总页数
+     * @return 数据总页数
+     */
+    int getPages();
 
-    public int getPageSize() {
-        return pageSize;
-    }
+    /**
+     * 是否第一页
+     * @return 是否第一页
+     */
+    boolean isFirstPage();
 
-    public long getTotal() {
-        return total;
-    }
+    /**
+     * 是否最后一页
+     * @return 是否最后一页
+     */
+    boolean isLastPage();
 
-    public void setTotal(long total) {
-        this.total = total;
-    }
+    /**
+     * 开始日期时间戳, 单位为"ms"
+     * @return 开始日期
+     */
+    long getStartDate();
 
-    public int getPages() {
-        return pages;
-    }
+    /**
+     * 结束日期时间戳, 单位为"ms"
+     * @return 结束日期
+     */
+    long getEndDate();
 
-    public void setPageNumber(int pageNumber) {
-        this.pageNumber = pageNumber;
-    }
+    /**
+     * 检查分页配置是否正确, 包括页数和页码
+     */
+    void checkPage();
 
-    public void setPageSize(int pageSize) {
-        this.pageSize = pageSize;
-    }
-
-    public void setPages(int pages) {
-        this.pages = pages;
-    }
-
-    public boolean isFirstPage() {
-        return isFirstPage;
-    }
-
-    public void setFirstPage(boolean firstPage) {
-        isFirstPage = firstPage;
-    }
-
-    public boolean isLastPage() {
-        return isLastPage;
-    }
-
-    public void setLastPage(boolean lastPage) {
-        isLastPage = lastPage;
-    }
-
-    public Long getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(Long startDate) {
-        this.startDate = startDate;
-    }
-
-    public Date startDate() {
-        if (startDate == null) {
-            return null;
-        }
-        return getDate(startDate);
-    }
-
-    public Date endDate() {
-        if (endDate == null) {
-            return null;
-        }
-        return getDate(endDate);
-    }
-
-    private Date getDate(long date) {
+    /**
+     * 时间戳转换为 {@link Date}, 支持"s", "ms"
+     * @param date 时间戳
+     * @return {@link Date} 实例
+     */
+    static Date convertToDate(long date) {
         if (date > MILLISECONDS_FLAG) {
             return new Date(date);
         } else {
@@ -230,35 +128,39 @@ public class Page<T> implements Serializable {
         }
     }
 
-    public Long getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Long endDate) {
-        this.endDate = endDate;
-    }
-
-    public int getQueryFlag() {
-        return queryFlag;
-    }
-
-    public String getWd() {
-        return wd;
-    }
-
-    public void setAuthIdsMap(Map<String, Object> authIdsMap) {
-        this.authIdsMap = authIdsMap;
+    /**
+     * 创建空列表 {@link Page}
+     * @param <T> 类型
+     * @return {@link Page} 实例
+     */
+    static <T> Page<T> empty() {
+        return SimplePage.empty();
     }
 
     /**
-     * 设置需要注入到condition的key-value
+     * 创建默认配置的 {@link Page} 实例
+     * @param <T> 类型
+     * @return {@link Page} 实例
      */
-    public void putMappedValue(String key, Object value) {
-        if (authIdsMap == null) {
-            authIdsMap = new HashMap<>();
+    static <T> Page<T> emptyPageForRequest() {
+        return new SimplePage<>(Page.PAGE_NUMBER_FIRST_PAGE, Page.PAGE_SIZE);
+    }
+
+    /**
+     * 检查分页配置是否正确, 包括页数和页码
+     * @param pageCondition 原 {@link Page} 实例
+     * @param <T> 类型
+     * @return 处理后的 {@link Page} 实例
+     */
+    @Nonnull
+    static <T> Page<T> checkPage(@Nullable Page<T> pageCondition) {
+        if (pageCondition == null) {
+            pageCondition = emptyPageForRequest();
         }
 
-        authIdsMap.put(key, value);
+        pageCondition.checkPage();
+
+        return pageCondition;
     }
 
 }

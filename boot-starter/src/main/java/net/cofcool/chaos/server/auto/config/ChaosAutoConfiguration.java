@@ -1,4 +1,22 @@
+/*
+ * Copyright 2019 cofcool
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.cofcool.chaos.server.auto.config;
+
+import static org.springframework.util.StringUtils.delimitedListToStringArray;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInterceptor;
@@ -35,7 +53,10 @@ import net.cofcool.chaos.server.security.shiro.access.JsonAuthenticationFilter;
 import net.cofcool.chaos.server.security.shiro.access.PermissionFilter;
 import net.cofcool.chaos.server.security.shiro.authorization.ShiroAuthServiceImpl;
 import net.cofcool.chaos.server.security.spring.authorization.SpringAuthServiceImpl;
-import net.cofcool.chaos.server.security.spring.authorization.UserDetail;
+import net.cofcool.chaos.server.security.spring.authorization.SpringDaoAuthenticationProvider;
+import net.cofcool.chaos.server.security.spring.authorization.SpringUserAuthorizationService;
+import net.cofcool.chaos.server.security.spring.authorization.UrlBased;
+import net.cofcool.chaos.server.security.spring.config.JsonLoginConfigure;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.Authenticator;
@@ -66,14 +87,23 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.access.expression.SecurityExpressionHandler;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.authentication.AuthenticationTrustResolver;
+import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
+import org.springframework.security.web.FilterInvocation;
+import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
+import org.springframework.security.web.access.expression.WebExpressionVoter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.util.Assert;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
@@ -151,7 +181,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
     @Configuration
     @EnableConfigurationProperties(value = ChaosProperties.class)
-    static class PropertiesConfiguration {
+    class PropertiesConfiguration {
 
         private final ChaosProperties chaosProperties;
 
@@ -190,11 +220,11 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
         @ConditionalOnProperty(prefix = "chaos.development", value = "injecting-enabled",
             havingValue = "true", matchIfMissing = false)
         @ConditionalOnMissingBean
-        public ApiProcessingInterceptor apiInterceptor(AuthService authService, ExceptionCodeManager exceptionCodeManager) {
+        public ApiProcessingInterceptor apiInterceptor(ExceptionCodeManager exceptionCodeManager) {
             ApiProcessingInterceptor interceptor = new ApiProcessingInterceptor();
-            interceptor.setAuthService(authService);
+            interceptor.setApplicationContext(ChaosAutoConfiguration.this.applicationContext);
             interceptor.setDefinedCheckedKeys(
-                org.springframework.util.StringUtils.delimitedListToStringArray(
+                delimitedListToStringArray(
                     chaosProperties.getAuth().getCheckedKeys(),
                     ","
                 )
@@ -222,8 +252,8 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
 
         @Configuration
-        @ConditionalOnClass(AuthService.class)
-        public class ShiroAutoConfiguration {
+        @ConditionalOnClass(ShiroFilterFactoryBean.class)
+        class ShiroAutoConfiguration {
 
             /**
              * 创建 <code>shiroFilter</code>
@@ -256,7 +286,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                 factoryBean.setSecurityManager(createSecurityManager(sessionManager, createDefaultAuthenticator(userAuthorizationService, passwordProcessor, chaosProperties.getAuth(), exceptionCodeManager), shiroCacheManager));
                 factoryBean.setLoginUrl(chaosProperties.getAuth().getLoginUrl());
                 factoryBean.setUnauthorizedUrl(chaosProperties.getAuth().getUnauthUrl());
-                factoryBean.setFilterChainDefinitions(chaosProperties.getAuth().getUrls());
+                factoryBean.setFilterChainDefinitions(chaosProperties.getAuth().shiroUrls());
 
                 return factoryBean;
             }
@@ -333,62 +363,148 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
         }
 
         @Configuration
-        @ConditionalOnClass(UserDetail.class)
-        public class SpringSecurityAutoConfiguration {
+        @ConditionalOnClass(DefaultAuthenticationEventPublisher.class)
+        @ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
+        class SpringSecurityConfig {
+
+            private AuthenticationProvider authenticationProvider;
+
+            private MappingJackson2HttpMessageConverter messageConverter;
+            private ExceptionCodeManager exceptionCodeManager;
+
+            private SpringUserAuthorizationService userAuthorizationService;
+
+            @Autowired
+            public void setMessageConverter(MappingJackson2HttpMessageConverter messageConverter) {
+                this.messageConverter = messageConverter;
+            }
+
+            @Autowired
+            public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
+                this.exceptionCodeManager = exceptionCodeManager;
+            }
+
+            @Autowired
+            public void setUserAuthorizationService(
+                SpringUserAuthorizationService userAuthorizationService) {
+                this.userAuthorizationService = userAuthorizationService;
+            }
+
+            @Configuration
+            @EnableWebSecurity
+            public class SpringSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
+
+                @Override
+                protected void configure(HttpSecurity http) throws Exception {
+                    Assert.notNull(authenticationProvider, "authenticationProvider must be specified");
+                    Assert.notNull(messageConverter, "messageConverter must be specified");
+                    Assert.notNull(exceptionCodeManager, "exceptionCodeManager must be specified");
+
+                    net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter authenticationFilter = new net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter();
+
+                    if (chaosProperties.getAuth().getCorsEnabled()) {
+                        http.cors();
+                    }
+
+                    if (!chaosProperties.getAuth().getCsrfEnabled()) {
+                        http.csrf().disable();
+                    }
+
+                    http
+                        .authenticationProvider(authenticationProvider)
+                        .rememberMe()
+                        .and()
+                        .authorizeRequests()
+                        .antMatchers(
+                            delimitedListToStringArray(chaosProperties.getAuth().springExcludeUrl(), ",")
+                        ).anonymous()
+                        .antMatchers("/**").authenticated()
+                        .accessDecisionManager(
+                            new UrlBased(getDecisionVoters(http), userAuthorizationService, true)
+                        )
+                        .and()
+                        .addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                        .apply(new JsonLoginConfigure<>(authenticationFilter))
+                        .loginProcessingUrl(chaosProperties.getAuth().getLoginUrl())
+                        .exceptionCodeManager(exceptionCodeManager)
+                        .messageConverter(messageConverter)
+                        .filterSupportsLoginType(chaosProperties.getAuth().getLoginObjectType())
+                        .unAuthUrl(chaosProperties.getAuth().getUnauthUrl())
+                        .unLoginUrl(chaosProperties.getAuth().getUnLoginUrl())
+                        .and()
+                        .logout()
+                        .logoutUrl(chaosProperties.getAuth().getLogoutUrl())
+                        .permitAll()
+                        .and()
+                        .sessionManagement()
+                        .maximumSessions(10)
+                        .expiredUrl(chaosProperties.getAuth().getExpiredUrl());
+                }
+
+                private List<AccessDecisionVoter<? extends Object>> getDecisionVoters(HttpSecurity http) {
+                    List<AccessDecisionVoter<? extends Object>> decisionVoters = new ArrayList<AccessDecisionVoter<? extends Object>>();
+
+                    WebExpressionVoter expressionVoter = new WebExpressionVoter();
+                    expressionVoter.setExpressionHandler(getExpressionHandler(http));
+                    decisionVoters.add(expressionVoter);
+
+
+
+                    return decisionVoters;
+                }
+
+                private SecurityExpressionHandler<FilterInvocation> getExpressionHandler(HttpSecurity http) {
+                    DefaultWebSecurityExpressionHandler defaultHandler = new DefaultWebSecurityExpressionHandler();
+                    AuthenticationTrustResolver trustResolver = http
+                        .getSharedObject(AuthenticationTrustResolver.class);
+                    if (trustResolver != null) {
+                        defaultHandler.setTrustResolver(trustResolver);
+                    }
+                    ApplicationContext context = http.getSharedObject(ApplicationContext.class);
+                    if (context != null) {
+                        String[] roleHiearchyBeanNames = context.getBeanNamesForType(RoleHierarchy.class);
+                        if (roleHiearchyBeanNames.length == 1) {
+                            defaultHandler.setRoleHierarchy(context.getBean(roleHiearchyBeanNames[0], RoleHierarchy.class));
+                        }
+                        String[] grantedAuthorityDefaultsBeanNames = context.getBeanNamesForType(
+                            GrantedAuthorityDefaults.class);
+                        if (grantedAuthorityDefaultsBeanNames.length == 1) {
+                            GrantedAuthorityDefaults grantedAuthorityDefaults = context.getBean(grantedAuthorityDefaultsBeanNames[0], GrantedAuthorityDefaults.class);
+                            defaultHandler.setDefaultRolePrefix(grantedAuthorityDefaults.getRolePrefix());
+                        }
+                        String[] permissionEvaluatorBeanNames = context.getBeanNamesForType(
+                            PermissionEvaluator.class);
+                        if (permissionEvaluatorBeanNames.length == 1) {
+                            PermissionEvaluator permissionEvaluator = context.getBean(permissionEvaluatorBeanNames[0], PermissionEvaluator.class);
+                            defaultHandler.setPermissionEvaluator(permissionEvaluator);
+                        }
+                    }
+
+                    return defaultHandler;
+                }
+
+            }
 
             @Bean
-            public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordProcessor passwordProcessor) {
-                DaoAuthenticationProvider p = new DaoAuthenticationProvider();
-                p.setPasswordEncoder(new PasswordEncoderDelegate(passwordProcessor));
-                p.setUserDetailsService(userDetailsService);
+            public AuthenticationProvider authenticationProvider(PasswordProcessor passwordProcessor) {
+                SpringDaoAuthenticationProvider p = new SpringDaoAuthenticationProvider();
+                p.setPasswordProcessor(passwordProcessor);
+                p.setUserAuthorizationService(userAuthorizationService);
+
+                this.authenticationProvider = p;
+
                 return p;
             }
 
             @Bean
-            public Filter jsonAuthenticationFilter(HttpMessageConverter httpMessageConverter, AuthenticationManager authenticationManager)
-                throws Exception {
-                net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter filter = new net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter();
-                filter.setPostOnly(true);
-                filter.setMessageConverter(httpMessageConverter);
-                filter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(chaosProperties.getAuth().getLoginUrl(), "POST"));
-                filter.setAuthenticationManager(authenticationManager);
-
-                return filter;
-            }
-
-            @Bean
-            public AuthService authService(UserAuthorizationService userAuthorizationService, ExceptionCodeManager exceptionCodeManager) {
-                SpringAuthServiceImpl authService = new SpringAuthServiceImpl();
-                authService.setUserAuthorizationService(userAuthorizationService);
-                authService.setExceptionCodeManager(exceptionCodeManager);
-
-                return authService;
-            }
-
-            class PasswordEncoderDelegate implements PasswordEncoder {
-
-                private PasswordProcessor passwordProcessor;
-
-                PasswordEncoderDelegate(
-                    PasswordProcessor passwordProcessor) {
-                    this.passwordProcessor = passwordProcessor;
-                }
-
-                @Override
-                public String encode(CharSequence rawPassword) {
-                    return passwordProcessor.process(rawPassword.toString());
-                }
-
-                @Override
-                public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                    return passwordProcessor.doMatch(rawPassword.toString(), encodedPassword);
-                }
+            public AuthService authService() {
+                return new SpringAuthServiceImpl();
             }
         }
 
         @Configuration
         @ConditionalOnClass(SqlSessionFactoryBean.class)
-        public class MybatisConfig {
+        class MybatisConfig {
 
             @Bean
             public org.apache.ibatis.session.Configuration configuration() {

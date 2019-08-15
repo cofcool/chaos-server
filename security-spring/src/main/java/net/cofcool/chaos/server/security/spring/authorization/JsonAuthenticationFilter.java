@@ -1,111 +1,107 @@
+/*
+ * Copyright 2019 cofcool
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.cofcool.chaos.server.security.spring.authorization;
 
 import java.io.IOException;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
-import net.cofcool.chaos.server.common.core.Message;
+import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.security.AbstractLogin.DefaultLogin;
-import net.cofcool.chaos.server.common.security.AuthConstant;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.Assert;
 
 /**
+ * 处理 Json 请求
+ *
  * @author CofCool
  */
-public class JsonAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class JsonAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    private HttpMessageConverter messageConverter;
+    private  MappingJackson2HttpMessageConverter messageConverter;
+
+    private Class<? extends AbstractLogin> LoginType;
+
+    public JsonAuthenticationFilter() {
+        super(new AntPathRequestMatcher("/login", "POST"));
+    }
 
     public HttpMessageConverter getMessageConverter() {
         return messageConverter;
     }
 
-    public void setMessageConverter(HttpMessageConverter  messageConverter) {
+    public void setMessageConverter(MappingJackson2HttpMessageConverter messageConverter) {
         this.messageConverter = messageConverter;
     }
 
+    public Class<? extends AbstractLogin> getLoginType() {
+        if (LoginType == null) {
+            LoginType = DefaultLogin.class;
+        }
+
+        return LoginType;
+    }
+
+    public void setLoginType(Class<? extends AbstractLogin> loginType) {
+        LoginType = loginType;
+    }
+
     @Override
-    @SuppressWarnings("unchecked")
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         if (!request.getMethod().equals("POST")) {
             throw new AuthenticationServiceException(
                     "Authentication method not supported: " + request.getMethod());
         }
 
-        DefaultLogin loginUser;
+        Object loginUser;
         try {
-            loginUser = (DefaultLogin) messageConverter.read(DefaultLogin.class, new ServletServerHttpRequest(request));
-        } catch (IOException e) {
-            loginUser = new DefaultLogin("", "");
+            /*
+             * 可通过 SecurityJackson2Modules 获取 Jackson 相关配置
+             * ObjectMapper mapper = new ObjectMapper();
+             * ClassLoader loader = getClass().getClassLoader();
+             * List<Module> modules = SecurityJackson2Modules.getModules(loader);
+             * mapper.registerModules(modules);
+             *
+             * mapper.readValue()
+             */
+            loginUser = messageConverter.read(getLoginType(), new ServletServerHttpRequest(request));
+        } catch (IOException | HttpMessageNotReadableException e) {
+            throw new AuthenticationServiceException("cannot parse the json request", e);
         }
 
-        JsonAuthenticationToken authRequest = new JsonAuthenticationToken(
-                loginUser.getUsername(), loginUser.getPassword());
+        AbstractLogin login = (AbstractLogin) loginUser;
+        login.parseDevice(request);
+
+        JsonAuthenticationToken authRequest = new JsonAuthenticationToken(login);
 
         setDetails(request, authRequest);
 
         return this.getAuthenticationManager().authenticate(authRequest);
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Authentication success. Updating SecurityContextHolder to contain: "
-                    + authResult);
-        }
-
-        SecurityContextHolder.getContext().setAuthentication(authResult);
-
-        getRememberMeServices().loginSuccess(request, response, authResult);
-
-        // Fire event
-        if (this.eventPublisher != null) {
-            eventPublisher.publishEvent(new InteractiveAuthenticationSuccessEvent(
-                    authResult, this.getClass()));
-        }
-
-        // 直接返回数据, 如重定向到“/”路径可调用父类方法
-        request.getSession(true).setAttribute(AuthConstant.LOGINED_USER_KEY, authResult.getPrincipal());
-         messageConverter.write(authResult.getPrincipal(), MediaType.APPLICATION_JSON, new ServletServerHttpResponse(response));
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected void unsuccessfulAuthentication(HttpServletRequest request,
-        HttpServletResponse response, AuthenticationException failed)
-        throws IOException, ServletException {
-        SecurityContextHolder.clearContext();
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Authentication request failed: " + failed.toString(), failed);
-            logger.debug("Updated SecurityContextHolder to contain null Authentication");
-            logger.debug("Delegating to authentication failure handler " + getFailureHandler());
-        }
-
-        getRememberMeServices().loginFail(request, response);
-
-        String errorCode;
-        if (failed instanceof UsernameNotFoundException) {
-            errorCode = ExceptionCodeDescriptor.NO_LOGIN;
-        } else {
-            errorCode = ExceptionCodeDescriptor.DENIAL_AUTH;
-        }
-
-        messageConverter.write(Message.of(errorCode, failed.getMessage()), MediaType.APPLICATION_JSON, new ServletServerHttpResponse(response));
+    protected void setDetails(HttpServletRequest request, JsonAuthenticationToken authRequest) {
+        authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
     }
 
     @Override

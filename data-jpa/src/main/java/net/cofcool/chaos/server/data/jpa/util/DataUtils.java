@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 cofcool
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.cofcool.chaos.server.data.jpa.util;
 
 import java.util.List;
@@ -19,7 +35,7 @@ public class DataUtils {
      */
     @SuppressWarnings("unchecked")
     public static <T> Optional<T> mergeJoinResult(List<T> result, Class<T> primaryBean) {
-        List<T> resultData = Paging.of(new PageImpl<>((List<List<T>>) result), primaryBean).getList();
+        List<T> resultData = Paging.of(new PageImpl<>((List<List<T>>) result), primaryBean).getContent();
         if (resultData.isEmpty()) {
             return Optional.empty();
         } else {
@@ -36,7 +52,7 @@ public class DataUtils {
      */
     @SuppressWarnings("unchecked")
     public static <T> List<T> mergeMultiJoinResult(List<T> result, Class<T> primaryBean) {
-        return Paging.of(new PageImpl<>((List<List<T>>) result), primaryBean).getList();
+        return Paging.of(new PageImpl<>((List<List<T>>) result), primaryBean).getContent();
     }
 
 }

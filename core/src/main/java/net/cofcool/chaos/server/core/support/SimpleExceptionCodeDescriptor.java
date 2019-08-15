@@ -1,16 +1,33 @@
+/*
+ * Copyright 2019 cofcool
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.cofcool.chaos.server.core.support;
 
 import java.util.HashMap;
 import java.util.Map;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.core.i18n.ResourceExceptionCodeDescriptor;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * ExceptionCodeDescriptor 的默认实现, 处理默认信息, 包括 {@link ExceptionCodeDescriptor#SERVER_ERR} 等,
  *  应用可使用 {@link ResourceExceptionCodeDescriptor}, 该类可读取"Spring"配置的"message"信息
  * @author CofCool
  */
-public class SimpleExceptionCodeDescriptor implements ExceptionCodeDescriptor {
+public class SimpleExceptionCodeDescriptor implements ExceptionCodeDescriptor, InitializingBean {
 
     /**
      * 成功
@@ -198,4 +215,19 @@ public class SimpleExceptionCodeDescriptor implements ExceptionCodeDescriptor {
         return DEFAULT_EXCEPTION_MESSAGES.getOrDefault(type, type);
     }
 
+    /**
+     * 添加自定义描述信息
+     * @return 描述信息
+     */
+    protected Map<String, String> customize() {
+        return null;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Map<String, String> customizeMap = customize();
+        if (customizeMap != null) {
+            customizeMap.forEach(DEFAULT_EXCEPTION_MESSAGES::put);
+        }
+    }
 }

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 cofcool
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.cofcool.chaos.server.common.core;
 
 import java.util.HashMap;
@@ -43,7 +59,7 @@ public class SimpleQueryResult<T> implements QueryResult<T, Map<String, Object>>
      */
     public SimpleQueryResult(Page<T> page, Object ext, String code, String msg) {
         Objects.requireNonNull(page);
-        Objects.requireNonNull(page.getList());
+        Objects.requireNonNull(page.getContent());
 
         this.page = page;
         this.ext = ext;
@@ -67,7 +83,7 @@ public class SimpleQueryResult<T> implements QueryResult<T, Map<String, Object>>
     private Map<String, Object> createResultMap(Page<T> page) {
         Map<String, Object> result = new HashMap<>();
         result.put("totalRow", page.getTotal());
-        result.put("list", page.getList());
+        result.put("list", page.getContent());
         result.put("firstPage", page.isFirstPage());
         result.put("lastPage", page.isLastPage());
         result.put("pageNumber", page.getPageNumber());

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 cofcool
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.cofcool.chaos.server.common.security;
 
 import java.io.Serializable;
@@ -78,12 +94,12 @@ public class User <T extends Auth, ID extends Serializable> implements Serializa
     }
 
     /**
-     * 创建用户, {@link #device} 默认为 {@linkplain SimpleDevice#BROWSER 浏览器}
+     * 创建用户
      * @param username 用户名
      * @param password 密码
      */
     public User(String username, String password) {
-        this(username, password, SimpleDevice.BROWSER);
+        this(username, password, null);
     }
 
     /**
@@ -257,4 +273,22 @@ public class User <T extends Auth, ID extends Serializable> implements Serializa
             ", detail=" + detail +
             '}';
     }
+
+    /**
+     * 读取 <code>detail</code>, 针对在没有指定范型的情况, 常规情况请调用 {@link #getDetail()}
+     * @param type <code>detail</code> 对应的 <code>Class</code>
+     * @param <D> <code>detail</code> 的类型
+     * @return <code>detail</code>
+     *
+     * @throws ClassCastException <code>detail</code> 不是 <code>type</code> 类型时抛出
+     */
+    @SuppressWarnings("unchecked")
+    public <D> D unwrap(Class<D> type) {
+        if (type.isAssignableFrom(getDetail().getClass())) {
+            return (D) getDetail();
+        }
+
+        throw new ClassCastException("detail cannot cast to be " + type.getName());
+    }
+
 }
