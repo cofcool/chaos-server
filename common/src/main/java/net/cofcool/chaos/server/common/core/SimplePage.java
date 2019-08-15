@@ -19,12 +19,14 @@ package net.cofcool.chaos.server.common.core;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
+import lombok.ToString;
 
 /**
  * 分页实体, 包含日期处理, 关键字等, 默认 pageNumber 为 0 时为第一页
  *
  * @author CofCool
  **/
+@ToString
 public class SimplePage<T> implements Page<T> {
 
     private static final long serialVersionUID = -76703640096908564L;

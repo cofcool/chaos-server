@@ -9,7 +9,7 @@
 <dependency>
   <groupId>net.cofcool.chaos</groupId>
   <artifactId>chaos-server-${MODULE_NAME}</artifactId>
-  <version>0.3.2</version>
+  <version>${VERSION}</version>
 </dependency>
 ```
 

@@ -8,14 +8,14 @@
     <parent>
         <groupId>net.cofcool.chaos</groupId>
         <artifactId>chaos-server</artifactId>
-        <version>0.4.0.2019.06.27-SNAPSHOT</version>
+        <version>0.4.0</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>net.cofcool.chaos</groupId>
             <artifactId>chaos-server-common</artifactId>
-            <version>0.4.0.2019.06.27-SNAPSHOT</version>
+            <version>0.4.0</version>
         </dependency>
     </dependencies>
 </project>
