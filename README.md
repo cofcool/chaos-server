@@ -15,7 +15,7 @@
 
 查看[更新日志](./CHANGELOG.md)
 
-使用可查看 [示例项目](https://github.com/cofcool/chaos-server/tree/master/demo)
+使用可查看 [示例项目](https://github.com/cofcool/chaos-server-demo.git)
 
 查看 [简单介绍 Chaos Server](https://cofcool.github.io/tech/2019/07/23/intro-chaos-server) 了解基本用法, 后续文档会以 Wiki 的形式逐步完善。
 
