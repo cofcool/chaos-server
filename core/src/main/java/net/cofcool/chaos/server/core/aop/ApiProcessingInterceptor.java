@@ -19,8 +19,8 @@ package net.cofcool.chaos.server.core.aop;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import javax.annotation.Nullable;
+import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
-import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.core.ServiceException;
 import net.cofcool.chaos.server.common.security.Auth;
@@ -62,14 +62,14 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
     private ApplicationContext applicationContext;
     private AuthService authService;
 
-    private ExceptionCodeManager exceptionCodeManager;
+    private ConfigurationSupport configuration;
 
-    public ExceptionCodeManager getExceptionCodeManager() {
-        return exceptionCodeManager;
+    protected ConfigurationSupport getConfiguration() {
+        return configuration;
     }
 
-    public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
-        this.exceptionCodeManager = exceptionCodeManager;
+    public void setConfiguration(ConfigurationSupport configuration) {
+        this.configuration = configuration;
     }
 
     public void setAuthService(
@@ -154,8 +154,8 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
 
     private void throwException(String code, String exceptionType) {
         throw new ServiceException(
-            exceptionCodeManager.getDescription(exceptionType),
-            exceptionCodeManager.getCode(exceptionType)
+            configuration.getExceptionDescription(exceptionType),
+            configuration.getExceptionCode(code)
         );
     }
 
@@ -219,6 +219,7 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
 
     protected void setTheId(Object obj, Auth authData, ResolvableType type, String property) throws Throwable {
         Object value = BeanUtils.getPropertyDescriptor(authData.getClass(), property).getReadMethod().invoke(authData);
+        // 检查值是否为 0, 如果是 0 的话忽略
         if (BeanUtils.checkNullOrZero(value).isPresent()) {
             if (obj instanceof Page) {
                 copyIdsToCondition(

@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Properties;
 import javax.servlet.Filter;
 import javax.sql.DataSource;
+import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.security.AuthService;
@@ -191,10 +192,20 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
         @Bean
         @ConditionalOnMissingBean
-        public GlobalHandlerExceptionResolver exceptionResolver(ExceptionCodeManager exceptionCodeManager, ObjectMapper objectMapper) {
+        public ConfigurationSupport configurationSupport(ExceptionCodeManager exceptionCodeManager) {
+            ConfigurationSupport configurationSupport = new ConfigurationSupport();
+            configurationSupport.setExceptionCodeManager(exceptionCodeManager);
+            configurationSupport.setDebug(chaosProperties.getDevelopment().getDebug());
+
+            return configurationSupport;
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public GlobalHandlerExceptionResolver exceptionResolver(
+            ConfigurationSupport configurationSupport, ObjectMapper objectMapper) {
             GlobalHandlerExceptionResolver ex = new GlobalHandlerExceptionResolver();
-            ex.setDevelopmentMode(chaosProperties.getDevelopment().getMode());
-            ex.setExceptionCodeManager(exceptionCodeManager);
+            ex.setConfiguration(configurationSupport);
             ex.setJacksonObjectMapper(objectMapper);
 
             return ex;
@@ -220,7 +231,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
         @ConditionalOnProperty(prefix = "chaos.development", value = "injecting-enabled",
             havingValue = "true", matchIfMissing = false)
         @ConditionalOnMissingBean
-        public ApiProcessingInterceptor apiInterceptor(ExceptionCodeManager exceptionCodeManager) {
+        public ApiProcessingInterceptor apiInterceptor(ConfigurationSupport configurationSupport) {
             ApiProcessingInterceptor interceptor = new ApiProcessingInterceptor();
             interceptor.setApplicationContext(ChaosAutoConfiguration.this.applicationContext);
             interceptor.setDefinedCheckedKeys(
@@ -230,7 +241,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                 )
             );
             interceptor.setVersion(chaosProperties.getDevelopment().getVersion());
-            interceptor.setExceptionCodeManager(exceptionCodeManager);
+            interceptor.setConfiguration(configurationSupport);
             return interceptor;
         }
 
@@ -242,10 +253,10 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
         @Bean
         @ConditionalOnMissingBean
-        public MappingJackson2HttpMessageConverter responseBodyMessageConverter(ObjectMapper objectMapper, ExceptionCodeManager exceptionCodeManager) {
+        public MappingJackson2HttpMessageConverter responseBodyMessageConverter(ObjectMapper objectMapper, ConfigurationSupport configurationSupport) {
             ResponseBodyMessageConverter converter = new ResponseBodyMessageConverter();
             converter.setObjectMapper(objectMapper);
-            converter.setExceptionCodeManager(exceptionCodeManager);
+            converter.setConfiguration(configurationSupport);
 
             return converter;
         }
@@ -264,7 +275,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
              */
             @Bean
             @ConditionalOnMissingBean
-            public ShiroFilterFactoryBean shiroFilter(UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, PasswordProcessor passwordProcessor, ExceptionCodeManager exceptionCodeManager) {
+            public ShiroFilterFactoryBean shiroFilter(UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, PasswordProcessor passwordProcessor, ConfigurationSupport configurationSupport) {
                 Map<String, Filter> filterMap = new HashMap<>();
                 filterMap.put(
                     PermissionFilter.FILTER_KEY,
@@ -283,7 +294,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
                 ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
                 factoryBean.setFilters(filterMap);
-                factoryBean.setSecurityManager(createSecurityManager(sessionManager, createDefaultAuthenticator(userAuthorizationService, passwordProcessor, chaosProperties.getAuth(), exceptionCodeManager), shiroCacheManager));
+                factoryBean.setSecurityManager(createSecurityManager(sessionManager, createDefaultAuthenticator(userAuthorizationService, passwordProcessor, chaosProperties.getAuth(), configurationSupport), shiroCacheManager));
                 factoryBean.setLoginUrl(chaosProperties.getAuth().getLoginUrl());
                 factoryBean.setUnauthorizedUrl(chaosProperties.getAuth().getUnauthUrl());
                 factoryBean.setFilterChainDefinitions(chaosProperties.getAuth().shiroUrls());
@@ -310,9 +321,9 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
              * @param passwordProcessor 密码处理
              * @return authenticator
              */
-            public ModularRealmAuthenticator createDefaultAuthenticator(UserAuthorizationService userAuthorizationService, PasswordProcessor passwordProcessor, ChaosProperties.Auth auth, ExceptionCodeManager exceptionCodeManager) {
+            public ModularRealmAuthenticator createDefaultAuthenticator(UserAuthorizationService userAuthorizationService, PasswordProcessor passwordProcessor, ChaosProperties.Auth auth, ConfigurationSupport configurationSupport) {
                 List<Realm> shiroRealms = new ArrayList<>();
-                shiroRealms.add(createDefaultAuthRealm(userAuthorizationService, passwordProcessor, auth, exceptionCodeManager));
+                shiroRealms.add(createDefaultAuthRealm(userAuthorizationService, passwordProcessor, auth, configurationSupport));
 
                 ModularRealmAuthenticator realmAuthenticator = new ModularRealmAuthenticator();
                 realmAuthenticator.setAuthenticationStrategy(new ExceptionAuthenticationStrategy());
@@ -321,7 +332,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                 return realmAuthenticator;
             }
 
-            private Realm createDefaultAuthRealm(UserAuthorizationService userAuthorizationService, PasswordProcessor passwordProcessor, ChaosProperties.Auth auth, ExceptionCodeManager exceptionCodeManager) {
+            private Realm createDefaultAuthRealm(UserAuthorizationService userAuthorizationService, PasswordProcessor passwordProcessor, ChaosProperties.Auth auth, ConfigurationSupport configurationSupport) {
                 AccountCredentialsMatcher matcher = new AccountCredentialsMatcher();
                 matcher.setPasswordProcessor(passwordProcessor);
 
@@ -329,7 +340,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                 realm.setCredentialsMatcher(matcher);
                 realm.setUserAuthorizationService(userAuthorizationService);
                 realm.setUsingCaptcha(auth.getUsingCaptcha());
-                realm.setExceptionCodeManager(exceptionCodeManager);
+                realm.setConfiguration(configurationSupport);
 
                 return realm;
             }
@@ -341,10 +352,10 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
              */
             @Bean
             @SuppressWarnings("unchecked")
-            public AuthService authService(UserAuthorizationService userAuthorizationService, ExceptionCodeManager exceptionCodeManager) {
+            public AuthService authService(UserAuthorizationService userAuthorizationService, ConfigurationSupport configurationSupport) {
                 ShiroAuthServiceImpl authService = new ShiroAuthServiceImpl();
                 authService.setUserAuthorizationService(userAuthorizationService);
-                authService.setExceptionCodeManager(exceptionCodeManager);
+                authService.setConfiguration(configurationSupport);
 
                 return authService;
             }
@@ -370,7 +381,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
             private AuthenticationProvider authenticationProvider;
 
             private MappingJackson2HttpMessageConverter messageConverter;
-            private ExceptionCodeManager exceptionCodeManager;
+            private ConfigurationSupport configurationSupport;
 
             private SpringUserAuthorizationService userAuthorizationService;
 
@@ -380,8 +391,8 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
             }
 
             @Autowired
-            public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
-                this.exceptionCodeManager = exceptionCodeManager;
+            public void setConfiguration(ConfigurationSupport configurationSupport) {
+                this.configurationSupport = configurationSupport;
             }
 
             @Autowired
@@ -398,7 +409,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                 protected void configure(HttpSecurity http) throws Exception {
                     Assert.notNull(authenticationProvider, "authenticationProvider must be specified");
                     Assert.notNull(messageConverter, "messageConverter must be specified");
-                    Assert.notNull(exceptionCodeManager, "exceptionCodeManager must be specified");
+                    Assert.notNull(configurationSupport, "configurationSupport must be specified");
 
                     net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter authenticationFilter = new net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter();
 
@@ -426,7 +437,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                         .addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
                         .apply(new JsonLoginConfigure<>(authenticationFilter))
                         .loginProcessingUrl(chaosProperties.getAuth().getLoginUrl())
-                        .exceptionCodeManager(exceptionCodeManager)
+                        .configuration(configurationSupport)
                         .messageConverter(messageConverter)
                         .filterSupportsLoginType(chaosProperties.getAuth().getLoginObjectType())
                         .unAuthUrl(chaosProperties.getAuth().getUnauthUrl())

@@ -17,8 +17,8 @@
 package net.cofcool.chaos.server.security.shiro.access;
 
 import lombok.extern.slf4j.Slf4j;
+import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
-import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
 import net.cofcool.chaos.server.common.security.UserStatus;
@@ -42,7 +42,7 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
 
     private UserAuthorizationService userAuthorizationService;
 
-    private ExceptionCodeManager exceptionCodeManager;
+    private ConfigurationSupport configuration;
 
     /**
      * 是否使用验证码
@@ -66,12 +66,12 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
         this.userAuthorizationService = userAuthorizationService;
     }
 
-    public ExceptionCodeManager getExceptionCodeManager() {
-        return exceptionCodeManager;
+    public ConfigurationSupport getConfiguration() {
+        return configuration;
     }
 
-    public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
-        this.exceptionCodeManager = exceptionCodeManager;
+    public void setConfiguration(ConfigurationSupport configuration) {
+        this.configuration = configuration;
     }
 
     /**
@@ -112,11 +112,11 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
     }
 
     private String getExceptionCode(String type) {
-        return exceptionCodeManager.getCode(type);
+        return configuration.getExceptionCode(type);
     }
 
     private String getExceptionDesc(String type) {
-        return exceptionCodeManager.getDescription(type);
+        return configuration.getExceptionDescription(type);
     }
 
     private void checkCaptcha(CaptchaUsernamePasswordToken token) {

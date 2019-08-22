@@ -42,12 +42,12 @@ public abstract class SimpleMybatisService<T, ID, M extends Mapper<T>> extends
 
     @Override
     public ExecuteResult<List<T>> queryAll(T entity) {
-        return ExecuteResult.of(
+        return getConfiguration().getExecuteResult(
             getMapper()
                 .selectByExample(Example.builder(entity.getClass()).build()),
             ResultState.SUCCESSFUL,
-            getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
-            getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC)
+            ExceptionCodeDescriptor.SERVER_OK,
+            ExceptionCodeDescriptor.SERVER_OK_DESC
         );
     }
 

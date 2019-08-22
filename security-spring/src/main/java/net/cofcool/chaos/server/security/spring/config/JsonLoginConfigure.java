@@ -16,7 +16,7 @@
 
 package net.cofcool.chaos.server.security.spring.config;
 
-import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
+import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFailureHandler;
 import net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter;
@@ -31,7 +31,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
- * 配置 {@link JsonAuthenticationFilter}, 需要 {@link ExceptionCodeManager} 和 {@link MappingJackson2HttpMessageConverter}
+ * 配置 {@link JsonAuthenticationFilter}, 需要 {@link ConfigurationSupport} 和 {@link MappingJackson2HttpMessageConverter}
  *
  * @author CofCool
  *
@@ -40,7 +40,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
         AbstractAuthenticationFilterConfigurer<H, JsonLoginConfigure<H>, JsonAuthenticationFilter> {
 
-    private ExceptionCodeManager exceptionCodeManager;
+    private ConfigurationSupport configuration;
     private MappingJackson2HttpMessageConverter messageConverter;
 
     private String unAuthUrl = "/unauth";
@@ -57,8 +57,8 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
         super(authenticationFilter, "/login");
     }
 
-    public JsonLoginConfigure<H> exceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
-        this.exceptionCodeManager = exceptionCodeManager;
+    public JsonLoginConfigure<H> configuration(ConfigurationSupport configuration) {
+        this.configuration = configuration;
 
         return this;
     }
@@ -72,10 +72,10 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
 
     private void createHandler() {
         if (usingDefaultFailureHandler) {
-            this.failureHandler(new JsonAuthenticationFailureHandler(exceptionCodeManager, messageConverter));
+            this.failureHandler(new JsonAuthenticationFailureHandler(configuration, messageConverter));
         }
         if (usingDefaultSuccessHandler) {
-            this.successHandler(new JsonAuthenticationSuccessHandler(exceptionCodeManager, messageConverter));
+            this.successHandler(new JsonAuthenticationSuccessHandler(configuration, messageConverter));
         }
     }
 
@@ -123,7 +123,7 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
 
         createHandler();
 
-        registerJsonAuthenticationEntryPoint(http, new JsonUnAuthEntryPoint(exceptionCodeManager, messageConverter, unAuthUrl, unLoginUrl));
+        registerJsonAuthenticationEntryPoint(http, new JsonUnAuthEntryPoint(configuration, messageConverter, unAuthUrl, unLoginUrl));
     }
 
     @SuppressWarnings("unchecked")

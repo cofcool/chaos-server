@@ -33,33 +33,26 @@ public interface QueryResult<T, R> extends Result<R> {
     Page<T> page();
 
     /**
-     * QueryResult 携带的额外数据
-     *
-     * @return 扩展数据
-     */
-    Object ext();
-
-    /**
-     * 创建 QueryResult 实例的方便方法
+     * 创建 {@link QueryResult} 实例的方便方法
      *
      * @param page 分页数据
      * @param <T> 数据类型
-     * @return QueryResult 实例
+     * @param code 描述码
+     * @param msg 描述信息
+     * @return {@link QueryResult} 实例
      */
     static <T> QueryResult<T, ?> of(Page<T> page, String code, String msg) {
-        return new SimpleQueryResult<>(page, code, msg);
+        return new SimpleQueryResult<>(Message.of(code, msg, page));
     }
 
     /**
-     * 创建 QueryResult 实例的方便方法
-     *
-     * @param page 分页数据
-     * @param ext 扩展数据
-     * @param <T>  数据类型
-     * @return QueryResult 实例
+     * 创建 {@link QueryResult} 实例的方便方法
+     * @param message 分页数据
+     * @param <T> 数据类型
+     * @return {@link QueryResult} 实例
      */
-    static <T> QueryResult<T, ?> of(Page<T> page, Object ext, String code, String msg) {
-        return new SimpleQueryResult<>(page, ext, code, msg);
+    static <T> QueryResult<T, ?> of(Message<Page<T>> message) {
+        return new SimpleQueryResult<>(message);
     }
 
 }

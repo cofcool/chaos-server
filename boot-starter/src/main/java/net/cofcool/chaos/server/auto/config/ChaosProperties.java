@@ -22,7 +22,6 @@ import java.util.Map;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.core.annotation.ApiVersion;
 import net.cofcool.chaos.server.core.annotation.Scanned;
-import net.cofcool.chaos.server.core.config.DevelopmentMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -304,9 +303,9 @@ public class ChaosProperties {
         private Boolean injectingEnabled = false;
 
         /**
-         * 项目运行模式
+         * 是否调试模式
          */
-        private DevelopmentMode mode = DevelopmentMode.DEV;
+        private Boolean debug = false;
 
         /**
          * 项目版本
@@ -344,18 +343,12 @@ public class ChaosProperties {
             this.injectingEnabled = injectingEnabled;
         }
 
-        /**
-         * 项目运行模式
-         *
-         * @return 当前运行模式
-         * @see DevelopmentMode
-         */
-        public DevelopmentMode getMode() {
-            return mode;
+        public Boolean getDebug() {
+            return debug;
         }
 
-        public void setMode(DevelopmentMode mode) {
-            this.mode = mode;
+        public void setDebug(Boolean debug) {
+            this.debug = debug;
         }
 
         public Integer getVersion() {

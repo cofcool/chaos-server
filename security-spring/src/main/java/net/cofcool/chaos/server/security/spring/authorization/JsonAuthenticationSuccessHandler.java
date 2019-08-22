@@ -20,9 +20,8 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
-import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
-import net.cofcool.chaos.server.common.core.Message;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpResponse;
@@ -39,9 +38,9 @@ public class JsonAuthenticationSuccessHandler extends AbstractAuthenticationConf
 
 
     public JsonAuthenticationSuccessHandler(
-        ExceptionCodeManager exceptionCodeManager,
+        ConfigurationSupport configuration,
         MappingJackson2HttpMessageConverter messageConverter) {
-        super(exceptionCodeManager, messageConverter);
+        super(configuration, messageConverter);
     }
 
     @SuppressWarnings("unchecked")
@@ -49,9 +48,9 @@ public class JsonAuthenticationSuccessHandler extends AbstractAuthenticationConf
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
         Authentication authentication) throws IOException, ServletException {
         getMessageConverter().write(
-            Message.of(
-                getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
-                getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC),
+            getConfiguration().getMessageByKey(
+                ExceptionCodeDescriptor.SERVER_OK,
+                ExceptionCodeDescriptor.SERVER_OK_DESC,
                 authentication.getPrincipal()
             ),
             MediaType.APPLICATION_JSON,

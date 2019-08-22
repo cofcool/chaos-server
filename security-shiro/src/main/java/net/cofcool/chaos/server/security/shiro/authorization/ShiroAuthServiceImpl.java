@@ -19,8 +19,8 @@ package net.cofcool.chaos.server.security.shiro.authorization;
 import java.io.Serializable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
-import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.security.Auth;
@@ -48,18 +48,17 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
 
     private UserAuthorizationService<T, ID> userAuthorizationService;
 
-    private ExceptionCodeManager exceptionCodeManager;
+    private ConfigurationSupport configuration;
 
-    public ExceptionCodeManager getExceptionCodeManager() {
-        return exceptionCodeManager;
+    protected ConfigurationSupport getConfiguration() {
+        return configuration;
     }
 
-    public void setExceptionCodeManager(
-        ExceptionCodeManager exceptionCodeManager) {
-        this.exceptionCodeManager = exceptionCodeManager;
+    public void setConfiguration(ConfigurationSupport configuration) {
+        this.configuration = configuration;
     }
 
-    public UserAuthorizationService<T, ID> getUserAuthorizationService() {
+    protected UserAuthorizationService<T, ID> getUserAuthorizationService() {
         return userAuthorizationService;
     }
 
@@ -95,7 +94,7 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
                     getUserAuthorizationService().setupUserData(currentUser);
                 } else {
                     user.logout();
-                    return Message.of(checkedMessage.code(), checkedMessage.message());
+                    return configuration.getMessage(checkedMessage.code(), checkedMessage.message(), null);
                 }
 
                 isOk = true;
@@ -117,11 +116,14 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
 
             Throwable ex = e.getCause();
             if (ex instanceof AuthorizationException) {
-                return Message.of(((AuthorizationException) ex).getCode(), ex.getMessage());
+                return configuration.getMessage(((AuthorizationException) ex).getCode(), ex.getMessage(), null);
             } else {
-                return Message.of(
-                    exceptionCodeManager.getCode(ExceptionCodeDescriptor.AUTH_ERROR),
-                    e.getMessage()
+                return configuration.getMessage(
+                    ExceptionCodeDescriptor.AUTH_ERROR,
+                    true,
+                    e.getMessage(),
+                    false,
+                    null
                 );
             }
         } catch (Exception e) {
@@ -135,9 +137,10 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
     }
 
     protected Message<User<T, ID>> getExceptionMessage(String code, String type) {
-        return Message.of(
-            exceptionCodeManager.getCode(code),
-            exceptionCodeManager.getDescription(type)
+        return configuration.getMessageByKey(
+            code,
+            type,
+            null
         );
     }
 
@@ -173,9 +176,9 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
     }
 
     private Message<User<T, ID>> returnUserInfo(User<T, ID> user) {
-        return Message.of(
-            exceptionCodeManager.getCode(ExceptionCodeDescriptor.SERVER_OK),
-            exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC),
+        return configuration.getMessageByKey(
+            ExceptionCodeDescriptor.SERVER_OK,
+            ExceptionCodeDescriptor.SERVER_OK_DESC,
             user
         );
     }

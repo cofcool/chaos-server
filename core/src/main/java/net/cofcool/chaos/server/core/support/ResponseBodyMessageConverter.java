@@ -18,8 +18,8 @@ package net.cofcool.chaos.server.core.support;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
-import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.core.Result;
 import net.cofcool.chaos.server.common.core.Result.ResultState;
@@ -34,14 +34,14 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
  */
 public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConverter {
 
-    private ExceptionCodeManager exceptionCodeManager;
+    private ConfigurationSupport configuration;
 
-    public ExceptionCodeManager getExceptionCodeManager() {
-        return exceptionCodeManager;
+    protected ConfigurationSupport getConfiguration() {
+        return configuration;
     }
 
-    public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
-        this.exceptionCodeManager = exceptionCodeManager;
+    public void setConfiguration(ConfigurationSupport configuration) {
+        this.configuration = configuration;
     }
 
     @Override
@@ -50,23 +50,23 @@ public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConv
         if (object instanceof Result) {
             object = handleResult((Result) object);
         } else if (object instanceof Number || object instanceof String){
-            object = Message.of(
-                exceptionCodeManager.getCode(ExceptionCodeDescriptor.SERVER_OK),
-                exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC),
+            object = configuration.getMessageByKey(
+                ExceptionCodeDescriptor.SERVER_OK,
+                ExceptionCodeDescriptor.SERVER_OK_DESC,
                 object
             );
         } else if (object instanceof Result.ResultState) {
             ResultState state = (ResultState) object;
             if (state == ResultState.SUCCESSFUL) {
-                object = Message.of(
-                    exceptionCodeManager.getCode(ExceptionCodeDescriptor.SERVER_OK),
-                    exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC),
+                object = configuration.getMessageByKey(
+                    ExceptionCodeDescriptor.SERVER_OK,
+                    ExceptionCodeDescriptor.SERVER_OK_DESC,
                     null
                 );
             } else {
-                object = Message.of(
-                    exceptionCodeManager.getCode(ExceptionCodeDescriptor.OPERATION_ERR),
-                    exceptionCodeManager.getDescription(ExceptionCodeDescriptor.OPERATION_ERR_DESC),
+                object = configuration.getMessageByKey(
+                    ExceptionCodeDescriptor.OPERATION_ERR,
+                    ExceptionCodeDescriptor.OPERATION_ERR_DESC,
                     null
                 );
             }

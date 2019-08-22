@@ -20,8 +20,8 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
-import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.Message;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -40,9 +40,9 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 public class JsonAuthenticationFailureHandler extends AbstractAuthenticationConfigure implements AuthenticationFailureHandler {
 
     public JsonAuthenticationFailureHandler(
-        ExceptionCodeManager exceptionCodeManager,
+        ConfigurationSupport configuration,
         MappingJackson2HttpMessageConverter messageConverter) {
-        super(exceptionCodeManager, messageConverter);
+        super(configuration, messageConverter);
     }
 
     @SuppressWarnings("unchecked")
@@ -66,9 +66,10 @@ public class JsonAuthenticationFailureHandler extends AbstractAuthenticationConf
     }
 
     private Message getMessage(String codeKey, String descKey) {
-        return Message.of(
-            getExceptionCodeManager().getCode(codeKey),
-            getExceptionCodeManager().getDescription(descKey)
+        return getConfiguration().getMessageByKey(
+            codeKey,
+            descKey,
+            null
         );
     }
 }

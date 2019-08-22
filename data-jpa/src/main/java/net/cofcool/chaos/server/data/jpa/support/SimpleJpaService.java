@@ -62,10 +62,11 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
 
     @Override
     public ExecuteResult<T> add(T entity) {
-        return ExecuteResult.of(
-            jpaRepository.save(entity), ResultState.SUCCESSFUL,
-            getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
-            getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC)
+        return getConfiguration().getExecuteResult(
+            jpaRepository.save(entity),
+            ResultState.SUCCESSFUL,
+            ExceptionCodeDescriptor.SERVER_OK,
+            ExceptionCodeDescriptor.SERVER_OK_DESC
         );
     }
 
@@ -92,11 +93,11 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
     public ExecuteResult<T> update(T entity) {
         Optional<T> result = findById(entity);
         if (!result.isPresent()) {
-            return ExecuteResult.of(
+            return getConfiguration().getExecuteResult(
                 null,
                 ResultState.FAILURE,
-                getExceptionCodeManager().getCode(ExceptionCodeDescriptor.DATA_ERROR),
-                getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.DATA_ERROR_DESC)
+                ExceptionCodeDescriptor.DATA_ERROR,
+                ExceptionCodeDescriptor.DATA_ERROR_DESC
             );
         }
 
@@ -118,21 +119,21 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
 
         jpaRepository.save(dirtyEntity);
 
-        return ExecuteResult.of(
+        return getConfiguration().getExecuteResult(
             entity,
             ResultState.SUCCESSFUL,
-            getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
-            getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC)
+            ExceptionCodeDescriptor.SERVER_OK,
+            ExceptionCodeDescriptor.SERVER_OK_DESC
         );
     }
 
     @Override
     public ExecuteResult<List<T>> queryAll(T entity) {
-        return ExecuteResult.of(
+        return getConfiguration().getExecuteResult(
             jpaRepository.findAll(Example.of(entity)),
             ResultState.SUCCESSFUL,
-            getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
-            getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC)
+            ExceptionCodeDescriptor.SERVER_OK,
+            ExceptionCodeDescriptor.SERVER_OK_DESC
         );
     }
 
@@ -141,19 +142,19 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
         Optional<T> data = findById(entity);
         return data
             .map(t ->
-                ExecuteResult.of(
+                getConfiguration().getExecuteResult(
                     t,
                     ResultState.SUCCESSFUL,
-                    getExceptionCodeManager().getCode(ExceptionCodeDescriptor.SERVER_OK),
-                    getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC)
+                    ExceptionCodeDescriptor.SERVER_OK,
+                    ExceptionCodeDescriptor.SERVER_OK_DESC
                 )
             )
             .orElseGet(() ->
-                ExecuteResult.of(
+                getConfiguration().getExecuteResult(
                     null,
                     ResultState.FAILURE,
-                    getExceptionCodeManager().getCode(ExceptionCodeDescriptor.DATA_ERROR),
-                    getExceptionCodeManager().getDescription(ExceptionCodeDescriptor.DATA_ERROR_DESC)
+                    ExceptionCodeDescriptor.DATA_ERROR,
+                    ExceptionCodeDescriptor.DATA_ERROR_DESC
                 ));
     }
 
