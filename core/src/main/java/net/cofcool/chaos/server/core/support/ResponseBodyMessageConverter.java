@@ -50,7 +50,7 @@ public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConv
         if (object instanceof Result) {
             object = handleResult((Result) object);
         } else if (object instanceof Number || object instanceof String){
-            object = configuration.getMessageByKey(
+            object = configuration.getMessageWithKey(
                 ExceptionCodeDescriptor.SERVER_OK,
                 ExceptionCodeDescriptor.SERVER_OK_DESC,
                 object
@@ -58,13 +58,13 @@ public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConv
         } else if (object instanceof Result.ResultState) {
             ResultState state = (ResultState) object;
             if (state == ResultState.SUCCESSFUL) {
-                object = configuration.getMessageByKey(
+                object = configuration.getMessageWithKey(
                     ExceptionCodeDescriptor.SERVER_OK,
                     ExceptionCodeDescriptor.SERVER_OK_DESC,
                     null
                 );
             } else {
-                object = configuration.getMessageByKey(
+                object = configuration.getMessageWithKey(
                     ExceptionCodeDescriptor.OPERATION_ERR,
                     ExceptionCodeDescriptor.OPERATION_ERR_DESC,
                     null

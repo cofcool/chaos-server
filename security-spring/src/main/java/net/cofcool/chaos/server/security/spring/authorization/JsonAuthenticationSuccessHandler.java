@@ -48,7 +48,7 @@ public class JsonAuthenticationSuccessHandler extends AbstractAuthenticationConf
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
         Authentication authentication) throws IOException, ServletException {
         getMessageConverter().write(
-            getConfiguration().getMessageByKey(
+            getConfiguration().getMessageWithKey(
                 ExceptionCodeDescriptor.SERVER_OK,
                 ExceptionCodeDescriptor.SERVER_OK_DESC,
                 authentication.getPrincipal()

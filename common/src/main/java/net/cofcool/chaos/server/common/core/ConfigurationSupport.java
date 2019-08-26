@@ -16,34 +16,54 @@
 
 package net.cofcool.chaos.server.common.core;
 
+import lombok.Builder;
 import net.cofcool.chaos.server.common.core.Result.ResultState;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
- * 基础配置支持
- *
- * @author CofCool
+ * 基础配置支持, 包括 {@link ExceptionCodeManager}, {@link Message}, {@link Result}等,
+ * 应用可通过 {@link ConfigurationCustomizer} 自定义 {@link Message} 等实现方式等
  *
  * @see ExceptionCodeManager
  * @see Message
  * @see Result
+ * @see ConfigurationCustomizer
+ *
+ * @author CofCool
  */
-public class ConfigurationSupport implements InitializingBean {
+@Builder
+public class ConfigurationSupport {
 
-    private ExceptionCodeManager exceptionCodeManager;
+    /**
+     * 异常描述管理
+     */
+    private final ExceptionCodeManager exceptionCodeManager;
 
-    private boolean isDebug;
+    /**
+     * 是否调试模式
+     */
+    private final boolean isDebug;
 
-    public ConfigurationSupport() {
-    }
+    /**
+     *  自定义配置项
+     */
+    private final ConfigurationCustomizer customizer;
 
-    public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
+    protected ConfigurationSupport(
+        ExceptionCodeManager exceptionCodeManager, boolean isDebug,
+        ConfigurationCustomizer customizer) {
+        Assert.notNull(exceptionCodeManager, "exceptionCodeManager must be specified");
+        Assert.notNull(customizer, "customizer must be specified");
+
         this.exceptionCodeManager = exceptionCodeManager;
+        this.isDebug = isDebug;
+        this.customizer = customizer;
     }
 
-    public void setDebug(boolean debug) {
-        isDebug = debug;
+    /**
+     * {@link ConfigurationCustomizer} 的默认实现
+     */
+    public static class DefaultConfigurationCustomizer implements ConfigurationCustomizer {
     }
 
     /**
@@ -55,15 +75,16 @@ public class ConfigurationSupport implements InitializingBean {
     }
 
     /**
-     * 创建 {@link Message} 实例，应用可创建自定义 {@link Message}
-     * @param code 状态码
-     * @param msg 描述信息
-     * @param data 携带数据
-     * @param <T> 携带数据类型
-     * @return {@link Message} 实例
+     * 获取 {@link ConfigurationCustomizer}
+     * @return {@link ConfigurationCustomizer}
      */
-    protected <T> Message<T> creatingMessage(String code, String msg, T data) {
-        return Message.of(code, msg, data);
+    public ConfigurationCustomizer getCustomizer() {
+        return customizer;
+    }
+
+
+    private  <T> Message<T> creatingMessage(String code, String msg, T data) {
+        return customizer.newMessage(code, msg, data);
     }
 
     /**
@@ -77,24 +98,17 @@ public class ConfigurationSupport implements InitializingBean {
      * @return ExecuteResult 实例
      */
     public <T> ExecuteResult<T> getExecuteResult(T entity, ResultState state, String codeKey, String msgKey) {
-        return ExecuteResult.of(
+        return customizer.newExecuteResult(
             state,
-            getMessageByKey(codeKey, msgKey, entity)
+            getMessageWithKey(codeKey, msgKey, entity)
         );
     }
 
-    /**
-     * 创建 {@link QueryResult} 实例
-     *
-     * @param page 分页数据
-     * @param <T> 数据类型
-     * @param code 描述码
-     * @param msg 描述信息
-     * @return {@link QueryResult} 实例
-     */
-    public <T> QueryResult<T, ?> getQueryResult(Page<T> page, String code, String msg) {
-        return QueryResult.of(
-            getMessageByKey(code, msg, page)
+    public <T> QueryResult<T, ?> getQueryResult(Page<T> page, String codeKey, String msgKey) {
+        return customizer.newQueryResult(
+            getMessageWithKey(
+                codeKey, msgKey, page
+            )
         );
     }
 
@@ -135,7 +149,7 @@ public class ConfigurationSupport implements InitializingBean {
      * @param <T> 携带数据类型
      * @return {@link Message} 实例
      */
-    public <T> Message<T> getMessageByKey(String codeKey, String msgKey, T data) {
+    public <T> Message<T> getMessageWithKey(String codeKey, String msgKey, T data) {
         return creatingMessage(
             getExceptionCode(codeKey),
             getExceptionDescription(msgKey),
@@ -169,8 +183,4 @@ public class ConfigurationSupport implements InitializingBean {
         return isDebug;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Assert.notNull(exceptionCodeManager, "exceptionCodeManager must be specified");
-    }
 }

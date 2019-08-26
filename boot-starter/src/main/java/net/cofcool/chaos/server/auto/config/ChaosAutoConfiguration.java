@@ -29,6 +29,7 @@ import java.util.Properties;
 import javax.servlet.Filter;
 import javax.sql.DataSource;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
+import net.cofcool.chaos.server.common.core.ConfigurationSupport.DefaultConfigurationCustomizer;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.security.AuthService;
@@ -193,11 +194,12 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
         @Bean
         @ConditionalOnMissingBean
         public ConfigurationSupport configurationSupport(ExceptionCodeManager exceptionCodeManager) {
-            ConfigurationSupport configurationSupport = new ConfigurationSupport();
-            configurationSupport.setExceptionCodeManager(exceptionCodeManager);
-            configurationSupport.setDebug(chaosProperties.getDevelopment().getDebug());
-
-            return configurationSupport;
+            return ConfigurationSupport
+                .builder()
+                .exceptionCodeManager(exceptionCodeManager)
+                .isDebug(chaosProperties.getDevelopment().getDebug())
+                .customizer(new DefaultConfigurationCustomizer())
+                .build();
         }
 
         @Bean

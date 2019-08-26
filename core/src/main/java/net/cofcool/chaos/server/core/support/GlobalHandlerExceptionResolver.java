@@ -170,7 +170,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handleNullException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            configuration.getMessageByKey(ExceptionCodeDescriptor.DATA_ERROR, ExceptionCodeDescriptor.DATA_ERROR_DESC, null)
+            configuration.getMessageWithKey(ExceptionCodeDescriptor.DATA_ERROR, ExceptionCodeDescriptor.DATA_ERROR_DESC, null)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -179,7 +179,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handle5xxException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            configuration.getMessageByKey(ExceptionCodeDescriptor.SERVER_ERR, ExceptionCodeDescriptor.SERVER_ERR_DESC, null)
+            configuration.getMessageWithKey(ExceptionCodeDescriptor.SERVER_ERR, ExceptionCodeDescriptor.SERVER_ERR_DESC, null)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -210,7 +210,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handleServiceException(HttpServletResponse response, ServiceException ex) {
         writeMessage(
             response,
-            configuration.getMessageByKey(
+            configuration.getMessageWithKey(
                 ex.getCode() == null ? ExceptionCodeDescriptor.OPERATION_ERR : ex.getCode(),
                 ex.getMessage(),
                 null
@@ -223,7 +223,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handle4xxException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            configuration.getMessageByKey(
+            configuration.getMessageWithKey(
                 ExceptionCodeDescriptor.PARAM_ERROR,
                 ExceptionCodeDescriptor.PARAM_ERROR_DESC,
                 null

@@ -66,7 +66,7 @@ public class JsonAuthenticationFailureHandler extends AbstractAuthenticationConf
     }
 
     private Message getMessage(String codeKey, String descKey) {
-        return getConfiguration().getMessageByKey(
+        return getConfiguration().getMessageWithKey(
             codeKey,
             descKey,
             null

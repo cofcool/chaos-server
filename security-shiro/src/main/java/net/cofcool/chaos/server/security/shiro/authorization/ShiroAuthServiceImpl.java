@@ -137,7 +137,7 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
     }
 
     protected Message<User<T, ID>> getExceptionMessage(String code, String type) {
-        return configuration.getMessageByKey(
+        return configuration.getMessageWithKey(
             code,
             type,
             null
@@ -176,7 +176,7 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
     }
 
     private Message<User<T, ID>> returnUserInfo(User<T, ID> user) {
-        return configuration.getMessageByKey(
+        return configuration.getMessageWithKey(
             ExceptionCodeDescriptor.SERVER_OK,
             ExceptionCodeDescriptor.SERVER_OK_DESC,
             user
