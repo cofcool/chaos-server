@@ -274,21 +274,4 @@ public class User <T extends Auth, ID extends Serializable> implements Serializa
             '}';
     }
 
-    /**
-     * 读取 <code>detail</code>, 针对在没有指定范型的情况, 常规情况请调用 {@link #getDetail()}
-     * @param type <code>detail</code> 对应的 <code>Class</code>
-     * @param <D> <code>detail</code> 的类型
-     * @return <code>detail</code>
-     *
-     * @throws ClassCastException <code>detail</code> 不是 <code>type</code> 类型时抛出
-     */
-    @SuppressWarnings("unchecked")
-    public <D> D unwrap(Class<D> type) {
-        if (type.isAssignableFrom(getDetail().getClass())) {
-            return (D) getDetail();
-        }
-
-        throw new ClassCastException("detail cannot cast to be " + type.getName());
-    }
-
 }
