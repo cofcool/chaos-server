@@ -44,7 +44,9 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
- * 异常处理器, 应用处于 {@link ConfigurationSupport#isDebug()} 时优先级低于Spring默认异常解析器的, 其它情况优先级最高
+ * 异常处理器, 应用处于 {@link ConfigurationSupport#isDebug()} 时优先级低于Spring默认异常解析器的, 其它情况优先级最高,
+ * 部分 {@linkplain Message 描述信息} 通过 {@link ConfigurationSupport#getMessageWithKey(String, String, Object)} 创建,
+ * 如 {@link ServiceException} 等
  *
  * @see DefaultHandlerExceptionResolver
  * @see org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver
