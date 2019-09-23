@@ -37,3 +37,7 @@
   * 优化验证码处理逻辑
   * `Shiro`的`url`配置由"\n"改为","分割
   * `security-spring`模块基本完成
+  
+**0.4.1**:
+
+* 新增 `ConfigurationSupport` 配置类, 简化 `ExceptionCodeManager` 等类的配置方式, 可自定义 `Message` 等接口类

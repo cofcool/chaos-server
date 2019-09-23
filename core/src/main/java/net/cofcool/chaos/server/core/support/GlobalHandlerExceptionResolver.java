@@ -25,17 +25,17 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.NoSuchElementException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
-import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.core.ExceptionLevel;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.core.ServiceException;
 import net.cofcool.chaos.server.common.util.WebUtils;
 import net.cofcool.chaos.server.core.aop.ValidateInterceptor;
-import net.cofcool.chaos.server.core.config.DevelopmentMode;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Ordered;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -44,7 +44,9 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
- * 异常处理器, 应用处于 {@link DevelopmentMode#DEV} 时优先级低于Spring默认异常解析器的, 其它情况优先级最高
+ * 异常处理器, 应用处于 {@link ConfigurationSupport#isDebug()} 时优先级低于Spring默认异常解析器的, 其它情况优先级最高,
+ * 部分 {@linkplain Message 描述信息} 通过 {@link ConfigurationSupport#getMessageWithKey(String, String, Object)} 创建,
+ * 如 {@link ServiceException} 等
  *
  * @see DefaultHandlerExceptionResolver
  * @see org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver
@@ -55,7 +57,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  */
 public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionResolver implements InitializingBean {
 
-    private HandlerExceptionResolver defaultExceptionResolver;
+    private final HandlerExceptionResolver defaultExceptionResolver;
 
     protected static final ModelAndView EMPTY_MODEL_AND_VIEW = new ModelAndView();
 
@@ -72,38 +74,21 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
 
     private ObjectMapper jacksonObjectMapper;
 
-    private ExceptionCodeManager exceptionCodeManager;
+    private ConfigurationSupport configuration;
 
-    public ExceptionCodeManager getExceptionCodeManager() {
-        return exceptionCodeManager;
+    protected ConfigurationSupport getConfiguration() {
+        return configuration;
     }
 
-    public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
-        this.exceptionCodeManager = exceptionCodeManager;
-    }
-
-    private DevelopmentMode developmentMode;
-
-    public DevelopmentMode getDevelopmentMode() {
-        return developmentMode;
-    }
-
-    /**
-     * 该设置需在 Spring 创建 Bean 结束前设置，可通过 {@link #afterPropertiesSet()} 或构造方法
-     */
-    public void setDevelopmentMode(DevelopmentMode developmentMode) {
-        this.developmentMode = developmentMode;
-
-        if (!developmentMode.isDebugMode()) {
-            setOrder(Ordered.HIGHEST_PRECEDENCE);
-        }
+    public void setConfiguration(ConfigurationSupport configuration) {
+        this.configuration = configuration;
     }
 
     public GlobalHandlerExceptionResolver() {
         defaultExceptionResolver = new DefaultHandlerExceptionResolver();
     }
 
-    public ObjectMapper getJacksonObjectMapper() {
+    protected ObjectMapper getJacksonObjectMapper() {
         return jacksonObjectMapper;
     }
 
@@ -114,8 +99,6 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     protected HandlerExceptionResolver getDefaultExceptionResolver() {
         return defaultExceptionResolver;
     }
-
-
 
     @Override
     protected ModelAndView doResolveException(HttpServletRequest request,
@@ -147,9 +130,10 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView resolveValidException(HttpServletResponse response, MethodArgumentNotValidException ex) {
         writeMessage(
             response,
-            getMessage(
-                exceptionCodeManager.getCode(ExceptionCodeDescriptor.PARAM_NULL),
-                ValidateInterceptor.getFirstErrorString(ex.getBindingResult())
+            configuration.getMessage(
+                ExceptionCodeDescriptor.PARAM_NULL, true,
+                ValidateInterceptor.getFirstErrorString(ex.getBindingResult()), false,
+                null
             )
         );
 
@@ -170,10 +154,13 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         if (modelAndView == null) {
             writeMessage(
                 response,
-                getMessage(
-                    exceptionCodeManager.getCode(ExceptionCodeDescriptor.OPERATION_ERR),
-                    developmentMode.isDebugMode() ? ex.getMessage() : exceptionCodeManager.getDescription(
-                        ExceptionCodeDescriptor.OPERATION_ERR_DESC)
+                configuration.getMessage(
+                    ExceptionCodeDescriptor.OPERATION_ERR, true,
+                    configuration.isDebug() ?
+                        ex.getMessage() :
+                        ExceptionCodeDescriptor.OPERATION_ERR_DESC,
+                    !configuration.isDebug(),
+                    null
                 )
             );
             modelAndView = EMPTY_MODEL_AND_VIEW;
@@ -185,7 +172,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handleNullException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getExceptionMessage(ExceptionCodeDescriptor.DATA_ERROR, ExceptionCodeDescriptor.DATA_ERROR_DESC)
+            configuration.getMessageWithKey(ExceptionCodeDescriptor.DATA_ERROR, ExceptionCodeDescriptor.DATA_ERROR_DESC, null)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -194,7 +181,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handle5xxException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getExceptionMessage(ExceptionCodeDescriptor.SERVER_ERR, ExceptionCodeDescriptor.SERVER_ERR_DESC)
+            configuration.getMessageWithKey(ExceptionCodeDescriptor.SERVER_ERR, ExceptionCodeDescriptor.SERVER_ERR_DESC, null)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -209,10 +196,13 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     protected ModelAndView handleSqlException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getMessage(
-                exceptionCodeManager.getCode(ExceptionCodeDescriptor.DATA_ERROR),
-                developmentMode.isDebugMode() ? ex.getMessage() : exceptionCodeManager.getDescription(
-                    ExceptionCodeDescriptor.DATA_ERROR_DESC)
+            configuration.getMessage(
+                ExceptionCodeDescriptor.DATA_ERROR, true,
+                configuration.isDebug() ?
+                    ex.getMessage() :
+                    ExceptionCodeDescriptor.DATA_ERROR_DESC,
+                !configuration.isDebug(),
+                null
             )
         );
 
@@ -222,9 +212,10 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handleServiceException(HttpServletResponse response, ServiceException ex) {
         writeMessage(
             response,
-            getMessage(
-                ex.getCode() == null ? exceptionCodeManager.getCode(ExceptionCodeDescriptor.OPERATION_ERR) : ex.getCode(),
-                ex.getMessage()
+            configuration.getMessageWithKey(
+                ex.getCode() == null ? ExceptionCodeDescriptor.OPERATION_ERR : ex.getCode(),
+                ex.getMessage(),
+                null
             )
         );
 
@@ -234,7 +225,11 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handle4xxException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            getExceptionMessage(ExceptionCodeDescriptor.PARAM_ERROR, ExceptionCodeDescriptor.PARAM_ERROR_DESC)
+            configuration.getMessageWithKey(
+                ExceptionCodeDescriptor.PARAM_ERROR,
+                ExceptionCodeDescriptor.PARAM_ERROR_DESC,
+                null
+            )
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -253,24 +248,12 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         }
     }
 
-    protected Message getExceptionMessage(String code, String type) {
-        return Message.of(
-            exceptionCodeManager.getCode(code),
-            exceptionCodeManager.getDescription(type)
-        );
-    }
-
-    protected Message getMessage(String code, String message) {
-        return Message.of(
-            code,
-            message
-        );
-    }
-
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (getDefaultExceptionResolver() == null) {
-            setDevelopmentMode(DevelopmentMode.RELEASE);
+        Assert.notNull(configuration, "configuration must be specified");
+
+        if (!configuration.isDebug()) {
+            setOrder(Ordered.HIGHEST_PRECEDENCE);
         }
     }
 }

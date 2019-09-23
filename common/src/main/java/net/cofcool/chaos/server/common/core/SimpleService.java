@@ -31,7 +31,7 @@ public abstract class SimpleService<T> implements DataAccess<T> {
 
     private PageProcessor<T> pageProcessor;
 
-    public PageProcessor<T> getPageProcessor() {
+    protected PageProcessor<T> getPageProcessor() {
         return pageProcessor;
     }
 
@@ -39,15 +39,15 @@ public abstract class SimpleService<T> implements DataAccess<T> {
         this.pageProcessor = pageProcessor;
     }
 
-    private ExceptionCodeManager exceptionCodeManager;
+    private ConfigurationSupport configuration;
 
-    public ExceptionCodeManager getExceptionCodeManager() {
-        return exceptionCodeManager;
+    protected ConfigurationSupport getConfiguration() {
+        return configuration;
     }
 
     @Autowired
-    public void setExceptionCodeManager(ExceptionCodeManager exceptionCodeManager) {
-        this.exceptionCodeManager = exceptionCodeManager;
+    public void setConfiguration(ConfigurationSupport configuration) {
+        this.configuration = configuration;
     }
 
     @Override
@@ -55,10 +55,10 @@ public abstract class SimpleService<T> implements DataAccess<T> {
         Page<T> page = Page.checkPage(condition);
 
         Objects.requireNonNull(getPageProcessor());
-        return QueryResult.of(
+        return configuration.getQueryResult(
             getPageProcessor().process(page, queryWithPage(page, entity)),
-            exceptionCodeManager.getCode(ExceptionCodeDescriptor.SERVER_OK),
-            exceptionCodeManager.getDescription(ExceptionCodeDescriptor.SERVER_OK_DESC)
+            ExceptionCodeDescriptor.SERVER_OK,
+            ExceptionCodeDescriptor.SERVER_OK_DESC
         );
     }
 

@@ -21,7 +21,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
+import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
@@ -76,11 +76,11 @@ public class JsonUnAuthEntryPoint extends AbstractAuthenticationConfigure implem
 
 
     public JsonUnAuthEntryPoint(
-        ExceptionCodeManager exceptionCodeManager,
+        ConfigurationSupport configuration,
         MappingJackson2HttpMessageConverter messageConverter,
         String unAuthUrl,
         String unLoginUrl) {
-        super(exceptionCodeManager, messageConverter);
+        super(configuration, messageConverter);
 
         Assert.notNull(unAuthUrl, "unAuthUrl cannot be null");
         Assert.notNull(unLoginUrl, "unLoginUrl cannot be null");

@@ -16,7 +16,7 @@
 
 package net.cofcool.chaos.server.security.spring.authorization;
 
-import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
+import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
@@ -26,23 +26,23 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractAuthenticationConfigure {
 
-    private final ExceptionCodeManager exceptionCodeManager;
+    private final ConfigurationSupport configuration;
 
     private final MappingJackson2HttpMessageConverter messageConverter;
 
-    public AbstractAuthenticationConfigure(ExceptionCodeManager exceptionCodeManager,
+    public AbstractAuthenticationConfigure(ConfigurationSupport configuration,
         MappingJackson2HttpMessageConverter messageConverter) {
-        Assert.notNull(exceptionCodeManager, "exceptionCodeManager cannot be null");
+        Assert.notNull(configuration, "configuration cannot be null");
         Assert.notNull(messageConverter, "messageConverter cannot be null");
-        this.exceptionCodeManager = exceptionCodeManager;
+        this.configuration = configuration;
         this.messageConverter = messageConverter;
     }
 
-    public ExceptionCodeManager getExceptionCodeManager() {
-        return exceptionCodeManager;
+    protected ConfigurationSupport getConfiguration() {
+        return configuration;
     }
 
-    public HttpMessageConverter getMessageConverter() {
+    protected HttpMessageConverter getMessageConverter() {
         return messageConverter;
     }
 }

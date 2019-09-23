@@ -7,7 +7,7 @@
     <groupId>net.cofcool.chaos</groupId>
     <artifactId>chaos-server</artifactId>
     <packaging>pom</packaging>
-    <version>0.4.0</version>
+    <version>0.4.1</version>
     <description>Chaos Web Server</description>
     <url>https://github.com/cofcool/chaos-server</url>
 
@@ -71,6 +71,8 @@
         <lombok.version>1.18.0</lombok.version>
         <mysql.driver.version>5.1.30</mysql.driver.version>
         <jackson-joda-time.version>2.9.5</jackson-joda-time.version>
+
+        <chaos.version>0.4.1</chaos.version>
     </properties>
 
     <dependencies>
