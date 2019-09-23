@@ -133,3 +133,4 @@ chaos.auth.checked-keys=id
 ### 后续计划
 
 - [ ] `data-mybatis`模块集成通用 Mapper
+- [ ] 完善单元测试

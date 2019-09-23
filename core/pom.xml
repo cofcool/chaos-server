@@ -8,7 +8,7 @@
     <parent>
         <groupId>net.cofcool.chaos</groupId>
         <artifactId>chaos-server</artifactId>
-        <version>0.4.1.2019.08.21-SNAPSHOT</version>
+        <version>0.4.1</version>
     </parent>
 
     <dependencies>
