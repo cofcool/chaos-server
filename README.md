@@ -36,15 +36,15 @@
 
 
 ```properties
-# 项目运行模式
-chaos.development.mode=dev
+# 是否调试模式
+chaos.development.debug=false
 # 项目版本
 chaos.development.version=100
 # 是否开启验证码
 chaos.auth.using-captcha=false
 # 定义扫描 Scanned 注解的路径
 chaos.development.annotation-path=net.cofcool.chaos.server.demo
-# shiro授权路径配置
+# "Spring Security" 项目, 该配置为匿名访问路径; "Shiro" 为授权路径配置, 即"filterChainDefinitions"
 chaos.auth.urls=/auth/**\=anon,/error\=anon,/**\=authc
 # 登陆路径
 chaos.auth.login-url=/auth/login
