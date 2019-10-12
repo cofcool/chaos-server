@@ -11,15 +11,11 @@
 
     <artifactId>chaos-server-data-redis</artifactId>
 
-    <properties>
-        <spring-data-redis.version>2.1.6.RELEASE</spring-data-redis.version>
-    </properties>
-
     <dependencies>
         <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-redis</artifactId>
-            <version>${spring-data-redis.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <version>${spring-boot.version}</version>
         </dependency>
     </dependencies>
 
