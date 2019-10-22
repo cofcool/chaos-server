@@ -227,7 +227,7 @@ public class SimpleExceptionCodeDescriptor implements ExceptionCodeDescriptor, I
     public void afterPropertiesSet() throws Exception {
         Map<String, String> customizeMap = customize();
         if (customizeMap != null) {
-            customizeMap.forEach(DEFAULT_EXCEPTION_MESSAGES::put);
+            DEFAULT_EXCEPTION_MESSAGES.putAll(customizeMap);
         }
     }
 }
