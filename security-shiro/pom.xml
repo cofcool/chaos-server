@@ -5,14 +5,14 @@
     <parent>
         <artifactId>chaos-server</artifactId>
         <groupId>net.cofcool.chaos</groupId>
-        <version>0.4.1</version>
+        <version>0.4.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>chaos-server-security-shiro</artifactId>
 
     <properties>
-        <shiro.version>1.4.0</shiro.version>
+        <shiro.version>1.4.1</shiro.version>
     </properties>
 
     <dependencies>

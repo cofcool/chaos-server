@@ -7,7 +7,7 @@
     <groupId>net.cofcool.chaos</groupId>
     <artifactId>chaos-server</artifactId>
     <packaging>pom</packaging>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
     <description>Chaos Web Server</description>
     <url>https://github.com/cofcool/chaos-server</url>
 
@@ -64,15 +64,13 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <spring-boot.version>2.1.4.RELEASE</spring-boot.version>
+        <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
 
         <servlet-api.version>4.0.0</servlet-api.version>
 
-        <lombok.version>1.18.0</lombok.version>
-        <mysql.driver.version>5.1.30</mysql.driver.version>
-        <jackson-joda-time.version>2.9.5</jackson-joda-time.version>
+        <lombok.version>1.18.8</lombok.version>
 
-        <chaos.version>0.4.1</chaos.version>
+        <chaos.version>0.4.2-SNAPSHOT</chaos.version>
     </properties>
 
     <dependencies>
@@ -128,19 +126,6 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql.driver.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-joda</artifactId>
-            <version>${jackson-joda-time.version}</version>
         </dependency>
 
         <dependency>

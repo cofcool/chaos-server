@@ -128,9 +128,4 @@ chaos.auth.checked-keys=id
 `SimpleExceptionCodeDescriptor`为默认配置，包含了常见的描述代码和描述信息，例如操作成功，操作失败等。
 
 `ResourceExceptionCodeDescriptor` 从"messages"文件中读取配置的描述信息。
-
-
-### 后续计划
-
-- [ ] `data-mybatis`模块集成通用 Mapper
-- [ ] 完善单元测试
+ 
