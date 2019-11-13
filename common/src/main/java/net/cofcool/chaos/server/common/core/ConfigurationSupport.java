@@ -16,6 +16,7 @@
 
 package net.cofcool.chaos.server.common.core;
 
+import java.util.Objects;
 import lombok.Builder;
 import net.cofcool.chaos.server.common.core.Result.ResultState;
 import org.springframework.util.Assert;
@@ -34,6 +35,8 @@ import org.springframework.util.Assert;
 @Builder
 public class ConfigurationSupport {
 
+    private static ConfigurationSupport INSTANCE;
+
     /**
      * 异常描述管理
      */
@@ -45,7 +48,7 @@ public class ConfigurationSupport {
     private final boolean isDebug;
 
     /**
-     *  自定义配置项
+     * 自定义配置项
      */
     private final ConfigurationCustomizer customizer;
 
@@ -58,6 +61,8 @@ public class ConfigurationSupport {
         this.exceptionCodeManager = exceptionCodeManager;
         this.isDebug = isDebug;
         this.customizer = customizer;
+
+        INSTANCE = this;
     }
 
     /**
@@ -181,6 +186,17 @@ public class ConfigurationSupport {
      */
     public boolean isDebug() {
         return isDebug;
+    }
+
+    /**
+     * 获取 {@linkplain ConfigurationSupport configuration},
+     * 注意：如果多次调用 {@linkplain ConfigurationSupportBuilder#build() build},
+     * 会覆盖之前创建的实例, 只返回最近一次创建的实例
+     * @return configuration
+     */
+    public static ConfigurationSupport getConfiguration() {
+        Objects.requireNonNull(INSTANCE, "ConfigurationSupport do not configure");
+        return INSTANCE;
     }
 
 }
