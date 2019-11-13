@@ -18,7 +18,7 @@ import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport.DefaultConfigurationCustomizer;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class UtilsTest {
@@ -42,7 +42,7 @@ class UtilsTest {
             .customizer(new DefaultConfigurationCustomizer())
             .build();
 
-        Assert.assertNotNull(ConfigurationSupport.getConfiguration());
+        Assertions.assertNotNull(ConfigurationSupport.getConfiguration());
     }
 
 }
