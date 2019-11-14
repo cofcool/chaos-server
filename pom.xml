@@ -66,8 +66,6 @@
 
         <spring-boot.version>2.2.1.RELEASE</spring-boot.version>
 
-        <junit.version>5.5.2</junit.version>
-
         <servlet-api.version>4.0.0</servlet-api.version>
 
         <lombok.version>1.18.8</lombok.version>

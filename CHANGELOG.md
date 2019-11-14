@@ -41,3 +41,8 @@
 **0.4.1**:
 
 * 新增 `ConfigurationSupport` 配置类, 简化 `ExceptionCodeManager` 等类的配置方式, 可自定义 `Message` 等接口类
+
+**0.4.2**:
+
+* 移除 MySQL 依赖
+* Spring Boot 升级到 v2.2.1.RELEASE
