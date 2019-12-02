@@ -277,7 +277,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
              */
             @Bean
             @ConditionalOnMissingBean
-            public ShiroFilterFactoryBean shiroFilter(UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, PasswordProcessor passwordProcessor, ConfigurationSupport configurationSupport) {
+            public ShiroFilterFactoryBean shiroFilter(AuthService authService, UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, PasswordProcessor passwordProcessor, ConfigurationSupport configurationSupport, MappingJackson2HttpMessageConverter messageConverter) {
                 Map<String, Filter> filterMap = new HashMap<>();
                 filterMap.put(
                     PermissionFilter.FILTER_KEY,
@@ -290,7 +290,10 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                     JsonAuthenticationFilter.FILTER_KEY,
                     new JsonAuthenticationFilter(
                         chaosProperties.getAuth().getLoginUrl(),
-                        chaosProperties.getAuth().getUnLoginUrl()
+                        chaosProperties.getAuth().getUnLoginUrl(),
+                        messageConverter,
+                        authService,
+                        chaosProperties.getAuth().getLoginObjectType()
                     )
                 );
 
