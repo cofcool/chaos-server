@@ -114,7 +114,10 @@ public class JsonAuthenticationFilter extends FormAuthenticationFilter {
                 log.trace("Attempting to access a path which requires authentication.  Forwarding to the " +
                         "Authentication url [" + getLoginUrl() + "]");
             }
-            request.getRequestDispatcher(getUnLoginUrl()).forward(request, response);
+
+            String newUrl = getUnLoginUrl() + "?ex=" + ConfigurationSupport.getConfiguration().getExceptionDescription(ExceptionCodeDescriptor.DENIAL_AUTH_DESC);
+
+            request.getRequestDispatcher(newUrl).forward(request, response);
 
             return false;
         }

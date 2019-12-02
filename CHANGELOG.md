@@ -46,3 +46,4 @@
 
 * 移除 MySQL 依赖
 * Spring Boot 升级到 v2.2.1.RELEASE
+* Shiro 优化登录操作, 可直接通过`Filter`进行登录
