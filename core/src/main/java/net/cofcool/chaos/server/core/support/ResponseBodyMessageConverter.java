@@ -24,6 +24,7 @@ import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.core.Result;
 import net.cofcool.chaos.server.common.core.Result.ResultState;
 import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
@@ -73,6 +74,15 @@ public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConv
         }
 
         super.writeInternal(object, type, outputMessage);
+    }
+
+    @Override
+    public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+        if (Result.class.isAssignableFrom(clazz)) {
+            return true;
+        }
+
+        return super.canWrite(clazz, mediaType);
     }
 
     private Message handleResult(Result result) {
