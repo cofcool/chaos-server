@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.2.1.RELEASE</version>
+        <version>2.2.2.RELEASE</version>
     </parent>
 
     <licenses>
@@ -43,14 +43,14 @@
 
     <profiles>
         <profile>
-            <id>jdk-1.8</id>
+            <id>11</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
-                <jdk>1.8</jdk>
+                <jdk>11</jdk>
             </activation>
             <properties>
-                <maven.compiler.source>1.8</maven.compiler.source>
-                <maven.compiler.target>1.8</maven.compiler.target>
+                <maven.compiler.source>11</maven.compiler.source>
+                <maven.compiler.target>11</maven.compiler.target>
                 <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
             </properties>
         </profile>
@@ -58,13 +58,13 @@
 
     <properties>
         <java-encoding>UTF-8</java-encoding>
-        <jdk.version>1.8</jdk.version>
+        <java.version>11</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <downloadSources>true</downloadSources>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
 
-        <spring-boot.version>2.2.1.RELEASE</spring-boot.version>
+        <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
 
         <servlet-api.version>4.0.0</servlet-api.version>
 
