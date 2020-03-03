@@ -70,7 +70,7 @@ chaos.auth.checked-keys=id
 
 <img src="./docs/auth_login.svg" alt="login"/>
 
-`AuthService`类定义了登录等操作, 应用不需要实现该类, 只需引用该组件即可, `Shiro`模块需要通过调用该类的`login`来实现登录，`Spring Security`的登录由"filter"完成，因此不需要调用该方法。
+`AuthService`类定义了登录等操作, 应用不需要实现该类, 只需引用该组件即可, 登录由"filter"完成，因此不需要主动调用该方法。
 
 `UserAuthorizationService`定义应用操作, 应用需实现该类。
 

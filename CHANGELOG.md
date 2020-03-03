@@ -46,4 +46,7 @@
 
 * 移除 MySQL 依赖
 * Spring Boot 升级到 v2.2.2.RELEASE
+* Shiro 升级到 1.5.1
 * Shiro 优化登录操作, 可直接通过`Filter`进行登录
+* `data-redis` 依赖改为 `spring-boot-starter-data-redis`
+* 优化 `ResponseBodyMessageConverter` 处理 `Result` 时的逻辑
