@@ -20,6 +20,7 @@ import static net.cofcool.chaos.server.auto.config.ChaosAutoConfiguration.PROJEC
 
 import java.util.Map;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
+import net.cofcool.chaos.server.common.util.StringUtils;
 import net.cofcool.chaos.server.core.annotation.ApiVersion;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -253,14 +254,24 @@ public class ChaosProperties {
          * @return 匿名访问路径
          */
         public String springExcludeUrl() {
-            return String.join(
-                ",",
-                getUrls().replace(";", ","),
-                getUnauthUrl(),
-                getExpiredUrl(),
-                getUnLoginUrl(),
-                getLogoutUrl()
-            );
+            if (StringUtils.isNullOrEmpty(urls)) {
+                return String.join(
+                    ",",
+                    getUnauthUrl(),
+                    getExpiredUrl(),
+                    getUnLoginUrl(),
+                    getLogoutUrl()
+                );
+            } else {
+                return String.join(
+                    ",",
+                    getUrls().replace(";", ","),
+                    getUnauthUrl(),
+                    getExpiredUrl(),
+                    getUnLoginUrl(),
+                    getLogoutUrl()
+                );
+            }
         }
 
         /**

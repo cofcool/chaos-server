@@ -23,27 +23,25 @@ import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 /**
- * 授权成功时调用
+ * 退出成功时调用
  *
  * @author CofCool
  */
-public class JsonAuthenticationSuccessHandler extends AbstractAuthenticationConfigure implements AuthenticationSuccessHandler {
+public class JsonLogoutSuccessHandler extends AbstractAuthenticationConfigure implements
+    LogoutSuccessHandler {
 
-
-    public JsonAuthenticationSuccessHandler(
+    public JsonLogoutSuccessHandler(
         ConfigurationSupport configuration,
         MappingJackson2HttpMessageConverter messageConverter) {
         super(configuration, messageConverter);
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
         Authentication authentication) throws IOException, ServletException {
-        writeMessageToResponse(request, response, authentication);
+        writeMessageToResponse(request, response, null);
     }
-
 }

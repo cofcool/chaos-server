@@ -16,9 +16,17 @@
 
 package net.cofcool.chaos.server.security.spring.authorization;
 
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.Assert;
 
 /**
@@ -44,5 +52,20 @@ public abstract class AbstractAuthenticationConfigure {
 
     protected HttpMessageConverter getMessageConverter() {
         return messageConverter;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void writeMessageToResponse(HttpServletRequest request, HttpServletResponse response,
+        Authentication authentication) throws IOException, ServletException {
+        Object principal = authentication == null ? null : authentication.getPrincipal();
+        getMessageConverter().write(
+            getConfiguration().getMessageWithKey(
+                ExceptionCodeDescriptor.SERVER_OK,
+                ExceptionCodeDescriptor.SERVER_OK_DESC,
+                principal
+            ),
+            MediaType.APPLICATION_JSON,
+            new ServletServerHttpResponse(response)
+        );
     }
 }

@@ -54,6 +54,7 @@ import net.cofcool.chaos.server.security.shiro.access.ExceptionAuthenticationStr
 import net.cofcool.chaos.server.security.shiro.access.JsonAuthenticationFilter;
 import net.cofcool.chaos.server.security.shiro.access.PermissionFilter;
 import net.cofcool.chaos.server.security.shiro.authorization.ShiroAuthServiceImpl;
+import net.cofcool.chaos.server.security.spring.authorization.JsonLogoutSuccessHandler;
 import net.cofcool.chaos.server.security.spring.authorization.SpringAuthServiceImpl;
 import net.cofcool.chaos.server.security.spring.authorization.SpringDaoAuthenticationProvider;
 import net.cofcool.chaos.server.security.spring.authorization.SpringUserAuthorizationService;
@@ -450,6 +451,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                         .and()
                         .logout()
                         .logoutUrl(chaosProperties.getAuth().getLogoutUrl())
+                        .logoutSuccessHandler(new JsonLogoutSuccessHandler(configurationSupport, messageConverter))
                         .permitAll()
                         .and()
                         .sessionManagement()
