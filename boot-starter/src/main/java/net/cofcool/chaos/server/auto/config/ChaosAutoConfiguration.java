@@ -52,6 +52,7 @@ import net.cofcool.chaos.server.security.shiro.access.AccountCredentialsMatcher;
 import net.cofcool.chaos.server.security.shiro.access.AuthRealm;
 import net.cofcool.chaos.server.security.shiro.access.ExceptionAuthenticationStrategy;
 import net.cofcool.chaos.server.security.shiro.access.JsonAuthenticationFilter;
+import net.cofcool.chaos.server.security.shiro.access.JsonLogoutFilter;
 import net.cofcool.chaos.server.security.shiro.access.PermissionFilter;
 import net.cofcool.chaos.server.security.shiro.authorization.ShiroAuthServiceImpl;
 import net.cofcool.chaos.server.security.spring.authorization.JsonLogoutSuccessHandler;
@@ -286,6 +287,10 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                         userAuthorizationService,
                         chaosProperties.getAuth().getUnauthUrl()
                     )
+                );
+                filterMap.put(
+                    JsonLogoutFilter.FILTER_KEY,
+                    new JsonLogoutFilter(messageConverter)
                 );
                 filterMap.put(
                     JsonAuthenticationFilter.FILTER_KEY,

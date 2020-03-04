@@ -26,6 +26,7 @@ import org.apache.shiro.web.filter.AccessControlFilter;
  *
  * @author CofCool
  */
+@SuppressWarnings({"rawtypes"})
 public class PermissionFilter extends AccessControlFilter {
 
     public static final String FILTER_KEY = "check";
