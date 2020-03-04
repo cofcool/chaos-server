@@ -29,6 +29,7 @@ import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.security.AuthService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
+import org.apache.shiro.web.filter.mgt.DefaultFilter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -39,10 +40,11 @@ import org.springframework.http.server.ServletServerHttpResponse;
  *
  * @author CofCool
  */
+@SuppressWarnings({"rawtypes"})
 @Slf4j
 public class JsonAuthenticationFilter extends FormAuthenticationFilter {
 
-    public static final String FILTER_KEY = "authc";
+    public static final String FILTER_KEY = DefaultFilter.authc.name();
 
     private String UnLoginUrl;
 
