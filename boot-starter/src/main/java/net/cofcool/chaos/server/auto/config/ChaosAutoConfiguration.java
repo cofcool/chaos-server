@@ -387,6 +387,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
         @Configuration
         @ConditionalOnClass(DefaultAuthenticationEventPublisher.class)
         @ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
+        @SuppressWarnings("rawtypes")
         class SpringSecurityConfig {
 
             private AuthenticationProvider authenticationProvider;
@@ -408,8 +409,12 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
             @Autowired
             public void setUserAuthorizationService(
-                SpringUserAuthorizationService userAuthorizationService) {
-                this.userAuthorizationService = userAuthorizationService;
+                UserAuthorizationService userAuthorizationService) {
+                if (userAuthorizationService instanceof SpringUserAuthorizationService) {
+                    this.userAuthorizationService = (SpringUserAuthorizationService) userAuthorizationService;
+                } else {
+                    this.userAuthorizationService = SpringUserAuthorizationService.of(userAuthorizationService);
+                }
             }
 
             @Configuration
