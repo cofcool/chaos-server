@@ -42,7 +42,7 @@ public class LoggingInterceptor extends AbstractScannedMethodInterceptor {
     protected StringBuilder appendAfterLog(StringBuilder sb, Object returnValue) {
         sb
             .append(";result=[")
-            .append(returnValue.toString())
+            .append(returnValue)
             .append("]");
 
         return sb;
