@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.security.AbstractLogin.DefaultLogin;
+import net.cofcool.chaos.server.common.security.exception.CaptchaErrorException;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -91,7 +92,12 @@ public class JsonAuthenticationFilter extends AbstractAuthenticationProcessingFi
         }
 
         AbstractLogin login = (AbstractLogin) loginUser;
-        login.parseDevice(request);
+
+        try {
+            login.parseDevice(request);
+        } catch (CaptchaErrorException e) {
+            throw new AuthenticationServiceException("captcha error", e);
+        }
 
         JsonAuthenticationToken authRequest = new JsonAuthenticationToken(login);
 

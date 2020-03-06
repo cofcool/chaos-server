@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.Message;
+import net.cofcool.chaos.server.common.security.exception.CaptchaErrorException;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpResponse;
@@ -54,8 +55,11 @@ public class JsonAuthenticationFailureHandler extends AbstractAuthenticationConf
             message = getMessage(ExceptionCodeDescriptor.NO_LOGIN, ExceptionCodeDescriptor.NO_LOGIN_DESC);
         } else if (exception instanceof BadCredentialsException) {
             message = getMessage(ExceptionCodeDescriptor.USER_PASSWORD_ERROR, ExceptionCodeDescriptor.USER_PASSWORD_ERROR_DESC);
+        } else if (exception.getCause() instanceof CaptchaErrorException) {
+            CaptchaErrorException cause = (CaptchaErrorException) exception.getCause();
+            message = getConfiguration().getMessage(cause.getCode(), cause.getMessage(), null);
         } else {
-            message = getMessage(ExceptionCodeDescriptor.DENIAL_AUTH, ExceptionCodeDescriptor.DENIAL_AUTH_DESC);
+            message = getMessage(ExceptionCodeDescriptor.AUTH_ERROR, exception.getMessage());
         }
 
         getMessageConverter().write(

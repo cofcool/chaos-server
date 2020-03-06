@@ -350,7 +350,6 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                 AuthRealm realm = new AuthRealm();
                 realm.setCredentialsMatcher(matcher);
                 realm.setUserAuthorizationService(userAuthorizationService);
-                realm.setUsingCaptcha(auth.getUsingCaptcha());
                 realm.setConfiguration(configurationSupport);
 
                 return realm;

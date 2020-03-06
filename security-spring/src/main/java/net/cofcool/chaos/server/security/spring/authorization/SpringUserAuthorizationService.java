@@ -124,11 +124,6 @@ public interface SpringUserAuthorizationService<T extends Auth, ID extends Seria
         }
 
         @Override
-        public boolean checkCaptcha(AbstractLogin loginUser) {
-            return delegate.checkCaptcha(loginUser);
-        }
-
-        @Override
         public void reportAuthenticationExceptionInfo(Object authenticationInfo,
             Throwable authenticationException) {
             delegate.reportAuthenticationExceptionInfo(authenticationInfo, authenticationException);

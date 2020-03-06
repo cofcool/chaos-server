@@ -39,13 +39,6 @@ public interface Device extends Serializable {
     String desc();
 
     /**
-     * 是否需要安全检查
-     */
-    default Boolean shouldValidate() {
-        return Boolean.FALSE;
-    }
-
-    /**
      * 是否包含
      */
     default boolean contained(@Nonnull String... identifiers) {

@@ -18,6 +18,7 @@ package net.cofcool.chaos.server.common.security;
 
 import java.io.Serializable;
 import javax.servlet.http.HttpServletRequest;
+import net.cofcool.chaos.server.common.security.exception.CaptchaErrorException;
 
 /**
  * 登陆数据
@@ -56,6 +57,7 @@ public abstract class AbstractLogin implements Serializable {
      * @param servletRequest 请求
      */
     public void parseDevice(HttpServletRequest servletRequest) {
+        checkCaptcha(servletRequest);
         setDevice(checkRequestAgent(servletRequest));
     }
 
@@ -65,6 +67,14 @@ public abstract class AbstractLogin implements Serializable {
      * @return 设备数据
      */
     protected abstract Device checkRequestAgent(HttpServletRequest servletRequest);
+
+    /**
+     * 检查验证码
+     * @param servletRequest 请求
+     * @throws CaptchaErrorException 验证不通过时抛出该异常
+     */
+    protected void checkCaptcha(HttpServletRequest servletRequest) throws CaptchaErrorException {
+    }
 
     public Device getDevice() {
         return device;

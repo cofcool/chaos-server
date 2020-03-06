@@ -45,15 +45,6 @@ public interface UserAuthorizationService<T extends Auth, ID extends Serializabl
     Message<Boolean> checkUser(User<T, ID> currentUser);
 
     /**
-     * 检查验证码
-     * @param loginUser 请求数据
-     * @return 是否通过验证
-     */
-    default boolean checkCaptcha(AbstractLogin loginUser) {
-        return true;
-    }
-
-    /**
      * 配置登陆时的用户数据
      * @param currentUser 当前用户
      */

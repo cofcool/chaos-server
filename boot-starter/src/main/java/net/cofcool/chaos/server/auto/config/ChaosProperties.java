@@ -82,11 +82,6 @@ public class ChaosProperties {
         private String checkedKeys = "";
 
         /**
-         * 是否开启验证码
-         */
-        private Boolean usingCaptcha = false;
-
-        /**
          * 默认用户的用户名
          */
         private String defaultUsername;
@@ -175,14 +170,6 @@ public class ChaosProperties {
 
         public void setCheckedKeys(String checkedKeys) {
             this.checkedKeys = checkedKeys;
-        }
-
-        public Boolean getUsingCaptcha() {
-            return usingCaptcha;
-        }
-
-        public void setUsingCaptcha(Boolean usingCaptcha) {
-            this.usingCaptcha = usingCaptcha;
         }
 
         public String getUrls() {
