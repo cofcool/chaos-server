@@ -52,7 +52,7 @@ public class JsonAuthenticationFailureHandler extends AbstractAuthenticationConf
         AuthenticationException exception) throws IOException, ServletException {
         Message message;
         if (exception instanceof UsernameNotFoundException) {
-            message = getMessage(ExceptionCodeDescriptor.NO_LOGIN, ExceptionCodeDescriptor.NO_LOGIN_DESC);
+            message = getMessage(ExceptionCodeDescriptor.USER_NOT_EXITS, ExceptionCodeDescriptor.USER_NOT_EXITS_DESC);
         } else if (exception instanceof BadCredentialsException) {
             message = getMessage(ExceptionCodeDescriptor.USER_PASSWORD_ERROR, ExceptionCodeDescriptor.USER_PASSWORD_ERROR_DESC);
         } else if (exception.getCause() instanceof CaptchaErrorException) {
