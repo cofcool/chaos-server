@@ -50,3 +50,4 @@
 * Shiro 优化登录操作, 可直接通过`Filter`进行登录
 * `data-redis` 依赖改为 `spring-boot-starter-data-redis`
 * 优化 `ResponseBodyMessageConverter` 处理 `Result` 时的逻辑
+* 移除旧版验证码验证方式，改为由 `AbstractLogin` 处理
