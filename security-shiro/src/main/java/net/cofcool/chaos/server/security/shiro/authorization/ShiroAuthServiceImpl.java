@@ -19,6 +19,7 @@ package net.cofcool.chaos.server.security.shiro.authorization;
 import java.io.Serializable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.Message;
@@ -29,6 +30,7 @@ import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
 import net.cofcool.chaos.server.common.security.exception.AuthorizationException;
+import net.cofcool.chaos.server.common.security.exception.CaptchaErrorException;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -43,6 +45,7 @@ import org.springframework.util.Assert;
  *
  * @author CofCool
  */
+@Slf4j
 public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> implements
     AuthService<T, ID>, InitializingBean {
 
@@ -69,8 +72,19 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
     @Override
     @SuppressWarnings("unchecked")
     public Message<User<T, ID>> login(HttpServletRequest request, HttpServletResponse response, AbstractLogin loginUser) {
-        loginUser.parseDevice(request);
-        CaptchaUsernamePasswordToken token = new CaptchaUsernamePasswordToken(loginUser);
+        try {
+            loginUser.parseDevice(request);
+        } catch (CaptchaErrorException e) {
+            log.trace("captcha error", e);
+            reportException(loginUser, e);
+            return configuration
+                .getMessage(
+                    e.getCode(),
+                    e.getMessage(),
+                    null
+                );
+        }
+        LoginUsernamePasswordToken token = new LoginUsernamePasswordToken(loginUser);
 
         Subject user = SecurityUtils.getSubject();
 

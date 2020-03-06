@@ -26,13 +26,13 @@ import org.apache.shiro.util.Assert;
  *
  * @author CofCool
  */
-public class CaptchaUsernamePasswordToken extends UsernamePasswordToken {
+public class LoginUsernamePasswordToken extends UsernamePasswordToken {
 
     private static final long serialVersionUID = -4991467222582687202L;
 
     private final AbstractLogin login;
 
-    public CaptchaUsernamePasswordToken(@Nonnull AbstractLogin login) {
+    public LoginUsernamePasswordToken(@Nonnull AbstractLogin login) {
         super(login.getUsername(), login.getPassword());
         Assert.notNull(login, "login - this argument is required; it must not be null");
         Assert.notNull(login.getDevice(), "login.getDevice() - this argument is required; it must not be nul");

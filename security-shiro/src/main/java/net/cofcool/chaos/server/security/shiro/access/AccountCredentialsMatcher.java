@@ -18,13 +18,13 @@ package net.cofcool.chaos.server.security.shiro.access;
 
 import net.cofcool.chaos.server.common.security.PasswordProcessor;
 import net.cofcool.chaos.server.common.security.User;
-import net.cofcool.chaos.server.security.shiro.authorization.CaptchaUsernamePasswordToken;
+import net.cofcool.chaos.server.security.shiro.authorization.LoginUsernamePasswordToken;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
 
 /**
- * 密码验证, 配合 {@link CaptchaUsernamePasswordToken}
+ * 密码验证, 配合 {@link LoginUsernamePasswordToken}
  *
  * @author CofCool
  */
@@ -43,11 +43,11 @@ public class AccountCredentialsMatcher implements CredentialsMatcher {
 
     @Override
     public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) {
-        if (!(token instanceof CaptchaUsernamePasswordToken)) {
+        if (!(token instanceof LoginUsernamePasswordToken)) {
             return false;
         }
 
-        CaptchaUsernamePasswordToken userToken = (CaptchaUsernamePasswordToken) token;
+        LoginUsernamePasswordToken userToken = (LoginUsernamePasswordToken) token;
         User user = (User) info.getPrincipals().getPrimaryPrincipal();
         return passwordProcessor.doMatch(new String(userToken.getPassword()), user.getPassword());
     }
