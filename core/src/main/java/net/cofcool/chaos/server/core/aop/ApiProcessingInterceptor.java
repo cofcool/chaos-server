@@ -160,7 +160,7 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
     }
 
     @SuppressWarnings("unchecked")
-    protected void checkRole(int[] roles, User user) {
+    protected void checkRole(String[] roles, User user) {
         BeanUtils.applyNonnull(user, data -> {
             Collection<UserRole> userRoles = data.getRoles();
             userRoles.forEach(userRole -> {

@@ -55,6 +55,7 @@ public abstract class AbstractLogin implements Serializable {
     /**
      * 解析请求设备
      * @param servletRequest 请求
+     * @throws CaptchaErrorException 验证码验证不通过时抛出该异常, 查看 {@link #checkCaptcha(HttpServletRequest)}
      */
     public void parseDevice(HttpServletRequest servletRequest) {
         checkCaptcha(servletRequest);
@@ -73,7 +74,7 @@ public abstract class AbstractLogin implements Serializable {
      * @param servletRequest 请求
      * @throws CaptchaErrorException 验证不通过时抛出该异常
      */
-    protected void checkCaptcha(HttpServletRequest servletRequest) throws CaptchaErrorException {
+    protected void checkCaptcha(HttpServletRequest servletRequest) {
     }
 
     public Device getDevice() {
