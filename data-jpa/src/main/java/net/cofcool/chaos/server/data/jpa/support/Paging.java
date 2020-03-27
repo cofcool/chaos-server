@@ -75,17 +75,17 @@ public class Paging<T> extends SimplePage<T> {
     }
 
     /**
-     * Page中的元素为List时, 本方法可合并List的元素到 primaryBean。
-     * 当primaryBean中的getter方法使用@Transient标注时, 即触发合并操作。<br>
+     * 当 <code>Page</code> 为联表分页结果时, 本方法可合并分页数据中的多个元素到 <code>primaryBean</code>。
+     * 被合并的元素在 <code>primaryBean</code>中必须有相应的 <code>getter</code> 方法, 并且使用 {@link Transient} 标注, 才可触发合并操作。<br>
      *
-     * 注意：primaryBean需有getter和setter方法
+     * 注意：<code>primaryBean</code> 需有 <code>getter</code> 和 <code>setter</code> 方法
      *
      * @param page page
      * @param primaryBean 主类
      * @param <T> 元素类型
      * @return page
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T> Page<T> of(org.springframework.data.domain.Page<List<T>> page, Class<T> primaryBean) {
         Paging mPage = createPaging(page);
         List mPageList = mPage.getContent();
