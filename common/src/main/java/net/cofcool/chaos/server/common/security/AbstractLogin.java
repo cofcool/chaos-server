@@ -101,6 +101,15 @@ public abstract class AbstractLogin implements Serializable {
         this.password = password;
     }
 
+    @Override
+    public String toString() {
+        return "AbstractLogin{" +
+            "username='" + username + '\'' +
+            ", password='" + password + '\'' +
+            ", device=" + device +
+            '}';
+    }
+
     /**
      * 默认登陆实现
      */

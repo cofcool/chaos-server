@@ -61,15 +61,4 @@ public interface UserAuthorizationService<T extends Auth, ID extends Serializabl
      */
     void checkPermission(ServletRequest servletRequest, ServletResponse servletResponse, Object authenticationInfo, String requestPath);
 
-    /**
-     * 报告授权验证异常信息
-     * <br>
-     * <b>TODO</b>: 使用事件监听方式替代, 参考<code>org.springframework.security.authentication.event.AuthenticationSuccessEvent</code>等
-     * @param authenticationInfo 授权信息
-     * @param authenticationException 异常信息
-     */
-    default void reportAuthenticationExceptionInfo(Object authenticationInfo, Throwable authenticationException) {
-
-    }
-
 }

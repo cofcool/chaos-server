@@ -38,6 +38,8 @@ import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 
 /**
@@ -47,7 +49,9 @@ import org.springframework.util.Assert;
  */
 @Slf4j
 public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> implements
-    AuthService<T, ID>, InitializingBean {
+    AuthService<T, ID>, InitializingBean, ApplicationEventPublisherAware {
+
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private UserAuthorizationService<T, ID> userAuthorizationService;
 
@@ -76,7 +80,7 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
             loginUser.parseDevice(request);
         } catch (CaptchaErrorException e) {
             log.trace("captcha error", e);
-            reportException(loginUser, e);
+            publishEvent(loginUser, e);
             return configuration
                 .getMessage(
                     e.getCode(),
@@ -113,20 +117,22 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
 
                 isOk = true;
                 storageUser(currentUser);
+
+                publishEvent(currentUser, null);
                 return returnUserInfo(currentUser);
             }
 
             return getExceptionMessage(ExceptionCodeDescriptor.AUTH_ERROR, ExceptionCodeDescriptor.AUTH_ERROR_DESC);
         } catch (UnknownAccountException e) {
-            reportException(loginUser, e);
+            publishEvent(loginUser, e);
 
             return getExceptionMessage(ExceptionCodeDescriptor.USER_NOT_EXITS, ExceptionCodeDescriptor.USER_NOT_EXITS_DESC);
         } catch (IncorrectCredentialsException e) {
-            reportException(loginUser, e);
+            publishEvent(loginUser, e);
 
             return getExceptionMessage(ExceptionCodeDescriptor.USER_PASSWORD_ERROR, ExceptionCodeDescriptor.USER_PASSWORD_ERROR_DESC);
         } catch (AuthenticationException e) {
-            reportException(loginUser, e);
+            publishEvent(loginUser, e);
 
             Throwable ex = e.getCause();
             if (ex instanceof AuthorizationException) {
@@ -141,7 +147,7 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
                 );
             }
         } catch (Exception e) {
-            reportException(loginUser, e);
+            publishEvent(loginUser, e);
             return getExceptionMessage(ExceptionCodeDescriptor.AUTH_ERROR, ExceptionCodeDescriptor.AUTH_ERROR_DESC);
         } finally {
             if (!isOk) {
@@ -158,8 +164,8 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
         );
     }
 
-    private void reportException(AbstractLogin loginUser, Exception e) {
-        getUserAuthorizationService().reportAuthenticationExceptionInfo(loginUser ,e);
+    private void publishEvent(Object loginUser, Exception e) {
+        applicationEventPublisher.publishEvent(new ShiroApplicationEvent(loginUser, e));
     }
 
     @Override
@@ -205,5 +211,10 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
     @Override
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(getUserAuthorizationService(), "userAuthorizationService - this argument is required; it must not be null");
+    }
+
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 }

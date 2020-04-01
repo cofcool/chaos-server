@@ -62,18 +62,12 @@ public interface SpringUserAuthorizationService<T extends Auth, ID extends Seria
         User<T, ID> user = queryUser(login);
 
         if (user == null) {
-            UsernameNotFoundException e = new UsernameNotFoundException(login.getUsername());
-            reportAuthenticationExceptionInfo(login, e);
-
-            throw e;
+            throw new UsernameNotFoundException(login.getUsername());
         }
 
         Message<Boolean> userState = checkUser(user);
         if (!userState.data()) {
-            LoginException exception = new LoginException(userState.message(), userState.code());
-            reportAuthenticationExceptionInfo(login, exception);
-
-            throw exception;
+            throw new LoginException(userState.message(), userState.code());
         }
 
         return UserDetail.of(user);
@@ -121,12 +115,6 @@ public interface SpringUserAuthorizationService<T extends Auth, ID extends Seria
             Object authenticationInfo, String requestPath) {
             delegate
                 .checkPermission(servletRequest, servletResponse, authenticationInfo, requestPath);
-        }
-
-        @Override
-        public void reportAuthenticationExceptionInfo(Object authenticationInfo,
-            Throwable authenticationException) {
-            delegate.reportAuthenticationExceptionInfo(authenticationInfo, authenticationException);
         }
 
         @Override
