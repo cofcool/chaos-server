@@ -52,3 +52,4 @@
 * 优化 `ResponseBodyMessageConverter` 处理 `Result` 时的逻辑
 * 移除旧版验证码验证方式，改为由 `AbstractLogin` 处理
 * `UserRole` 删除 `roleId`
+* 移除 `UserAuthorizationService.reportAuthenticationExceptionInfo`, 改为使用事件机制
