@@ -25,7 +25,6 @@ import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.security.Auth;
-import net.cofcool.chaos.server.common.security.AuthConstant;
 import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
@@ -50,6 +49,8 @@ import org.springframework.util.Assert;
 @Slf4j
 public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> implements
     AuthService<T, ID>, InitializingBean, ApplicationEventPublisherAware {
+
+    private static final String CACHED_USER_KEY = "CACHED_USER_KEY";
 
     private ApplicationEventPublisher applicationEventPublisher;
 
@@ -182,14 +183,14 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
      * @param currentUser 用户信息
      */
     protected void storageUser(User currentUser) {
-        SecurityUtils.getSubject().getSession().setAttribute(AuthConstant.LOGINED_USER_KEY, currentUser);
+        SecurityUtils.getSubject().getSession().setAttribute(CACHED_USER_KEY, currentUser);
     }
 
     @SuppressWarnings("unchecked")
     private User<T, ID> getCachedUser() {
         Session session = SecurityUtils.getSubject().getSession(false);
         if (session != null) {
-            return (User<T, ID>) session.getAttribute(AuthConstant.LOGINED_USER_KEY);
+            return (User<T, ID>) session.getAttribute(CACHED_USER_KEY);
         }
 
         return null;
