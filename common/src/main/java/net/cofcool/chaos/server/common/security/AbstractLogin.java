@@ -19,6 +19,7 @@ package net.cofcool.chaos.server.common.security;
 import java.io.Serializable;
 import javax.servlet.http.HttpServletRequest;
 import net.cofcool.chaos.server.common.security.exception.CaptchaErrorException;
+import org.springframework.http.HttpHeaders;
 
 /**
  * 登陆数据
@@ -127,7 +128,8 @@ public abstract class AbstractLogin implements Serializable {
 
         @Override
         protected Device checkRequestAgent(HttpServletRequest servletRequest) {
-            return SimpleDevice.BROWSER;
+            String agent = servletRequest.getHeader(HttpHeaders.USER_AGENT);
+            return DefaultDevice.fromUserAgent(agent);
         }
 
     }
