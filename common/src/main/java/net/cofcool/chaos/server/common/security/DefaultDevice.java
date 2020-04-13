@@ -19,7 +19,7 @@ package net.cofcool.chaos.server.common.security;
 import javax.annotation.Nonnull;
 
 /**
- * Device 默认实现
+ * Device 默认实现, 使用枚举保证为不可变对象
  *
  * @author CofCool
  */
@@ -43,7 +43,7 @@ public enum DefaultDevice implements Device {
     /**
      * 未知
      */
-    UNKNOWN("unknown", "unknown");
+    UNKNOWN("Unknown", "unknown device");
 
     DefaultDevice(String identifier, String desc) {
         this.identifier = identifier;

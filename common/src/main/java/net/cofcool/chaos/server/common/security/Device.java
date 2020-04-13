@@ -39,9 +39,15 @@ public interface Device extends Serializable {
     String desc();
 
     /**
+     * 详细的设备信息, 方便日志处理
+     */
+    String toString();
+
+    /**
      * 是否包含
      */
     default boolean contained(@Nonnull String... identifiers) {
+        // 是否合理 ?
         boolean flag = identifiers.length == 0 || ALLOW_ALL.equals(identifiers[0]);
 
         int i = 0;

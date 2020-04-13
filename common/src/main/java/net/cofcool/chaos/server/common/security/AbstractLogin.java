@@ -22,7 +22,7 @@ import net.cofcool.chaos.server.common.security.exception.CaptchaErrorException;
 import org.springframework.http.HttpHeaders;
 
 /**
- * 登陆数据
+ * 登陆数据, 账号密码等信息
  *
  * @author CofCool
  */

@@ -28,6 +28,11 @@ public abstract class AbstractDevice implements Device {
 
     private final String desc;
 
+    /**
+     * 创建 {@code Device}, 建议子类声明为 {@literal protect} 或 {@literal private}, 该类为不可变对象
+     * @param identifier 设备惟一标识
+     * @param desc 描述
+     */
     protected AbstractDevice(String identifier, String desc) {
         this.identifier = identifier;
         this.desc = desc;
@@ -43,7 +48,15 @@ public abstract class AbstractDevice implements Device {
         return desc;
     }
 
-    // for json serializer
+    @Override
+    public String toString() {
+        return "AbstractDevice{" +
+            "identifier='" + identifier + '\'' +
+            ", desc='" + desc + '\'' +
+            '}';
+    }
+
+    // just for json serializer
     public String getDesc() {
         return desc;
     }
