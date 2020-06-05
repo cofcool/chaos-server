@@ -27,7 +27,7 @@ public class SimpleQueryResult<T> implements QueryResult<T, Page<T>> {
 
     private static final long serialVersionUID = 3886864123428767070L;
 
-    private Message<Page<T>> message;
+    private final Message<Page<T>> message;
 
     /**
      * 查询结果封装
