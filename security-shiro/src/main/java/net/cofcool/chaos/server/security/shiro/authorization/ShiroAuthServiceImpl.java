@@ -172,6 +172,7 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
     @Override
     public void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         SecurityUtils.getSubject().logout();
+        publishEvent("logout successful", null);
     }
 
     private void setupBaseDataOfUser(User currentUser, AbstractLogin loginUser) {
