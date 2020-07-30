@@ -253,7 +253,8 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         Assert.notNull(configuration, "configuration must be specified");
 
         if (!configuration.isDebug()) {
-            setOrder(Ordered.HIGHEST_PRECEDENCE);
+            // 允许自定义更高优先级的异常处理器
+            setOrder(Ordered.HIGHEST_PRECEDENCE + 100);
         }
     }
 }
