@@ -19,19 +19,17 @@ package net.cofcool.chaos.server.auto.config;
 import static org.springframework.util.StringUtils.delimitedListToStringArray;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.pagehelper.PageInterceptor;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import javax.servlet.Filter;
-import javax.sql.DataSource;
+import net.cofcool.chaos.server.common.core.ConfigurationCustomizer;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport.DefaultConfigurationCustomizer;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
+import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.PasswordProcessor;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
@@ -61,7 +59,6 @@ import net.cofcool.chaos.server.security.spring.authorization.SpringDaoAuthentic
 import net.cofcool.chaos.server.security.spring.authorization.SpringUserAuthorizationService;
 import net.cofcool.chaos.server.security.spring.authorization.UrlBased;
 import net.cofcool.chaos.server.security.spring.config.JsonLoginConfigure;
-import org.apache.ibatis.plugin.Interceptor;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.Authenticator;
 import org.apache.shiro.authc.pam.ModularRealmAuthenticator;
@@ -74,13 +71,13 @@ import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.aop.Advisor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -90,7 +87,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.PermissionEvaluator;
@@ -195,12 +191,14 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
         @Bean
         @ConditionalOnMissingBean
-        public ConfigurationSupport configurationSupport(ExceptionCodeManager exceptionCodeManager) {
+        public ConfigurationSupport configurationSupport(
+            ExceptionCodeManager exceptionCodeManager,
+            @Autowired(required = false) ConfigurationCustomizer configurationCustomizer) {
             return ConfigurationSupport
                 .builder()
                 .exceptionCodeManager(exceptionCodeManager)
                 .isDebug(chaosProperties.getDevelopment().getDebug())
-                .customizer(new DefaultConfigurationCustomizer())
+                .customizer(configurationCustomizer == null ? new DefaultConfigurationCustomizer() : configurationCustomizer)
                 .build();
         }
 
