@@ -22,11 +22,11 @@ import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
+import net.cofcool.chaos.server.common.util.WebUtils;
 import org.apache.shiro.session.SessionException;
 import org.apache.shiro.web.filter.authc.LogoutFilter;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.server.ServletServerHttpResponse;
 
 /**
  * 覆盖默认的退出登录逻辑, 不会跳转到登录路径, 直接返回退出成功信息
@@ -38,10 +38,9 @@ public class JsonLogoutFilter extends LogoutFilter {
 
     public static final String FILTER_KEY = "j-logout";
 
-    private final MappingJackson2HttpMessageConverter messageConverter;
+    private final HttpMessageConverters messageConverter;
 
-    public JsonLogoutFilter(
-        MappingJackson2HttpMessageConverter messageConverter) {
+    public JsonLogoutFilter(HttpMessageConverters messageConverter) {
         this.messageConverter = messageConverter;
     }
 
@@ -53,7 +52,9 @@ public class JsonLogoutFilter extends LogoutFilter {
             log.debug("Encountered session exception during logout.  This can generally safely be ignored.", ise);
         }
 
-        messageConverter.write(
+        WebUtils.writeObjToResponse(
+            messageConverter,
+            (HttpServletResponse) response,
             ConfigurationSupport
                 .getConfiguration()
                 .getMessageWithKey(
@@ -62,8 +63,7 @@ public class JsonLogoutFilter extends LogoutFilter {
                     null
                 )
             ,
-            MediaType.APPLICATION_JSON,
-            new ServletServerHttpResponse((HttpServletResponse) response)
+            MediaType.APPLICATION_JSON
         );
 
         return false;

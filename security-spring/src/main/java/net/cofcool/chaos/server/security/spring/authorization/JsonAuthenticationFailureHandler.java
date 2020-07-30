@@ -24,9 +24,7 @@ import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.exception.CaptchaErrorException;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -42,7 +40,7 @@ public class JsonAuthenticationFailureHandler extends AbstractAuthenticationConf
 
     public JsonAuthenticationFailureHandler(
         ConfigurationSupport configuration,
-        MappingJackson2HttpMessageConverter messageConverter) {
+        HttpMessageConverters messageConverter) {
         super(configuration, messageConverter);
     }
 
@@ -62,11 +60,7 @@ public class JsonAuthenticationFailureHandler extends AbstractAuthenticationConf
             message = getMessage(ExceptionCodeDescriptor.AUTH_ERROR, exception.getMessage());
         }
 
-        getMessageConverter().write(
-            message,
-            MediaType.APPLICATION_JSON,
-            new ServletServerHttpResponse(response)
-        );
+        writeToResponse(request, response, message);
     }
 
     private Message getMessage(String codeKey, String descKey) {

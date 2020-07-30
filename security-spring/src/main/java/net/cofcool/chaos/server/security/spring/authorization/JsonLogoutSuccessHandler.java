@@ -21,7 +21,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
@@ -35,7 +35,7 @@ public class JsonLogoutSuccessHandler extends AbstractAuthenticationConfigure im
 
     public JsonLogoutSuccessHandler(
         ConfigurationSupport configuration,
-        MappingJackson2HttpMessageConverter messageConverter) {
+        HttpMessageConverters messageConverter) {
         super(configuration, messageConverter);
     }
 

@@ -84,6 +84,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
@@ -208,10 +209,10 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
         @Bean
         @ConditionalOnMissingBean
         public GlobalHandlerExceptionResolver exceptionResolver(
-            ConfigurationSupport configurationSupport, ObjectMapper objectMapper) {
+            ConfigurationSupport configurationSupport, HttpMessageConverters httpMessageConverters) {
             GlobalHandlerExceptionResolver ex = new GlobalHandlerExceptionResolver();
             ex.setConfiguration(configurationSupport);
-            ex.setJacksonObjectMapper(objectMapper);
+            ex.setHttpMessageConverters(httpMessageConverters);
 
             return ex;
         }
@@ -256,6 +257,10 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
             return new SessionLocaleResolver();
         }
 
+        /**
+         * 当应用主动创建 {@link HttpMessageConverters} 时, 该 {@code bean} 不会自动注入到 {@code HttpMessageConverters} 中, 需手动注入, 如 {@code new HttpMessageConverters(customConverter, responseBodyMessageConverter)}
+         * @return MappingJackson2HttpMessageConverter
+         */
         @Bean
         @ConditionalOnMissingBean
         public MappingJackson2HttpMessageConverter responseBodyMessageConverter(ObjectMapper objectMapper, ConfigurationSupport configurationSupport) {
@@ -280,7 +285,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
              */
             @Bean
             @ConditionalOnMissingBean
-            public ShiroFilterFactoryBean shiroFilter(AuthService authService, UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, PasswordProcessor passwordProcessor, ConfigurationSupport configurationSupport, MappingJackson2HttpMessageConverter messageConverter) {
+            public ShiroFilterFactoryBean shiroFilter(AuthService authService, UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, PasswordProcessor passwordProcessor, ConfigurationSupport configurationSupport, HttpMessageConverters httpMessageConverters) {
                 Map<String, Filter> filterMap = new HashMap<>();
                 filterMap.put(
                     PermissionFilter.FILTER_KEY,
@@ -291,14 +296,14 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                 );
                 filterMap.put(
                     JsonLogoutFilter.FILTER_KEY,
-                    new JsonLogoutFilter(messageConverter)
+                    new JsonLogoutFilter(httpMessageConverters)
                 );
                 filterMap.put(
                     JsonAuthenticationFilter.FILTER_KEY,
                     new JsonAuthenticationFilter(
                         chaosProperties.getAuth().getLoginUrl(),
                         chaosProperties.getAuth().getUnLoginUrl(),
-                        messageConverter,
+                        httpMessageConverters,
                         authService,
                         chaosProperties.getAuth().getLoginObjectType()
                     )
@@ -392,13 +397,13 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
             private AuthenticationProvider authenticationProvider;
 
-            private MappingJackson2HttpMessageConverter messageConverter;
+            private HttpMessageConverters messageConverter;
             private ConfigurationSupport configurationSupport;
 
             private SpringUserAuthorizationService userAuthorizationService;
 
             @Autowired
-            public void setMessageConverter(MappingJackson2HttpMessageConverter messageConverter) {
+            public void setMessageConverter(HttpMessageConverters messageConverter) {
                 this.messageConverter = messageConverter;
             }
 

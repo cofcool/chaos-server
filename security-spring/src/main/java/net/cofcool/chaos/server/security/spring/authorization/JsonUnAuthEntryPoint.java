@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -69,15 +69,15 @@ import org.springframework.util.Assert;
 @Slf4j
 public class JsonUnAuthEntryPoint extends AbstractAuthenticationConfigure implements AuthenticationEntryPoint {
 
-    private String unAuthUrl;
-    private String unLoginUrl;
+    private final String unAuthUrl;
+    private final String unLoginUrl;
 
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
 
     public JsonUnAuthEntryPoint(
         ConfigurationSupport configuration,
-        MappingJackson2HttpMessageConverter messageConverter,
+        HttpMessageConverters messageConverter,
         String unAuthUrl,
         String unLoginUrl) {
         super(configuration, messageConverter);

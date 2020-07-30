@@ -45,11 +45,14 @@
 **0.5.0**:
 
 * 移除 MySQL 依赖
-* Spring Boot 升级到 v2.2.2.RELEASE
-* Shiro 升级到 1.5.1
+* Spring Boot 升级到 v2.3.1.RELEASE
+* Shiro 升级到 v1.5.3
 * Shiro 优化登录操作, 可直接通过`Filter`进行登录
 * `data-redis` 依赖改为 `spring-boot-starter-data-redis`
 * 优化 `ResponseBodyMessageConverter` 处理 `Result` 时的逻辑
 * 移除旧版验证码验证方式，改为由 `AbstractLogin` 处理
 * `UserRole` 删除 `roleId`
 * 移除 `UserAuthorizationService.reportAuthenticationExceptionInfo`, 改为使用事件机制
+* `DataAccess` 添加 `save()` 方法, `add` 方法重命名为 `insert`
+* `data-mybatis` 改为依赖 `MyBatis-Plus`
+* 内部数据的解析不再依赖 `MappingJackson2HttpMessageConverter`, 转为调用默认的 `HttpMessageConverter`

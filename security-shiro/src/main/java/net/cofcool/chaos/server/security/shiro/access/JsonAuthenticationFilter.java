@@ -27,13 +27,12 @@ import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.security.AuthService;
+import net.cofcool.chaos.server.common.util.WebUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
 import org.apache.shiro.web.filter.mgt.DefaultFilter;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.http.server.ServletServerHttpResponse;
 
 /**
  * 处理登录和未登录, 未登录时跳转到 {@link #UnLoginUrl}, 重写"Shiro"默认的未登录处理方法。
@@ -46,18 +45,18 @@ public class JsonAuthenticationFilter extends FormAuthenticationFilter {
 
     public static final String FILTER_KEY = DefaultFilter.authc.name();
 
-    private String UnLoginUrl;
+    private final String UnLoginUrl;
 
-    private AuthService authService;
-    private Class<? extends AbstractLogin> loginType;
-    private MappingJackson2HttpMessageConverter messageConverter;
+    private final AuthService authService;
+    private final Class<? extends AbstractLogin> loginType;
+    private final HttpMessageConverters messageConverter;
 
 
     public String getUnLoginUrl() {
         return UnLoginUrl;
     }
 
-    public JsonAuthenticationFilter(String loginUrl, String unLoginUrl, MappingJackson2HttpMessageConverter messageConverter, AuthService authService, Class<? extends AbstractLogin> loginType) {
+    public JsonAuthenticationFilter(String loginUrl, String unLoginUrl, HttpMessageConverters messageConverter, AuthService authService, Class<? extends AbstractLogin> loginType) {
         this.UnLoginUrl = unLoginUrl;
         setLoginUrl(loginUrl);
 
@@ -70,14 +69,16 @@ public class JsonAuthenticationFilter extends FormAuthenticationFilter {
     protected boolean executeLogin(ServletRequest request, ServletResponse response)
         throws Exception {
         try {
-            AbstractLogin login = (AbstractLogin) messageConverter.read(loginType, new ServletServerHttpRequest((HttpServletRequest) request));
+            AbstractLogin login = WebUtils.readObjFromRequest(messageConverter, (HttpServletRequest) request, loginType);
             Message message = authService.login((HttpServletRequest) request, (HttpServletResponse) response, login);
 
             log.info("login message: {}", message);
-            return writeMessage(message, (HttpServletResponse) response);
+            writeMessage(message, (HttpServletResponse) response);
+
+            return true;
         } catch (IOException e) {
             log.error("login error", e);
-            return writeMessage(
+            writeMessage(
                 ConfigurationSupport
                     .getConfiguration()
                     .getMessageWithKey(
@@ -86,13 +87,13 @@ public class JsonAuthenticationFilter extends FormAuthenticationFilter {
                         null
                     ),
                 (HttpServletResponse) response);
+
+            return false;
         }
     }
 
-    protected boolean writeMessage(Message message, HttpServletResponse response) throws Exception {
-        messageConverter.write(message, MediaType.APPLICATION_JSON, new ServletServerHttpResponse(response));
-
-        return false;
+    protected void writeMessage(Message message, HttpServletResponse response) throws Exception {
+        WebUtils.writeObjToResponse(messageConverter, response, message, MediaType.APPLICATION_JSON);
     }
 
     @Override
