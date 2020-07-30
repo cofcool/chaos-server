@@ -72,7 +72,7 @@ public class LoggingInterceptor extends AbstractScannedMethodInterceptor {
                 continue;
             }
 
-            String value = obj.toString();
+            String value = String.valueOf(obj);
             if (i == length - 1) {
                 builder.append(value);
             } else {
