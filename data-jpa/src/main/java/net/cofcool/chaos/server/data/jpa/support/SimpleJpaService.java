@@ -61,7 +61,7 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
     }
 
     @Override
-    public ExecuteResult<T> add(T entity) {
+    public ExecuteResult<T> insert(T entity) {
         return getConfiguration().getExecuteResult(
             jpaRepository.save(entity),
             ResultState.SUCCESSFUL,

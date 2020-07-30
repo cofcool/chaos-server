@@ -18,6 +18,9 @@ package net.cofcool.chaos.server.auto.config;
 
 import static org.springframework.util.StringUtils.delimitedListToStringArray;
 
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
+import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.pagination.optimize.JsqlParserCountOptimize;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -529,55 +532,23 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
         @Configuration
         @ConditionalOnClass(SqlSessionFactoryBean.class)
+        @AutoConfigureBefore(MybatisPlusAutoConfiguration.class)
         class MybatisConfig {
 
+            /**
+             * 分页插件
+             * @return {@link PaginationInterceptor}
+             */
             @Bean
-            public org.apache.ibatis.session.Configuration configuration() {
-                org.apache.ibatis.session.Configuration configuration = new org.apache.ibatis.session.Configuration();
-                configuration.setUseGeneratedKeys(true);
-
-                return configuration;
+            @ConditionalOnMissingBean
+            public PaginationInterceptor paginationInterceptor() {
+                PaginationInterceptor paginationInterceptor = new PaginationInterceptor();
+                 paginationInterceptor.setOverflow(false);
+                 paginationInterceptor.setLimit(Page.PAGE_MAX_SIZE);
+                paginationInterceptor.setCountSqlParser(new JsqlParserCountOptimize(true));
+                return paginationInterceptor;
             }
 
-            @Bean
-            public SqlSessionFactoryBean sqlSessionFactory(DataSource dataSource, org.apache.ibatis.session.Configuration configuration, Interceptor[] mybatisPlugins, ApplicationContext applicationContext)
-                throws IOException {
-                SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
-                factoryBean.setMapperLocations(
-                    ResourcePatternUtils
-                        .getResourcePatternResolver(applicationContext)
-                        .getResources(
-                            chaosProperties.getData().getXmlPath()
-                        )
-                );
-                factoryBean.setDataSource(dataSource);
-                factoryBean.setPlugins(mybatisPlugins);
-
-                factoryBean.setConfiguration(configuration);
-
-                return factoryBean;
-            }
-
-            @Bean
-            public Interceptor[] mybatisPlugins() {
-                PageInterceptor interceptor = new PageInterceptor();
-                Properties properties = new Properties();
-                properties.setProperty("helperDialect", "mysql");
-                properties.setProperty("reasonable", "true");
-                interceptor.setProperties(properties);
-
-                return new Interceptor[] {interceptor};
-            }
-
-            @Bean
-            public MapperScannerConfigurer mapperScannerConfigurer() {
-                MapperScannerConfigurer configurer = new MapperScannerConfigurer();
-                configurer.setBasePackage(chaosProperties.getData
-                    ().getMapperPackage());
-                configurer.setSqlSessionFactoryBeanName("sqlSessionFactory");
-
-                return configurer;
-            }
         }
     }
 

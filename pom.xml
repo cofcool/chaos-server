@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.2.2.RELEASE</version>
+        <version>2.3.1.RELEASE</version>
     </parent>
 
     <licenses>
@@ -73,11 +73,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <downloadSources>true</downloadSources>
 
-        <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
+        <spring-boot.version>2.3.1.RELEASE</spring-boot.version>
 
         <servlet-api.version>4.0.0</servlet-api.version>
 
-        <lombok.version>1.18.8</lombok.version>
+        <lombok.version>1.18.12</lombok.version>
 
         <chaos.version>0.5.0-SNAPSHOT</chaos.version>
     </properties>
@@ -97,12 +97,18 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring-boot.version}</version>
+        </dependency>
+        <!--
+            2.3.x 移除了 validation 包, 详情参考 https://github.com/spring-projects/spring-boot/commit/18ccbf031ae85fe0aec2a8ba0577a64efae1c6da
+            本项目
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
-            <version>${spring-boot.version}</version>
         </dependency>
 
         <dependency>

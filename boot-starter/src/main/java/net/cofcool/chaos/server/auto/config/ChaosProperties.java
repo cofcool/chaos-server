@@ -37,42 +37,10 @@ public class ChaosProperties {
 
     private Development development = new Development();
 
-    private Data data = new Data();
-
     /**
      * 应用自定义配置
      */
     private Map<String, String> properties;
-
-    public static class Data {
-
-        /**
-         * Mybatis 包扫描路径
-         */
-        private String mapperPackage;
-
-        /**
-         * Mybatis xml 路径
-         */
-        private String xmlPath;
-
-
-        public String getMapperPackage() {
-            return mapperPackage;
-        }
-
-        public void setMapperPackage(String mapperPackage) {
-            this.mapperPackage = mapperPackage;
-        }
-
-        public String getXmlPath() {
-            return xmlPath;
-        }
-
-        public void setXmlPath(String xmlPath) {
-            this.xmlPath = xmlPath;
-        }
-    }
 
     public static final class Auth {
 
@@ -393,17 +361,6 @@ public class ChaosProperties {
 
     public void setDevelopment(Development development) {
         this.development = development;
-    }
-
-    /**
-     * 数据库相关配置
-     */
-    public Data getData() {
-        return data;
-    }
-
-    public void setData(Data data) {
-        this.data = data;
     }
 
     public Map<String, String> getProperties() {

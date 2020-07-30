@@ -16,18 +16,18 @@
 
 package net.cofcool.chaos.server.data.mybatis.support;
 
-import com.github.pagehelper.ISelect;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.core.PageProcessor;
 import net.cofcool.chaos.server.common.core.SimplePage;
 
 /**
- * 适配 {@link PageHelper}
+ * 适配 {@link com.baomidou.mybatisplus.extension.plugins.pagination.Page}
  *
  * @author CofCool
  */
@@ -45,22 +45,46 @@ public class Paging<T> extends SimplePage<T> {
     }
 
     /**
-     * 根据 PageHelper 的 PageInfo 创建Page
-     * @param page PageInfo实例
-     * @param <T> 模型类
+     * 根据 IPage 创建 Page
+     * @param page IPage 实例
+     * @param <T> 数据类型
      * @return Page实例
      */
     @Nonnull
-    public static <T> Page<T> of(@Nonnull PageInfo<T> page) {
-        Paging<T> mPage = new Paging<>(page.getList());
-        mPage.setFirstPage(page.isIsFirstPage());
-        mPage.setLastPage(page.isIsLastPage());
+    public static <T> Page<T> of(@Nonnull IPage<T> page) {
+        Paging<T> mPage = new Paging<>(page.getRecords());
         mPage.setTotal(page.getTotal());
-        mPage.setPageNumber(page.getPageNum());
-        mPage.setPageSize(page.getPageSize());
-        mPage.setPages(page.getPages());
+        mPage.setPageNumber((int) page.getCurrent());
+        mPage.setPageSize((int) page.getSize());
+        mPage.setPages((int) page.getPages());
 
         return mPage;
+    }
+
+    /**
+     * 获取 {@link IPage} 实例
+     * @param page page 实例
+     * @param <T> 数据类型
+     * @param orders 排序字段信息
+     * @return IPage 实例
+     */
+    public static <T> IPage<T> getIPage(Page<T> page, @Nullable List<OrderItem> orders) {
+        com.baomidou.mybatisplus.extension.plugins.pagination.Page<T> mPage = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>();
+        mPage.setCurrent(page.getPageNumber());
+        mPage.setSize(page.getPageSize());
+        mPage.setOrders(orders);
+
+        return mPage;
+    }
+
+    /**
+     * 获取 IPage 实例
+     * @param page page 实例
+     * @param <T> 数据类型
+     * @return IPage 实例
+     */
+    public static <T> IPage<T> getIPage(Page<T> page) {
+        return getIPage(page, null);
     }
 
 
@@ -76,23 +100,19 @@ public class Paging<T> extends SimplePage<T> {
 
     private static final class MybatisPageProcessor<T> implements PageProcessor<T> {
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked, rawtypes")
         @Override
         public Page<T> process(Page<T> condition, Object pageSomething) {
             Objects.requireNonNull(condition);
             Objects.requireNonNull(pageSomething);
 
-            if (pageSomething instanceof ISelect) {
-                return Paging.of(
-                    PageHelper.startPage(
-                        condition.getPageNumber(), condition.getPageSize()
-                    ).doSelectPageInfo((ISelect) pageSomething)
-                );
+            if (pageSomething instanceof IPage) {
+                return (Page<T>) Paging.of((IPage)pageSomething);
             } else if (pageSomething instanceof Page) {
                 return (Page<T>) pageSomething;
             }
 
-            throw new IllegalArgumentException("must be ISelect instance");
+            throw new IllegalArgumentException("must be com.baomidou.mybatisplus.core.metadata.IPage instance");
         }
 
     }
