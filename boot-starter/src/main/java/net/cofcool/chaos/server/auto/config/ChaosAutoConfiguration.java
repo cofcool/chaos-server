@@ -119,6 +119,7 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 @Configuration
 @ConditionalOnClass(ChaosProperties.class)
 @AutoConfigureAfter(JacksonAutoConfiguration.class)
+@SuppressWarnings("unchecked, rawtypes")
 public class ChaosAutoConfiguration implements ApplicationContextAware {
 
     public static final String PACKAGE_PATH = "net.cofcool.chaos";
@@ -367,7 +368,6 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
              * @return authService
              */
             @Bean
-            @SuppressWarnings("unchecked")
             public AuthService authService(UserAuthorizationService userAuthorizationService, ConfigurationSupport configurationSupport) {
                 ShiroAuthServiceImpl authService = new ShiroAuthServiceImpl();
                 authService.setUserAuthorizationService(userAuthorizationService);
@@ -389,10 +389,12 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
         }
 
+        /**
+         * Spring Security 配置, 若不使用本配置注意移除 {@link JsonLoginConfigure}, 如 {@code httpSecurity.removeConfigurer(JsonLoginConfigure.class)}
+         */
         @Configuration
         @ConditionalOnClass(DefaultAuthenticationEventPublisher.class)
         @ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
-        @SuppressWarnings("rawtypes")
         class SpringSecurityConfig {
 
             private AuthenticationProvider authenticationProvider;
@@ -535,6 +537,10 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
             }
         }
 
+
+        /**
+         * Mybaits 相关配置
+         */
         @Configuration
         @ConditionalOnClass(SqlSessionFactoryBean.class)
         @AutoConfigureBefore(MybatisPlusAutoConfiguration.class)
