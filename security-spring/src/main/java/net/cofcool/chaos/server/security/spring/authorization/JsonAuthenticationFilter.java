@@ -78,7 +78,7 @@ public class JsonAuthenticationFilter extends AbstractAuthenticationProcessingFi
         try {
             loginUser = WebUtils.readObjFromRequest(messageConverter, request, getLoginType());
         } catch (IOException | HttpMessageNotReadableException e) {
-            throw new AuthenticationServiceException("cannot parse the json request", e);
+            throw new AuthenticationServiceException("cannot parse the request", e);
         }
 
         try {
