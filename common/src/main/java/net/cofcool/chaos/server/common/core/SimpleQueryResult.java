@@ -51,4 +51,10 @@ public class SimpleQueryResult<T> implements QueryResult<T, Page<T>> {
         return message;
     }
 
+    @Override
+    public String toString() {
+        return "SimpleQueryResult{" +
+            "message=" + message +
+            '}';
+    }
 }

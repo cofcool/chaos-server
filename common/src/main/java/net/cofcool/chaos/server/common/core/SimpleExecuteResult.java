@@ -63,4 +63,12 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
     public Message<T> result() {
         return message;
     }
+
+    @Override
+    public String toString() {
+        return "SimpleExecuteResult{" +
+            "state=" + state +
+            ", message=" + message +
+            '}';
+    }
 }
