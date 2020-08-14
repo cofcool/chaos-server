@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.Message;
-import net.cofcool.chaos.server.common.security.exception.CaptchaErrorException;
+import net.cofcool.chaos.server.common.security.exception.AuthorizationException;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -44,17 +44,16 @@ public class JsonAuthenticationFailureHandler extends AbstractAuthenticationConf
         super(configuration, messageConverter);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
         AuthenticationException exception) throws IOException, ServletException {
-        Message message;
+        Message<?> message;
         if (exception instanceof UsernameNotFoundException) {
             message = getMessage(ExceptionCodeDescriptor.USER_NOT_EXITS, ExceptionCodeDescriptor.USER_NOT_EXITS_DESC);
         } else if (exception instanceof BadCredentialsException) {
             message = getMessage(ExceptionCodeDescriptor.USER_PASSWORD_ERROR, ExceptionCodeDescriptor.USER_PASSWORD_ERROR_DESC);
-        } else if (exception.getCause() instanceof CaptchaErrorException) {
-            CaptchaErrorException cause = (CaptchaErrorException) exception.getCause();
+        } else if (exception.getCause() instanceof AuthorizationException) {
+            AuthorizationException cause = (AuthorizationException) exception.getCause();
             message = getConfiguration().getMessage(cause.getCode(), cause.getMessage(), null);
         } else {
             message = getMessage(ExceptionCodeDescriptor.AUTH_ERROR, exception.getMessage());
@@ -63,7 +62,7 @@ public class JsonAuthenticationFailureHandler extends AbstractAuthenticationConf
         writeToResponse(request, response, message);
     }
 
-    private Message getMessage(String codeKey, String descKey) {
+    private Message<?> getMessage(String codeKey, String descKey) {
         return getConfiguration().getMessageWithKey(
             codeKey,
             descKey,
