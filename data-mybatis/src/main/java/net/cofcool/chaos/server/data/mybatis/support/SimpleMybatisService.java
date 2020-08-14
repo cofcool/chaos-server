@@ -46,7 +46,7 @@ public abstract class SimpleMybatisService<T, ID extends Serializable, M extends
 
     @Override
     protected Object queryWithPage(Page<T> condition, T entity) {
-        return mapper.selectPage(Paging.getIPage(condition), buildWrapper(entity));
+        return mapper.selectPage(Paging.getIPage(condition), buildWrapper(condition, entity));
     }
 
     /**
@@ -54,7 +54,7 @@ public abstract class SimpleMybatisService<T, ID extends Serializable, M extends
      * @param entity 实体
      * @return Wrapper 实例
      */
-    protected Wrapper<T> buildWrapper(T entity) {
+    protected Wrapper<T> buildWrapper(Page<T> condition, T entity) {
         return new QueryWrapper<>(entity);
     }
 
