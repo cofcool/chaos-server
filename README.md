@@ -78,6 +78,8 @@ chaos.auth.checked-keys=id
 
 `User`存储用户信息。
 
+`spring-security` 配置时注意 `chaos.auth.cors-enabled` 和 `chaos.auth.csrf-enabled` 配置项。
+
 #### Service 层
 
 `DataAccess`定义"Service"常用的方法。

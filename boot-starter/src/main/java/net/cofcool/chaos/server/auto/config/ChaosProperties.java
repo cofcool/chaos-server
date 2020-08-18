@@ -92,13 +92,13 @@ public class ChaosProperties {
         private String unLoginUrl = expiredUrl;
 
         /**
-         * 是否启用 {@link  org.springframework.web.filter.CorsFilter}
+         * 是否启用 {@link  org.springframework.web.filter.CorsFilter CORS}, 默认关闭
          */
         private Boolean corsEnabled = false;
 
 
         /**
-         * 是否启用 CSRF, 默认启用
+         * 是否启用 {@link org.springframework.security.web.csrf.CsrfFilter CSRF} , 默认启用
          */
         private Boolean csrfEnabled = true;
 
