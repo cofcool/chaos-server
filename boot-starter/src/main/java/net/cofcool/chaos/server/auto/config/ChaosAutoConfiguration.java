@@ -451,7 +451,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                         .authorizeRequests()
                         .antMatchers(
                             delimitedListToStringArray(chaosProperties.getAuth().springExcludeUrl(), ",")
-                        ).anonymous()
+                        ).permitAll()
                         .antMatchers("/**").authenticated()
                         .accessDecisionManager(
                             new UrlBased(getDecisionVoters(http), userAuthorizationService, true)
