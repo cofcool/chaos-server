@@ -106,7 +106,7 @@ public class JsonUnAuthEntryPoint extends AbstractAuthenticationConfigure implem
             newUrl = getUnLoginUrl() + "?ex=" + authException.getMessage();
         }
 
-        log.debug("Server side forward to: " + newUrl);
+        log.debug("Server side forward to " + newUrl, authException);
 
         redirectStrategy.sendRedirect(request, response, newUrl);
     }

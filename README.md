@@ -59,7 +59,7 @@ chaos.auth.checked-keys=id
 
 使用`Page`类封装分页的相关数据, ORM模块的`Paging`继承并扩展。
 
-* Mybatis: 通过`PageHelper`分页。
+* Mybatis: 通过 `Mybatis Plus` 分页插件分页。
 * Jpa: 通过`Pageable`分页。
 
 **异常**处理时, 自定义业务相关异常需继承`ServiceException`。如需设定异常级别, 实现`ExceptionLevel`接口即可, 该级别影响异常的打印。`ServiceException`已实现该接口, 默认为最高级别。
