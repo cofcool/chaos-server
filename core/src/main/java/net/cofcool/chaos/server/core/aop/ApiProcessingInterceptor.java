@@ -54,6 +54,7 @@ import org.springframework.stereotype.Controller;
  *
  * @author CofCool
  */
+@SuppressWarnings("rawtypes")
 public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor implements
     ApplicationContextAware {
 
@@ -271,7 +272,7 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
     }
 
     @Override
-    protected boolean doSupport(Method method, Class targetClass) {
+    protected boolean doSupport(Method method, Class<?> targetClass) {
         return BeanResourceHolder.findAnnotation(targetClass, Controller.class, false) != null;
     }
 

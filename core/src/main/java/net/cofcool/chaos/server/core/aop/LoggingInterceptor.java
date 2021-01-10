@@ -40,10 +40,12 @@ public class LoggingInterceptor extends AbstractScannedMethodInterceptor {
 
 
     protected StringBuilder appendAfterLog(StringBuilder sb, Object returnValue) {
-        sb
-            .append(";result=[")
-            .append(returnValue)
-            .append("]");
+        if (returnValue instanceof Throwable) {
+            sb.append(";exception=[");
+        } else {
+            sb.append(";result=[");
+        }
+        sb.append(returnValue).append("]");
 
         return sb;
     }
@@ -85,11 +87,11 @@ public class LoggingInterceptor extends AbstractScannedMethodInterceptor {
     }
 
     private String parseHeaders(HttpServletRequest request) {
-        Enumeration headerNames = request.getHeaderNames();
+        Enumeration<String> headerNames = request.getHeaderNames();
 
         StringBuilder headers = new StringBuilder();
         while (headerNames.hasMoreElements()) {
-            String name= (String) headerNames.nextElement();
+            String name= headerNames.nextElement();
             headers.append(name).append("=").append(request.getHeader(name)).append(";");
         }
 
@@ -97,7 +99,7 @@ public class LoggingInterceptor extends AbstractScannedMethodInterceptor {
     }
 
     @Override
-    protected boolean doSupport(Method method, Class targetClass) {
+    protected boolean doSupport(Method method, Class<?> targetClass) {
         return BeanResourceHolder.findAnnotation(targetClass, Controller.class, false) != null;
     }
 

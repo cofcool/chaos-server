@@ -54,9 +54,15 @@ public class ScannedCompositeMethodInterceptor implements MethodInterceptor {
     public Object invoke(MethodInvocation invocation) throws Throwable {
         Object result = null;
 
-        invoke(invocation, false, result);
-        result = invocation.proceed();
-        invoke(invocation, true, result);
+        invoke(invocation, false, null);
+        try {
+            result = invocation.proceed();
+        } catch (Throwable e){
+            result = e;
+            throw e;
+        } finally {
+            invoke(invocation, true, result);
+        }
 
         return result;
     }

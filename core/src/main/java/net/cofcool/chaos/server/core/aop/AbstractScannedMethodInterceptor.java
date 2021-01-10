@@ -28,7 +28,7 @@ import org.aopalliance.intercept.MethodInvocation;
  */
 public abstract class AbstractScannedMethodInterceptor implements ScannedMethodInterceptor {
 
-    private Map<Method, Boolean> supportStatuses = new ConcurrentHashMap<>();
+    private final Map<Method, Boolean> supportStatuses = new ConcurrentHashMap<>();
 
     @Override
     public boolean supports(Method method) {
@@ -39,7 +39,7 @@ public abstract class AbstractScannedMethodInterceptor implements ScannedMethodI
         );
     }
 
-    protected abstract boolean doSupport(Method method, Class targetClass);
+    protected abstract boolean doSupport(Method method, Class<?> targetClass);
 
     @Override
     public void postBefore(MethodInvocation invocation) throws Throwable {
