@@ -52,6 +52,7 @@ import org.springframework.core.annotation.AnnotationUtils;
  *
  * @author CofCool
  */
+@SuppressWarnings("rawtypes")
 public final class BeanResourceHolder {
 
     private static final Map<Method, AnnotationHelper> CACHED_METHOD_ANNOTATIONS = new HashMap<>();
