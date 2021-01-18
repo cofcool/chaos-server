@@ -44,7 +44,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Controller;
 
 /**
- * 接口拦截, 包括 {@link User} 数据注入, 设备检查, 版本对比以及覆盖ID等, 通过拦截<b>Controller</b>实现,  被代理类需使用 {@link Scanned} 注解。
+ * 接口拦截, 包括 {@link User} 数据注入, 设备检查, 版本对比以及覆盖ID等, 通过拦截<b>Controller</b>实现, 被代理类需使用 {@link Scanned} 注解.
+ * 注意: {@link AuthService} 实例名必须为 {@code authService}
  * <br>
  *
  * @see Scanned
