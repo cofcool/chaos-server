@@ -36,7 +36,6 @@
         <module>data-jpa</module>
         <module>data-mybatis</module>
         <module>extension</module>
-        <module>actuator</module>
         <module>component-processor</module>
         <module>boot-starter</module>
     </modules>
