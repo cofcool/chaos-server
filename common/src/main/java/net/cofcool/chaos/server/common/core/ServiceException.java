@@ -38,15 +38,17 @@ public class ServiceException extends RuntimeException implements ExceptionLevel
     }
 
     public ServiceException(String message, String code, int level) {
-        super(message);
-        this.code = code;
-        this.level = level;
+        this(message, code, level, null);
     }
 
     public ServiceException(String message, Throwable cause) {
+        this(message, null, ExceptionLevel.NORMAL_LEVEL, cause);
+    }
+
+    public ServiceException(String message, String code, int level, Throwable cause) {
         super(message, cause);
-        this.code = null;
-        this.level = LOWEST_LEVEL;
+        this.code = code;
+        this.level = level;
     }
 
     public String getCode() {
