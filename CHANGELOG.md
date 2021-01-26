@@ -56,3 +56,5 @@
 * `DataAccess` 添加 `save()` 方法, `add` 方法重命名为 `insert`
 * `data-mybatis` 改为依赖 `MyBatis-Plus`
 * 内部数据的解析不再依赖 `MappingJackson2HttpMessageConverter`, 转为调用默认的 `HttpMessageConverter`
+* 移除 `data-redis` 模块
+* 添加 `extension` 模块, 封装 `Redis`, `MongoDB` 等相关操作

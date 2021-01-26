@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
 
 /**
  * 处理没有权限时的情况, "Spring Security" 默认为跳转到登录页面, 改为跳转到 <code>unAuthUrl</code>
- * <br/>
+ * </hr>
  * 如下示例:
  * <pre>
  * &#64;Api

@@ -20,20 +20,18 @@
 
 ### 模块说明
 
-
-1. common 该模块定义了基本接口和类等。
-2. core 核心实现，包括拦截器, 国际化，Json 解析等
-3. data-jpa `JPA`相关的基础`Service`和工具类等
-4. data-mybatis `Mybatis`相关的基础`Service`和工具类等
-5. data-redis 提供`Redis`所需依赖。
-6. security-shiro 封装了`Shiro`，简化开发流程。
-7. security-spring 封装了`Spring Security`，简化开发流程。
-8. actuator 提供监控所需依赖。
-9. component-processor 编译时扫描`BaseComponent`注解，该注解可标识基础组件, 避免组件调用混乱。
-10. boot-starter 根据`Spring Boot`规范进行自动化配置。
+1. common 该模块定义了基本接口和类等
+2. core 核心实现, 包括拦截器, 国际化, JSON 解析等
+3. data-jpa `JPA` 相关的基础 `Service` 和工具类等
+4. data-mybatis `Mybatis` 相关的基础 `Service` 和工具类等
+5. extension 封装 `Redis`, `MongoDB` 等相关操作
+6. security-shiro 封装了 `Shiro`, 简化开发流程
+7. security-spring 封装了 `Spring Security`, 简化开发流程
+8. actuator 提供监控所需依赖
+9. component-processor 编译时扫描 `BaseComponent` 注解, 该注解可标识基础组件, 避免组件调用混乱
+10. boot-starter 根据 `Spring Boot` 规范进行自动化配置
 
 ### 配置 
-
 
 ```properties
 # 是否调试模式
