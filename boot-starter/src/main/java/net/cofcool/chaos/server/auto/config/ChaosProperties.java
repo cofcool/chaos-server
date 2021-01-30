@@ -16,14 +16,15 @@
 
 package net.cofcool.chaos.server.auto.config;
 
-import static net.cofcool.chaos.server.auto.config.ChaosAutoConfiguration.PROJECT_CONFIGURE_PREFIX;
-
-import java.util.Map;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.util.StringUtils;
 import net.cofcool.chaos.server.core.annotation.ApiVersion;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.Map;
+
+import static net.cofcool.chaos.server.auto.config.ChaosAutoConfiguration.PROJECT_CONFIGURE_PREFIX;
 
 /**
  * 项目可配置项
@@ -271,7 +272,7 @@ public class ChaosProperties {
         /**
          * 是否调试模式
          */
-        private Boolean debug = false;
+        private Boolean debug = Boolean.FALSE;
 
         /**
          * 项目版本

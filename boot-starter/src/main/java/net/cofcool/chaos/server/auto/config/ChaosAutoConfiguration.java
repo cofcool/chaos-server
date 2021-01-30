@@ -16,51 +16,27 @@
 
 package net.cofcool.chaos.server.auto.config;
 
-import static org.springframework.util.StringUtils.delimitedListToStringArray;
-
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
 import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.pagination.optimize.JsqlParserCountOptimize;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.Filter;
-import net.cofcool.chaos.server.common.core.ConfigurationCustomizer;
-import net.cofcool.chaos.server.common.core.ConfigurationSupport;
+import net.cofcool.chaos.server.common.core.*;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport.DefaultConfigurationCustomizer;
-import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
-import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
-import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.PasswordProcessor;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
 import net.cofcool.chaos.server.common.util.StringUtils;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import net.cofcool.chaos.server.core.annotation.scanner.BeanScannerConfigure;
-import net.cofcool.chaos.server.core.aop.ApiProcessingInterceptor;
-import net.cofcool.chaos.server.core.aop.LoggingInterceptor;
-import net.cofcool.chaos.server.core.aop.ScannedCompositeMethodInterceptor;
-import net.cofcool.chaos.server.core.aop.ScannedMethodInterceptor;
-import net.cofcool.chaos.server.core.aop.ScannedResourceAdvisor;
-import net.cofcool.chaos.server.core.aop.ValidateInterceptor;
+import net.cofcool.chaos.server.core.aop.*;
 import net.cofcool.chaos.server.core.i18n.ResourceExceptionCodeDescriptor;
 import net.cofcool.chaos.server.core.support.GlobalHandlerExceptionResolver;
 import net.cofcool.chaos.server.core.support.ResponseBodyMessageConverter;
 import net.cofcool.chaos.server.core.support.SimpleExceptionCodeDescriptor;
-import net.cofcool.chaos.server.security.shiro.access.AccountCredentialsMatcher;
-import net.cofcool.chaos.server.security.shiro.access.AuthRealm;
-import net.cofcool.chaos.server.security.shiro.access.ExceptionAuthenticationStrategy;
 import net.cofcool.chaos.server.security.shiro.access.JsonAuthenticationFilter;
-import net.cofcool.chaos.server.security.shiro.access.JsonLogoutFilter;
-import net.cofcool.chaos.server.security.shiro.access.PermissionFilter;
+import net.cofcool.chaos.server.security.shiro.access.*;
 import net.cofcool.chaos.server.security.shiro.authorization.ShiroAuthServiceImpl;
-import net.cofcool.chaos.server.security.spring.authorization.JsonLogoutSuccessHandler;
-import net.cofcool.chaos.server.security.spring.authorization.SpringAuthServiceImpl;
-import net.cofcool.chaos.server.security.spring.authorization.SpringDaoAuthenticationProvider;
-import net.cofcool.chaos.server.security.spring.authorization.SpringUserAuthorizationService;
-import net.cofcool.chaos.server.security.spring.authorization.UrlBased;
+import net.cofcool.chaos.server.security.spring.authorization.*;
 import net.cofcool.chaos.server.security.spring.config.JsonLoginConfigure;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.Authenticator;
@@ -77,6 +53,7 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.aop.Advisor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -91,6 +68,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.PermissionEvaluator;
@@ -111,12 +89,20 @@ import org.springframework.util.Assert;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
+import javax.servlet.Filter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.springframework.util.StringUtils.delimitedListToStringArray;
+
 /**
  * 项目配置
  *
  * @author CofCool
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(ChaosProperties.class)
 @AutoConfigureAfter(JacksonAutoConfiguration.class)
 @SuppressWarnings("unchecked, rawtypes")
@@ -154,16 +140,26 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
     }
 
     /**
-     * 配置AOP, 使用 {@link Scanned} 注解的类可以被代理
+     * 创建 {@link ScannedResourceAdvisor}, 使用 {@link Scanned} 注解的类可以被代理
      *
-     * @param scannedMethodInterceptors 应用创建的 {@link ScannedMethodInterceptor} 实例列表
      * @return Advisor
      *
      * @see Scanned
      */
     @Bean
-    public Advisor scannedResourceAdvisor(List<ScannedMethodInterceptor> scannedMethodInterceptors) {
-        return new ScannedResourceAdvisor(new ScannedCompositeMethodInterceptor(scannedMethodInterceptors));
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    public Advisor scannedResourceAdvisor() {
+        return new ScannedResourceAdvisor(new ScannedCompositeMethodInterceptor());
+    }
+
+    /**
+     * 创建 ScannedResourceAdvisorHelper
+     * @param scannedResourceAdvisor ScannedResourceAdvisor
+     * @return ScannedResourceAdvisorHelper
+     */
+    @Bean
+    public ScannedResourceAdvisor.ScannedResourceAdvisorHelper scannedResourceAdvisorHelper(ScannedResourceAdvisor scannedResourceAdvisor) {
+        return ScannedResourceAdvisor.createHelper(scannedResourceAdvisor);
     }
 
 

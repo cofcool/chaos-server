@@ -16,9 +16,6 @@
 
 package net.cofcool.chaos.server.core.aop;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-import javax.annotation.Nullable;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.Page;
@@ -42,6 +39,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Controller;
+
+import javax.annotation.Nullable;
+import java.lang.reflect.Method;
+import java.util.Collection;
 
 /**
  * 接口拦截, 包括 {@link User} 数据注入, 设备检查, 版本对比以及覆盖ID等, 通过拦截<b>Controller</b>实现, 被代理类需使用 {@link Scanned} 注解.
@@ -67,6 +68,9 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
     private ConfigurationSupport configuration;
 
     protected ConfigurationSupport getConfiguration() {
+        if (configuration == null) {
+            configuration = ConfigurationSupport.getConfiguration();
+        }
         return configuration;
     }
 
@@ -74,8 +78,7 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
         this.configuration = configuration;
     }
 
-    public void setAuthService(
-        AuthService authService) {
+    public void setAuthService(AuthService authService) {
         this.authService = authService;
     }
 
@@ -150,14 +153,14 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
 
     protected void checkDevice(String[] devices, User user) {
         if (user != null && user.getDevice() != null && !user.getDevice().contained(devices)) {
-            throwException(ExceptionCodeDescriptor.DENIAL_DEVICE, ExceptionCodeDescriptor.DENIAL_DEVICE_DESC);
+            throwException(ExceptionCodeDescriptor.DENIAL_DEVICE);
         }
     }
 
-    private void throwException(String code, String exceptionType) {
+    private void throwException(String code) {
         throw new ServiceException(
-            configuration.getExceptionDescription(exceptionType),
-            configuration.getExceptionCode(code)
+            getConfiguration().getExceptionDescription(code),
+            getConfiguration().getExceptionCode(code)
         );
     }
 
@@ -167,7 +170,7 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
             Collection<UserRole> userRoles = data.getRoles();
             userRoles.forEach(userRole -> {
                 if (!userRole.contains(roles)) {
-                    throwException(ExceptionCodeDescriptor.DENIAL_OPERATING, ExceptionCodeDescriptor.DENIAL_OPERATING_DESC);
+                    throwException(ExceptionCodeDescriptor.DENIAL_OPERATING);
                 }
             });
 
@@ -177,7 +180,7 @@ public class ApiProcessingInterceptor extends AbstractScannedMethodInterceptor i
 
     protected void checkVersion(ApiVersion apiVersion) {
         if (apiVersion != null && (apiVersion.value() == ApiVersion.DENIAL_ALL || (apiVersion.value() != ApiVersion.ALLOW_ALL && compareApiVersion(apiVersion)))) {
-            throwException(ExceptionCodeDescriptor.LOWEST_LEVEL_API, ExceptionCodeDescriptor.LOWEST_LEVEL_API_DESC);
+            throwException(ExceptionCodeDescriptor.LOWEST_LEVEL_API);
         }
     }
 

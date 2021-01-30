@@ -16,12 +16,14 @@
 
 package net.cofcool.chaos.server.core.aop;
 
-import java.util.List;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 代理配置, 可通过 {@link #setInterceptorList(List)} 方法配置 {@link ScannedMethodInterceptor}, 用户可自定义{@link ScannedMethodInterceptor} 实例, 被拦截对象需使用 {@link Scanned} 注解
@@ -38,6 +40,10 @@ public class ScannedCompositeMethodInterceptor implements MethodInterceptor {
         setInterceptorList(interceptorList);
     }
 
+    public ScannedCompositeMethodInterceptor() {
+        this.interceptorList = new ArrayList<>();
+    }
+
     public void setInterceptorList(List<ScannedMethodInterceptor> interceptorList) {
         Assert.notNull(interceptorList, "interceptorList - this argument is required; it must not be null");
 
@@ -48,6 +54,12 @@ public class ScannedCompositeMethodInterceptor implements MethodInterceptor {
 
     public List<ScannedMethodInterceptor> getInterceptorList() {
         return interceptorList;
+    }
+
+    public void addInterceptor(ScannedMethodInterceptor interceptor) {
+        interceptorList.add(interceptor);
+
+        AnnotationAwareOrderComparator.sort(interceptorList);
     }
 
     @Override
