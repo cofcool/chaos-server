@@ -20,8 +20,6 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
-import java.io.Serializable;
-import java.util.List;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExecuteResult;
 import net.cofcool.chaos.server.common.core.Page;
@@ -29,6 +27,9 @@ import net.cofcool.chaos.server.common.core.Result.ResultState;
 import net.cofcool.chaos.server.common.core.SimpleService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.Serializable;
+import java.util.List;
 
 public abstract class SimpleMybatisService<T, ID extends Serializable, M extends BaseMapper<T>> extends
     SimpleService<T> implements InitializingBean {
@@ -84,8 +85,7 @@ public abstract class SimpleMybatisService<T, ID extends Serializable, M extends
         return getConfiguration().getExecuteResult(
                 mapper.selectList(new QueryWrapper<>(entity)),
                 ResultState.SUCCESSFUL,
-                ExceptionCodeDescriptor.SERVER_OK,
-                ExceptionCodeDescriptor.SERVER_OK_DESC
+                ExceptionCodeDescriptor.SERVER_OK
         );
     }
 
@@ -107,15 +107,13 @@ public abstract class SimpleMybatisService<T, ID extends Serializable, M extends
             return getConfiguration().getExecuteResult(
                 entity,
                 ResultState.SUCCESSFUL,
-                ExceptionCodeDescriptor.SERVER_OK,
-                ExceptionCodeDescriptor.SERVER_OK_DESC
+                ExceptionCodeDescriptor.SERVER_OK
             );
         } else {
             return getConfiguration().getExecuteResult(
                 null,
                 ResultState.FAILURE,
-                ExceptionCodeDescriptor.OPERATION_ERR,
-                ExceptionCodeDescriptor.OPERATION_ERR_DESC
+                ExceptionCodeDescriptor.OPERATION_ERR
             );
         }
     }

@@ -16,9 +16,6 @@
 
 package net.cofcool.chaos.server.security.shiro.access;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
@@ -27,6 +24,10 @@ import org.apache.shiro.session.SessionException;
 import org.apache.shiro.web.filter.authc.LogoutFilter;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.http.MediaType;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 覆盖默认的退出登录逻辑, 不会跳转到登录路径, 直接返回退出成功信息
@@ -57,9 +58,8 @@ public class JsonLogoutFilter extends LogoutFilter {
             (HttpServletResponse) response,
             ConfigurationSupport
                 .getConfiguration()
-                .getMessageWithKey(
+                .getMessage(
                     ExceptionCodeDescriptor.SERVER_OK,
-                    ExceptionCodeDescriptor.SERVER_OK_DESC,
                     null
                 )
             ,

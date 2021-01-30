@@ -16,18 +16,11 @@
 
 package net.cofcool.chaos.server.security.shiro.authorization;
 
-import java.io.Serializable;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.Message;
-import net.cofcool.chaos.server.common.security.AbstractLogin;
-import net.cofcool.chaos.server.common.security.Auth;
-import net.cofcool.chaos.server.common.security.AuthService;
-import net.cofcool.chaos.server.common.security.User;
-import net.cofcool.chaos.server.common.security.UserAuthorizationService;
+import net.cofcool.chaos.server.common.security.*;
 import net.cofcool.chaos.server.common.security.exception.AuthorizationException;
 import net.cofcool.chaos.server.common.security.exception.CaptchaErrorException;
 import org.apache.shiro.SecurityUtils;
@@ -40,6 +33,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.Serializable;
 
 /**
  * shiro 授权管理相关处理
@@ -83,7 +80,7 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
             log.trace("captcha error", e);
             publishEvent(loginUser, e);
             return configuration
-                .getMessage(
+                .newMessage(
                     e.getCode(),
                     e.getMessage(),
                     null
@@ -113,7 +110,7 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
                     getUserAuthorizationService().setupUserData(currentUser);
                 } else {
                     user.logout();
-                    return configuration.getMessage(checkedMessage.code(), checkedMessage.message(), null);
+                    return configuration.newMessage(checkedMessage.code(), checkedMessage.message(), null);
                 }
 
                 isOk = true;
@@ -123,33 +120,31 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
                 return returnUserInfo(currentUser);
             }
 
-            return getExceptionMessage(ExceptionCodeDescriptor.AUTH_ERROR, ExceptionCodeDescriptor.AUTH_ERROR_DESC);
+            return getExceptionMessage(ExceptionCodeDescriptor.AUTH_ERROR);
         } catch (UnknownAccountException e) {
             publishEvent(loginUser, e);
 
-            return getExceptionMessage(ExceptionCodeDescriptor.USER_NOT_EXITS, ExceptionCodeDescriptor.USER_NOT_EXITS_DESC);
+            return getExceptionMessage(ExceptionCodeDescriptor.USER_NOT_EXITS);
         } catch (IncorrectCredentialsException e) {
             publishEvent(loginUser, e);
 
-            return getExceptionMessage(ExceptionCodeDescriptor.USER_PASSWORD_ERROR, ExceptionCodeDescriptor.USER_PASSWORD_ERROR_DESC);
+            return getExceptionMessage(ExceptionCodeDescriptor.USER_PASSWORD_ERROR);
         } catch (AuthenticationException e) {
             publishEvent(loginUser, e);
 
             Throwable ex = e.getCause();
             if (ex instanceof AuthorizationException) {
-                return configuration.getMessage(((AuthorizationException) ex).getCode(), ex.getMessage(), null);
+                return configuration.newMessage(((AuthorizationException) ex).getCode(), ex.getMessage(), null);
             } else {
                 return configuration.getMessage(
                     ExceptionCodeDescriptor.AUTH_ERROR,
-                    true,
                     e.getMessage(),
-                    false,
                     null
                 );
             }
         } catch (Exception e) {
             publishEvent(loginUser, e);
-            return getExceptionMessage(ExceptionCodeDescriptor.AUTH_ERROR, ExceptionCodeDescriptor.AUTH_ERROR_DESC);
+            return getExceptionMessage(ExceptionCodeDescriptor.AUTH_ERROR);
         } finally {
             if (!isOk) {
                 user.logout();
@@ -157,12 +152,8 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
         }
     }
 
-    protected Message<User<T, ID>> getExceptionMessage(String code, String type) {
-        return configuration.getMessageWithKey(
-            code,
-            type,
-            null
-        );
+    protected Message<User<T, ID>> getExceptionMessage(String code) {
+        return configuration.getMessage(code, null);
     }
 
     private void publishEvent(Object loginUser, Exception e) {
@@ -198,9 +189,8 @@ public class ShiroAuthServiceImpl<T extends Auth, ID extends Serializable> imple
     }
 
     private Message<User<T, ID>> returnUserInfo(User<T, ID> user) {
-        return configuration.getMessageWithKey(
+        return configuration.getMessage(
             ExceptionCodeDescriptor.SERVER_OK,
-            ExceptionCodeDescriptor.SERVER_OK_DESC,
             user
         );
     }

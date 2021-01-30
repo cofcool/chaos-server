@@ -16,10 +16,6 @@
 
 package net.cofcool.chaos.server.security.spring.authorization;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.Message;
@@ -28,6 +24,11 @@ import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.Assert;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * 针对 <code>Authentication</code> 的基本配置项
@@ -58,9 +59,8 @@ public abstract class AbstractAuthenticationConfigure {
     protected void writeMessageToResponse(HttpServletRequest request, HttpServletResponse response,
         Authentication authentication) throws IOException, ServletException {
         Object principal = authentication == null ? null : authentication.getPrincipal();
-        Message result = getConfiguration().getMessageWithKey(
+        Message result = getConfiguration().getMessage(
             ExceptionCodeDescriptor.SERVER_OK,
-            ExceptionCodeDescriptor.SERVER_OK_DESC,
             principal
         );
 

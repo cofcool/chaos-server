@@ -47,8 +47,8 @@
 * 移除 MySQL 依赖
 * Spring Boot 升级到 v2.4.1
 * Shiro 升级到 v1.6.0
+* `Shiro` 的 `url` 配置由","改为";"分割
 * Shiro 优化登录操作, 可直接通过`Filter`进行登录
-* `data-redis` 依赖改为 `spring-boot-starter-data-redis`
 * 优化 `ResponseBodyMessageConverter` 处理 `Result` 时的逻辑
 * 移除旧版验证码验证方式，改为由 `AbstractLogin` 处理
 * `UserRole` 删除 `roleId`
@@ -58,3 +58,5 @@
 * 内部数据的解析不再依赖 `MappingJackson2HttpMessageConverter`, 转为调用默认的 `HttpMessageConverter`
 * 移除 `data-redis` 模块
 * 添加 `extension` 模块, 封装 `Redis`, `MongoDB` 等相关操作
+* 优化 `ExceptionCodeDescriptor` 实现, 状态码和描述信息共用键
+* 修复 `LoggingInterceptor` 在 controller 调用发生异常时不打印日志问题

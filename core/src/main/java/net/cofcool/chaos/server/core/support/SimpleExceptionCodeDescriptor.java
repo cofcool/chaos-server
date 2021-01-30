@@ -16,15 +16,16 @@
 
 package net.cofcool.chaos.server.core.support;
 
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
+import org.springframework.beans.factory.InitializingBean;
+
 import java.util.HashMap;
 import java.util.Map;
-import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
-import net.cofcool.chaos.server.core.i18n.ResourceExceptionCodeDescriptor;
-import org.springframework.beans.factory.InitializingBean;
 
 /**
  * ExceptionCodeDescriptor 的默认实现, 处理默认信息, 包括 {@link ExceptionCodeDescriptor#SERVER_ERR} 等,
- *  应用可使用 {@link ResourceExceptionCodeDescriptor}, 该类可读取"Spring"配置的"message"信息
+ *  应用可使用 {@link net.cofcool.chaos.server.core.i18n.ResourceExceptionCodeDescriptor}, 该类可读取"Spring"配置的"message"信息
+ * @see net.cofcool.chaos.server.core.i18n.ResourceExceptionCodeDescriptor
  * @author CofCool
  */
 public class SimpleExceptionCodeDescriptor implements ExceptionCodeDescriptor, InitializingBean {
@@ -147,85 +148,58 @@ public class SimpleExceptionCodeDescriptor implements ExceptionCodeDescriptor, I
      */
     public static final ExceptionCodeDescriptor DEFAULT_DESCRIPTOR = new SimpleExceptionCodeDescriptor();
 
-    private static final Map<String, String> DEFAULT_EXCEPTION_MESSAGES = new HashMap<>();
+    private static final Map<String, CodeMessage> DEFAULT_EXCEPTION_MESSAGES = new HashMap<>();
 
     static {
-        DEFAULT_EXCEPTION_MESSAGES.put(SERVER_OK, SERVER_OK_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(SERVER_OK_DESC, SERVER_OK_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(SERVER_ERR, SERVER_ERR_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(SERVER_ERR_DESC, SERVER_ERR_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(NO_LOGIN, NO_LOGIN_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(NO_LOGIN_DESC, NO_LOGIN_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(NO_ACCESS, NO_ACCESS_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(NO_ACCESS_DESC, NO_ACCESS_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(DENIAL_AUTH, DENIAL_AUTH_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(DENIAL_AUTH_DESC, DENIAL_AUTH_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(USER_PASSWORD_ERROR, USER_PASSWORD_ERROR_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(USER_PASSWORD_ERROR_DESC, USER_PASSWORD_ERROR_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(CAPTCHA_ERROR, CAPTCHA_ERROR_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(CAPTCHA_ERROR_DESC, CAPTCHA_ERROR_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(USER_NOT_EXITS, USER_NOT_EXITS_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(USER_NOT_EXITS_DESC, USER_NOT_EXITS_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(USERNAME_ERROR, USERNAME_ERROR_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(USERNAME_ERROR_DESC, USERNAME_ERROR_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(DENIAL_DEVICE, DENIAL_DEVICE_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(DENIAL_DEVICE_DESC, DENIAL_DEVICE_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(LOWEST_LEVEL_API, LOWEST_LEVEL_API_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(LOWEST_LEVEL_API_DESC, LOWEST_LEVEL_API_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(AUTH_ERROR, AUTH_ERROR_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(AUTH_ERROR_DESC, AUTH_ERROR_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(PARAM_NULL, PARAM_NULL_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(PARAM_NULL_DESC, PARAM_NULL_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(PARAM_ERROR, PARAM_ERROR_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(PARAM_ERROR_DESC, PARAM_ERROR_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(OPERATION_ERR, OPERATION_ERR_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(OPERATION_ERR_DESC, OPERATION_ERR_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(DENIAL_OPERATING, DENIAL_OPERATING_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(DENIAL_OPERATING_DESC, DENIAL_OPERATING_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(DATA_EXISTS, DATA_EXISTS_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(DATA_EXISTS_DESC, DATA_EXISTS_DESC_VAL);
-
-        DEFAULT_EXCEPTION_MESSAGES.put(DATA_ERROR, DATA_ERROR_VAL);
-        DEFAULT_EXCEPTION_MESSAGES.put(DATA_ERROR_DESC, DATA_ERROR_DESC_VAL);
+        DEFAULT_EXCEPTION_MESSAGES.put(SERVER_OK, ExceptionCodeDescriptor.message(SERVER_OK_VAL, SERVER_OK_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(SERVER_ERR, ExceptionCodeDescriptor.message(SERVER_ERR_VAL, SERVER_ERR_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(NO_LOGIN, ExceptionCodeDescriptor.message(NO_LOGIN_VAL, NO_LOGIN_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(NO_ACCESS, ExceptionCodeDescriptor.message(NO_ACCESS_VAL, NO_ACCESS_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(DENIAL_AUTH, ExceptionCodeDescriptor.message(DENIAL_AUTH_VAL, DENIAL_AUTH_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(USER_PASSWORD_ERROR, ExceptionCodeDescriptor.message(USER_PASSWORD_ERROR_VAL, USER_PASSWORD_ERROR_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(CAPTCHA_ERROR, ExceptionCodeDescriptor.message(CAPTCHA_ERROR_VAL, CAPTCHA_ERROR_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(USER_NOT_EXITS, ExceptionCodeDescriptor.message(USER_NOT_EXITS_VAL, USER_NOT_EXITS_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(USERNAME_ERROR, ExceptionCodeDescriptor.message(USERNAME_ERROR_VAL, USERNAME_ERROR_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(DENIAL_DEVICE, ExceptionCodeDescriptor.message(DENIAL_DEVICE_VAL, DENIAL_DEVICE_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(LOWEST_LEVEL_API, ExceptionCodeDescriptor.message(LOWEST_LEVEL_API_VAL, LOWEST_LEVEL_API_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(AUTH_ERROR, ExceptionCodeDescriptor.message(AUTH_ERROR_VAL, AUTH_ERROR_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(PARAM_NULL, ExceptionCodeDescriptor.message(PARAM_NULL_VAL, PARAM_NULL_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(PARAM_ERROR, ExceptionCodeDescriptor.message(PARAM_ERROR_VAL, PARAM_ERROR_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(OPERATION_ERR, ExceptionCodeDescriptor.message(OPERATION_ERR_VAL, OPERATION_ERR_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(DENIAL_OPERATING, ExceptionCodeDescriptor.message(DENIAL_OPERATING_VAL, DENIAL_OPERATING_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(DATA_EXISTS, ExceptionCodeDescriptor.message(DATA_EXISTS_VAL, DATA_EXISTS_DESC_VAL));
+        DEFAULT_EXCEPTION_MESSAGES.put(DATA_ERROR, ExceptionCodeDescriptor.message(DATA_ERROR_VAL, DATA_ERROR_DESC_VAL));
     }
 
     @Override
     public String code(String type) {
-        return DEFAULT_EXCEPTION_MESSAGES.getOrDefault(type, type);
+        CodeMessage message = DEFAULT_EXCEPTION_MESSAGES.get(type);
+        if (message == null) {
+            return type;
+        }
+        return message.code();
     }
 
     @Override
     public String description(String type) {
-        return DEFAULT_EXCEPTION_MESSAGES.getOrDefault(type, type);
+        CodeMessage message = DEFAULT_EXCEPTION_MESSAGES.get(type);
+        if (message == null) {
+            return type;
+        }
+        return message.desc();
     }
 
     /**
      * 添加自定义描述信息
      * @return 描述信息
      */
-    protected Map<String, String> customize() {
+    protected Map<String, CodeMessage> customize() {
         return null;
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Map<String, String> customizeMap = customize();
+        Map<String, CodeMessage> customizeMap = customize();
         if (customizeMap != null) {
             DEFAULT_EXCEPTION_MESSAGES.putAll(customizeMap);
         }

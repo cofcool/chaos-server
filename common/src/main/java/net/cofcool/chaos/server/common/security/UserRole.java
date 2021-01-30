@@ -16,11 +16,11 @@
 
 package net.cofcool.chaos.server.common.security;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * 用户角色
@@ -85,7 +85,7 @@ public interface UserRole extends Comparable<UserRole>, Serializable {
         while (i < roles.length && !flag) {
             if (roleName().equals(roles[i])) {
                 flag = true;
-            } else if (children() != null){
+            } else if (children() != null) {
                 Iterator<UserRole> roleIterator = children().iterator();
                 while (roleIterator.hasNext() && !flag) {
                     flag = roleIterator.next().contains(roles);

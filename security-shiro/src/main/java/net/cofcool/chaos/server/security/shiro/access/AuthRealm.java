@@ -81,14 +81,14 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
 
         if (user == null) {
             throw new UserNotExistException(
-                getExceptionDesc(ExceptionCodeDescriptor.USER_NOT_EXITS_DESC),
+                getExceptionDesc(ExceptionCodeDescriptor.USER_NOT_EXITS),
                 getExceptionCode(ExceptionCodeDescriptor.USER_NOT_EXITS)
             );
         }
 
         if (user.getUserStatuses().contains(UserStatus.LOCKED) || user.getUserStatuses().contains(UserStatus.CANCEL)) {
             throw new LoginException(
-                getExceptionDesc(ExceptionCodeDescriptor.DENIAL_AUTH_DESC),
+                getExceptionDesc(ExceptionCodeDescriptor.DENIAL_AUTH),
                 getExceptionCode(ExceptionCodeDescriptor.DENIAL_AUTH)
             );
         }

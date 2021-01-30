@@ -16,10 +16,6 @@
 
 package net.cofcool.chaos.server.security.spring.authorization;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.Message;
@@ -29,6 +25,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 
 /**
@@ -49,24 +50,17 @@ public class JsonAuthenticationFailureHandler extends AbstractAuthenticationConf
         AuthenticationException exception) throws IOException, ServletException {
         Message<?> message;
         if (exception instanceof UsernameNotFoundException) {
-            message = getMessage(ExceptionCodeDescriptor.USER_NOT_EXITS, ExceptionCodeDescriptor.USER_NOT_EXITS_DESC);
+            message = getConfiguration().getMessage(ExceptionCodeDescriptor.USER_NOT_EXITS, null);
         } else if (exception instanceof BadCredentialsException) {
-            message = getMessage(ExceptionCodeDescriptor.USER_PASSWORD_ERROR, ExceptionCodeDescriptor.USER_PASSWORD_ERROR_DESC);
+            message = getConfiguration().getMessage(ExceptionCodeDescriptor.USER_PASSWORD_ERROR, null);
         } else if (exception.getCause() instanceof AuthorizationException) {
             AuthorizationException cause = (AuthorizationException) exception.getCause();
-            message = getConfiguration().getMessage(cause.getCode(), cause.getMessage(), null);
+            message = getConfiguration().newMessage(cause.getCode(), cause.getMessage(), null);
         } else {
-            message = getMessage(ExceptionCodeDescriptor.AUTH_ERROR, exception.getMessage());
+            message = getConfiguration().getMessage(ExceptionCodeDescriptor.AUTH_ERROR, exception.getMessage(), null);
         }
 
         writeToResponse(request, response, message);
     }
 
-    private Message<?> getMessage(String codeKey, String descKey) {
-        return getConfiguration().getMessageWithKey(
-            codeKey,
-            descKey,
-            null
-        );
-    }
 }

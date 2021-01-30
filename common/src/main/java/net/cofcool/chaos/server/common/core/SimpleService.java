@@ -17,11 +17,12 @@
 package net.cofcool.chaos.server.common.core;
 
 
-import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Objects;
+
 /**
- * 基础 <b>Service</b>, 简化查询操作
+ * 基础 {@code Service}, 简化查询操作
  *
  * @see DataAccess
  *
@@ -57,8 +58,7 @@ public abstract class SimpleService<T> implements DataAccess<T> {
         Objects.requireNonNull(getPageProcessor());
         return configuration.getQueryResult(
             getPageProcessor().process(page, queryWithPage(page, entity)),
-            ExceptionCodeDescriptor.SERVER_OK,
-            ExceptionCodeDescriptor.SERVER_OK_DESC
+            ExceptionCodeDescriptor.SERVER_OK
         );
     }
 

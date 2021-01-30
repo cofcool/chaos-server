@@ -16,11 +16,6 @@
 
 package net.cofcool.chaos.server.security.shiro.access;
 
-import java.io.IOException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
@@ -33,6 +28,12 @@ import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
 import org.apache.shiro.web.filter.mgt.DefaultFilter;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.http.MediaType;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * 处理登录和未登录, 未登录时跳转到 {@link #UnLoginUrl}, 重写"Shiro"默认的未登录处理方法。
@@ -81,9 +82,8 @@ public class JsonAuthenticationFilter extends FormAuthenticationFilter {
             writeMessage(
                 ConfigurationSupport
                     .getConfiguration()
-                    .getMessageWithKey(
+                    .getMessage(
                         ExceptionCodeDescriptor.AUTH_ERROR,
-                        ExceptionCodeDescriptor.AUTH_ERROR_DESC,
                         null
                     ),
                 (HttpServletResponse) response);
@@ -118,7 +118,7 @@ public class JsonAuthenticationFilter extends FormAuthenticationFilter {
                         "Authentication url [" + getLoginUrl() + "]");
             }
 
-            String newUrl = getUnLoginUrl() + "?ex=" + ConfigurationSupport.getConfiguration().getExceptionDescription(ExceptionCodeDescriptor.DENIAL_AUTH_DESC);
+            String newUrl = getUnLoginUrl() + "?ex=" + ConfigurationSupport.getConfiguration().getExceptionDescription(ExceptionCodeDescriptor.DENIAL_AUTH);
 
             request.getRequestDispatcher(newUrl).forward(request, response);
 
