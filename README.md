@@ -27,9 +27,8 @@
 5. extension 封装 `Redis`, `MongoDB` 等相关操作
 6. security-shiro 封装了 `Shiro`, 简化开发流程
 7. security-spring 封装了 `Spring Security`, 简化开发流程
-8. actuator 提供监控所需依赖
-9. component-processor 编译时扫描 `BaseComponent` 注解, 该注解可标识基础组件, 避免组件调用混乱
-10. boot-starter 根据 `Spring Boot` 规范进行自动化配置
+8. component-processor 编译时扫描 `BaseComponent` 注解, 该注解可标识基础组件, 避免组件调用混乱
+9. boot-starter 根据 `Spring Boot` 规范进行自动化配置
 
 ### 配置 
 
