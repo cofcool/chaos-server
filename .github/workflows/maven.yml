@@ -20,4 +20,4 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Maven Verify
-        run: mvn --batch-mode -P1.8 verify -Dgpg.skip
+        run: mvn --batch-mode verify
