@@ -19,8 +19,5 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Publish to GitHub
-        env:
-          PGP_PASSPHRASE: ${{ secrets.GPG_SECRET_PASSPHRASE }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn --batch-mode -P1.8 deploy --file github-pom.xml -Dgpg.skip
+      - name: Maven Verify
+        run: mvn --batch-mode -P1.8 verify -Dgpg.skip
