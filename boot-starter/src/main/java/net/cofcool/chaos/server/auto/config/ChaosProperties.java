@@ -16,13 +16,15 @@
 
 package net.cofcool.chaos.server.auto.config;
 
-import static net.cofcool.chaos.server.auto.config.ChaosAutoConfiguration.PROJECT_CONFIGURE_PREFIX;
-
-import java.util.Map;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
+import net.cofcool.chaos.server.common.util.StringUtils;
 import net.cofcool.chaos.server.core.annotation.ApiVersion;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.Map;
+
+import static net.cofcool.chaos.server.auto.config.ChaosAutoConfiguration.PROJECT_CONFIGURE_PREFIX;
 
 /**
  * 项目可配置项
@@ -36,42 +38,10 @@ public class ChaosProperties {
 
     private Development development = new Development();
 
-    private Data data = new Data();
-
     /**
      * 应用自定义配置
      */
     private Map<String, String> properties;
-
-    public static class Data {
-
-        /**
-         * Mybatis 包扫描路径
-         */
-        private String mapperPackage;
-
-        /**
-         * Mybatis xml 路径
-         */
-        private String xmlPath;
-
-
-        public String getMapperPackage() {
-            return mapperPackage;
-        }
-
-        public void setMapperPackage(String mapperPackage) {
-            this.mapperPackage = mapperPackage;
-        }
-
-        public String getXmlPath() {
-            return xmlPath;
-        }
-
-        public void setXmlPath(String xmlPath) {
-            this.xmlPath = xmlPath;
-        }
-    }
 
     public static final class Auth {
 
@@ -79,11 +49,6 @@ public class ChaosProperties {
          * 注入数据key配置, 多个时以","分隔
          */
         private String checkedKeys = "";
-
-        /**
-         * 是否开启验证码
-         */
-        private Boolean usingCaptcha = false;
 
         /**
          * 默认用户的用户名
@@ -96,7 +61,7 @@ public class ChaosProperties {
         private String defaultPassword;
 
         /**
-         * 授权路径配置, 用","分割
+         * 授权路径配置, 用";"分割
          * <br>
          * <b>注意</b>: "Spring Security" 项目, 该配置为匿名访问路径; "Shiro" 为授权路径配置, 即"filterChainDefinitions"
          */
@@ -128,13 +93,13 @@ public class ChaosProperties {
         private String unLoginUrl = expiredUrl;
 
         /**
-         * 是否启用 {@link  org.springframework.web.filter.CorsFilter}
+         * 是否启用 {@link  org.springframework.web.filter.CorsFilter CORS}, 默认关闭
          */
         private Boolean corsEnabled = false;
 
 
         /**
-         * 是否启用 CSRF, 默认启用
+         * 是否启用 {@link org.springframework.security.web.csrf.CsrfFilter CSRF} , 默认启用
          */
         private Boolean csrfEnabled = true;
 
@@ -174,14 +139,6 @@ public class ChaosProperties {
 
         public void setCheckedKeys(String checkedKeys) {
             this.checkedKeys = checkedKeys;
-        }
-
-        public Boolean getUsingCaptcha() {
-            return usingCaptcha;
-        }
-
-        public void setUsingCaptcha(Boolean usingCaptcha) {
-            this.usingCaptcha = usingCaptcha;
         }
 
         public String getUrls() {
@@ -253,14 +210,24 @@ public class ChaosProperties {
          * @return 匿名访问路径
          */
         public String springExcludeUrl() {
-            return String.join(
-                ",",
-                getUrls(),
-                getUnauthUrl(),
-                getExpiredUrl(),
-                getUnLoginUrl(),
-                getLogoutUrl()
-            );
+            if (StringUtils.isNullOrEmpty(urls)) {
+                return String.join(
+                    ",",
+                    getUnauthUrl(),
+                    getExpiredUrl(),
+                    getUnLoginUrl(),
+                    getLogoutUrl()
+                );
+            } else {
+                return String.join(
+                    ",",
+                    getUrls().replace(";", ","),
+                    getUnauthUrl(),
+                    getExpiredUrl(),
+                    getUnLoginUrl(),
+                    getLogoutUrl()
+                );
+            }
         }
 
         /**
@@ -269,7 +236,7 @@ public class ChaosProperties {
          */
         public String shiroUrls() {
             StringBuilder urlStr = new StringBuilder();
-            String[] urls = getUrls().split(",");
+            String[] urls = getUrls().split(";");
             for (String url : urls) {
                 urlStr.append(url).append("\n");
             }
@@ -305,7 +272,7 @@ public class ChaosProperties {
         /**
          * 是否调试模式
          */
-        private Boolean debug = false;
+        private Boolean debug = Boolean.FALSE;
 
         /**
          * 项目版本
@@ -395,17 +362,6 @@ public class ChaosProperties {
 
     public void setDevelopment(Development development) {
         this.development = development;
-    }
-
-    /**
-     * 数据库相关配置
-     */
-    public Data getData() {
-        return data;
-    }
-
-    public void setData(Data data) {
-        this.data = data;
     }
 
     public Map<String, String> getProperties() {

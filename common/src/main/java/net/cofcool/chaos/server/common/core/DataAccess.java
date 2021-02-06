@@ -33,7 +33,7 @@ public interface DataAccess<T> {
      *
      * @return {@link ExecuteResult} 对象
      */
-    ExecuteResult<T> add(T entity);
+    ExecuteResult<T> insert(T entity);
 
     /**
      * 删除
@@ -52,6 +52,20 @@ public interface DataAccess<T> {
      * @return {@link ExecuteResult} 对象
      */
     ExecuteResult<T> update(T entity);
+
+    /**
+     * 保存, 如果发现有数据则做修改操作, 否则做添加操作
+     *
+     * @param entity 实体
+     * @return {@link ExecuteResult} 对象
+     */
+    default ExecuteResult<T> save(T entity) {
+        if (queryById(entity).successful()) {
+            return update(entity);
+        } else {
+            return insert(entity);
+        }
+    }
 
     /**
      * 分页查询

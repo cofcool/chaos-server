@@ -66,7 +66,7 @@ public class DataSourceAspect {
 
             setupDataSource(dataSource);
         } catch (Exception e) {
-            log.error("resolve datasource error: {}", e);
+            log.error("resolve datasource error", e);
         }
 
         return dataSource != null;

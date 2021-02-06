@@ -46,10 +46,20 @@ public class ExceptionCodeManager {
         return descriptor;
     }
 
+    /**
+     * 获取异常描述码, 如不存在则直接返回 type
+     * @param type 异常类型
+     * @return 异常描述码
+     */
     public String getCode(String type) {
         return descriptor.code(type);
     }
 
+    /**
+     * 获取异常描述信息, 如不存在则直接返回 type
+     * @param type 异常类型
+     * @return 异常描述信息
+     */
     public String getDescription(String type) {
         return descriptor.description(type);
     }

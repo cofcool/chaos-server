@@ -16,50 +16,28 @@
 
 package net.cofcool.chaos.server.auto.config;
 
-import static org.springframework.util.StringUtils.delimitedListToStringArray;
-
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
+import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.pagination.optimize.JsqlParserCountOptimize;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.pagehelper.PageInterceptor;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import javax.servlet.Filter;
-import javax.sql.DataSource;
-import net.cofcool.chaos.server.common.core.ConfigurationSupport;
+import net.cofcool.chaos.server.common.core.*;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport.DefaultConfigurationCustomizer;
-import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
-import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
 import net.cofcool.chaos.server.common.security.AuthService;
 import net.cofcool.chaos.server.common.security.PasswordProcessor;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
 import net.cofcool.chaos.server.common.util.StringUtils;
 import net.cofcool.chaos.server.core.annotation.Scanned;
 import net.cofcool.chaos.server.core.annotation.scanner.BeanScannerConfigure;
-import net.cofcool.chaos.server.core.aop.ApiProcessingInterceptor;
-import net.cofcool.chaos.server.core.aop.LoggingInterceptor;
-import net.cofcool.chaos.server.core.aop.ScannedCompositeMethodInterceptor;
-import net.cofcool.chaos.server.core.aop.ScannedMethodInterceptor;
-import net.cofcool.chaos.server.core.aop.ScannedResourceAdvisor;
-import net.cofcool.chaos.server.core.aop.ValidateInterceptor;
+import net.cofcool.chaos.server.core.aop.*;
 import net.cofcool.chaos.server.core.i18n.ResourceExceptionCodeDescriptor;
 import net.cofcool.chaos.server.core.support.GlobalHandlerExceptionResolver;
 import net.cofcool.chaos.server.core.support.ResponseBodyMessageConverter;
 import net.cofcool.chaos.server.core.support.SimpleExceptionCodeDescriptor;
-import net.cofcool.chaos.server.security.shiro.access.AccountCredentialsMatcher;
-import net.cofcool.chaos.server.security.shiro.access.AuthRealm;
-import net.cofcool.chaos.server.security.shiro.access.ExceptionAuthenticationStrategy;
 import net.cofcool.chaos.server.security.shiro.access.JsonAuthenticationFilter;
-import net.cofcool.chaos.server.security.shiro.access.PermissionFilter;
+import net.cofcool.chaos.server.security.shiro.access.*;
 import net.cofcool.chaos.server.security.shiro.authorization.ShiroAuthServiceImpl;
-import net.cofcool.chaos.server.security.spring.authorization.SpringAuthServiceImpl;
-import net.cofcool.chaos.server.security.spring.authorization.SpringDaoAuthenticationProvider;
-import net.cofcool.chaos.server.security.spring.authorization.SpringUserAuthorizationService;
-import net.cofcool.chaos.server.security.spring.authorization.UrlBased;
+import net.cofcool.chaos.server.security.spring.authorization.*;
 import net.cofcool.chaos.server.security.spring.config.JsonLoginConfigure;
-import org.apache.ibatis.plugin.Interceptor;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.Authenticator;
 import org.apache.shiro.authc.pam.ModularRealmAuthenticator;
@@ -72,23 +50,25 @@ import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.aop.Advisor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.context.annotation.Role;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.PermissionEvaluator;
@@ -109,14 +89,23 @@ import org.springframework.util.Assert;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
+import javax.servlet.Filter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.springframework.util.StringUtils.delimitedListToStringArray;
+
 /**
  * 项目配置
  *
  * @author CofCool
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(ChaosProperties.class)
 @AutoConfigureAfter(JacksonAutoConfiguration.class)
+@SuppressWarnings("unchecked, rawtypes")
 public class ChaosAutoConfiguration implements ApplicationContextAware {
 
     public static final String PACKAGE_PATH = "net.cofcool.chaos";
@@ -151,16 +140,26 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
     }
 
     /**
-     * 配置AOP, 使用 {@link Scanned} 注解的类可以被代理
+     * 创建 {@link ScannedResourceAdvisor}, 使用 {@link Scanned} 注解的类可以被代理
      *
-     * @param scannedMethodInterceptors 应用创建的 {@link ScannedMethodInterceptor} 实例列表
      * @return Advisor
      *
      * @see Scanned
      */
     @Bean
-    public Advisor scannedResourceAdvisor(List<ScannedMethodInterceptor> scannedMethodInterceptors) {
-        return new ScannedResourceAdvisor(new ScannedCompositeMethodInterceptor(scannedMethodInterceptors));
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    public Advisor scannedResourceAdvisor() {
+        return new ScannedResourceAdvisor(new ScannedCompositeMethodInterceptor());
+    }
+
+    /**
+     * 创建 ScannedResourceAdvisorHelper
+     * @param scannedResourceAdvisor ScannedResourceAdvisor
+     * @return ScannedResourceAdvisorHelper
+     */
+    @Bean
+    public ScannedResourceAdvisor.ScannedResourceAdvisorHelper scannedResourceAdvisorHelper(ScannedResourceAdvisor scannedResourceAdvisor) {
+        return ScannedResourceAdvisor.createHelper(scannedResourceAdvisor);
     }
 
 
@@ -193,22 +192,24 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
         @Bean
         @ConditionalOnMissingBean
-        public ConfigurationSupport configurationSupport(ExceptionCodeManager exceptionCodeManager) {
+        public ConfigurationSupport configurationSupport(
+            ExceptionCodeManager exceptionCodeManager,
+            @Autowired(required = false) ConfigurationCustomizer configurationCustomizer) {
             return ConfigurationSupport
                 .builder()
                 .exceptionCodeManager(exceptionCodeManager)
                 .isDebug(chaosProperties.getDevelopment().getDebug())
-                .customizer(new DefaultConfigurationCustomizer())
+                .customizer(configurationCustomizer == null ? new DefaultConfigurationCustomizer() : configurationCustomizer)
                 .build();
         }
 
         @Bean
         @ConditionalOnMissingBean
         public GlobalHandlerExceptionResolver exceptionResolver(
-            ConfigurationSupport configurationSupport, ObjectMapper objectMapper) {
+            ConfigurationSupport configurationSupport, HttpMessageConverters httpMessageConverters) {
             GlobalHandlerExceptionResolver ex = new GlobalHandlerExceptionResolver();
             ex.setConfiguration(configurationSupport);
-            ex.setJacksonObjectMapper(objectMapper);
+            ex.setHttpMessageConverters(httpMessageConverters);
 
             return ex;
         }
@@ -253,6 +254,10 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
             return new SessionLocaleResolver();
         }
 
+        /**
+         * 当应用主动创建 {@link HttpMessageConverters} 时, 该 {@code bean} 不会自动注入到 {@code HttpMessageConverters} 中, 需手动注入, 如 {@code new HttpMessageConverters(customConverter, responseBodyMessageConverter)}
+         * @return MappingJackson2HttpMessageConverter
+         */
         @Bean
         @ConditionalOnMissingBean
         public MappingJackson2HttpMessageConverter responseBodyMessageConverter(ObjectMapper objectMapper, ConfigurationSupport configurationSupport) {
@@ -277,7 +282,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
              */
             @Bean
             @ConditionalOnMissingBean
-            public ShiroFilterFactoryBean shiroFilter(UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, PasswordProcessor passwordProcessor, ConfigurationSupport configurationSupport) {
+            public ShiroFilterFactoryBean shiroFilter(AuthService authService, UserAuthorizationService userAuthorizationService, SessionManager sessionManager, @Autowired(required = false) CacheManager shiroCacheManager, PasswordProcessor passwordProcessor, ConfigurationSupport configurationSupport, HttpMessageConverters httpMessageConverters) {
                 Map<String, Filter> filterMap = new HashMap<>();
                 filterMap.put(
                     PermissionFilter.FILTER_KEY,
@@ -287,10 +292,17 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                     )
                 );
                 filterMap.put(
+                    JsonLogoutFilter.FILTER_KEY,
+                    new JsonLogoutFilter(httpMessageConverters)
+                );
+                filterMap.put(
                     JsonAuthenticationFilter.FILTER_KEY,
                     new JsonAuthenticationFilter(
                         chaosProperties.getAuth().getLoginUrl(),
-                        chaosProperties.getAuth().getUnLoginUrl()
+                        chaosProperties.getAuth().getUnLoginUrl(),
+                        httpMessageConverters,
+                        authService,
+                        chaosProperties.getAuth().getLoginObjectType()
                     )
                 );
 
@@ -341,7 +353,6 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                 AuthRealm realm = new AuthRealm();
                 realm.setCredentialsMatcher(matcher);
                 realm.setUserAuthorizationService(userAuthorizationService);
-                realm.setUsingCaptcha(auth.getUsingCaptcha());
                 realm.setConfiguration(configurationSupport);
 
                 return realm;
@@ -353,7 +364,6 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
              * @return authService
              */
             @Bean
-            @SuppressWarnings("unchecked")
             public AuthService authService(UserAuthorizationService userAuthorizationService, ConfigurationSupport configurationSupport) {
                 ShiroAuthServiceImpl authService = new ShiroAuthServiceImpl();
                 authService.setUserAuthorizationService(userAuthorizationService);
@@ -375,6 +385,9 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
         }
 
+        /**
+         * Spring Security 配置, 若不使用本配置注意移除 {@link JsonLoginConfigure}, 如 {@code httpSecurity.removeConfigurer(JsonLoginConfigure.class)}
+         */
         @Configuration
         @ConditionalOnClass(DefaultAuthenticationEventPublisher.class)
         @ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
@@ -382,13 +395,13 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
             private AuthenticationProvider authenticationProvider;
 
-            private MappingJackson2HttpMessageConverter messageConverter;
+            private HttpMessageConverters messageConverter;
             private ConfigurationSupport configurationSupport;
 
             private SpringUserAuthorizationService userAuthorizationService;
 
             @Autowired
-            public void setMessageConverter(MappingJackson2HttpMessageConverter messageConverter) {
+            public void setMessageConverter(HttpMessageConverters messageConverter) {
                 this.messageConverter = messageConverter;
             }
 
@@ -399,8 +412,12 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
 
             @Autowired
             public void setUserAuthorizationService(
-                SpringUserAuthorizationService userAuthorizationService) {
-                this.userAuthorizationService = userAuthorizationService;
+                UserAuthorizationService userAuthorizationService) {
+                if (userAuthorizationService instanceof SpringUserAuthorizationService) {
+                    this.userAuthorizationService = (SpringUserAuthorizationService) userAuthorizationService;
+                } else {
+                    this.userAuthorizationService = SpringUserAuthorizationService.of(userAuthorizationService);
+                }
             }
 
             @Configuration
@@ -430,7 +447,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                         .authorizeRequests()
                         .antMatchers(
                             delimitedListToStringArray(chaosProperties.getAuth().springExcludeUrl(), ",")
-                        ).anonymous()
+                        ).permitAll()
                         .antMatchers("/**").authenticated()
                         .accessDecisionManager(
                             new UrlBased(getDecisionVoters(http), userAuthorizationService, true)
@@ -447,6 +464,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
                         .and()
                         .logout()
                         .logoutUrl(chaosProperties.getAuth().getLogoutUrl())
+                        .logoutSuccessHandler(new JsonLogoutSuccessHandler(configurationSupport, messageConverter))
                         .permitAll()
                         .and()
                         .sessionManagement()
@@ -515,57 +533,29 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
             }
         }
 
+
+        /**
+         * Mybaits 相关配置
+         */
         @Configuration
         @ConditionalOnClass(SqlSessionFactoryBean.class)
+        @AutoConfigureBefore(MybatisPlusAutoConfiguration.class)
         class MybatisConfig {
 
+            /**
+             * 分页插件
+             * @return {@link PaginationInterceptor}
+             */
             @Bean
-            public org.apache.ibatis.session.Configuration configuration() {
-                org.apache.ibatis.session.Configuration configuration = new org.apache.ibatis.session.Configuration();
-                configuration.setUseGeneratedKeys(true);
-
-                return configuration;
+            @ConditionalOnMissingBean
+            public PaginationInterceptor paginationInterceptor() {
+                PaginationInterceptor paginationInterceptor = new PaginationInterceptor();
+                 paginationInterceptor.setOverflow(false);
+                 paginationInterceptor.setLimit(Page.PAGE_MAX_SIZE);
+                paginationInterceptor.setCountSqlParser(new JsqlParserCountOptimize(true));
+                return paginationInterceptor;
             }
 
-            @Bean
-            public SqlSessionFactoryBean sqlSessionFactory(DataSource dataSource, org.apache.ibatis.session.Configuration configuration, Interceptor[] mybatisPlugins, ApplicationContext applicationContext)
-                throws IOException {
-                SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
-                factoryBean.setMapperLocations(
-                    ResourcePatternUtils
-                        .getResourcePatternResolver(applicationContext)
-                        .getResources(
-                            chaosProperties.getData().getXmlPath()
-                        )
-                );
-                factoryBean.setDataSource(dataSource);
-                factoryBean.setPlugins(mybatisPlugins);
-
-                factoryBean.setConfiguration(configuration);
-
-                return factoryBean;
-            }
-
-            @Bean
-            public Interceptor[] mybatisPlugins() {
-                PageInterceptor interceptor = new PageInterceptor();
-                Properties properties = new Properties();
-                properties.setProperty("helperDialect", "mysql");
-                properties.setProperty("reasonable", "true");
-                interceptor.setProperties(properties);
-
-                return new Interceptor[] {interceptor};
-            }
-
-            @Bean
-            public MapperScannerConfigurer mapperScannerConfigurer() {
-                MapperScannerConfigurer configurer = new MapperScannerConfigurer();
-                configurer.setBasePackage(chaosProperties.getData
-                    ().getMapperPackage());
-                configurer.setSqlSessionFactoryBeanName("sqlSessionFactory");
-
-                return configurer;
-            }
         }
     }
 

@@ -16,12 +16,21 @@
 
 package net.cofcool.chaos.server.common.util;
 
+import java.io.IOException;
 import java.util.Enumeration;
 import javax.annotation.Nullable;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -173,6 +182,62 @@ public final class WebUtils {
         servletResponse.setHeader("Access-Control-Max-Age", "43200");
 
         return servletResponse;
+    }
+
+    /**
+     * 解析数据并写入 {@code response}, 参考 {@link HttpMessageConverter#write(Object, MediaType, HttpOutputMessage)}
+     *
+     * @param messageConverters messageConverters
+     * @param response {@code response}
+     * @param result 数据对象
+     *
+     * @throws IOException 发生 IO 错误
+     * @throws HttpMessageNotWritableException 解析失败
+     * @throws IllegalStateException 未找到合适的 {@link HttpMessageConverter}
+     */
+    @SuppressWarnings("unchecked, rawtypes")
+    public static void writeObjToResponse(HttpMessageConverters messageConverters, HttpServletResponse response, Object result, MediaType mediaType) throws IOException {
+        for (HttpMessageConverter convert : messageConverters.getConverters()) {
+            if (convert.canWrite(result.getClass(), mediaType)) {
+                convert.write(
+                    result,
+                    mediaType,
+                    new ServletServerHttpResponse(response)
+                );
+
+                return;
+            }
+        }
+
+        throw new IllegalStateException("no HttpMessageConverter be found for " + MediaType.APPLICATION_JSON.toString());
+    }
+
+    /**
+     * 解析 {@code request} 中的数据
+     *
+     * @param messageConverters messageConverters
+     * @param request {@code request}
+     * @param type 数据类型
+     * @param <T> 数据类型
+     * @return 解析后的对象
+     *
+     * @throws IOException 发生 IO 错误
+     * @throws HttpMessageNotReadableException 解析失败
+     * @throws IllegalStateException 未找到合适的 {@link HttpMessageConverter}
+     */
+    @SuppressWarnings("unchecked, rawtypes")
+    public static <T> T readObjFromRequest(HttpMessageConverters messageConverters, HttpServletRequest request, Class<? extends T> type) throws IOException {
+        MediaType mediaType = MediaType.parseMediaType(request.getContentType());
+        for (HttpMessageConverter convert : messageConverters.getConverters()) {
+            if (convert.canRead(type, mediaType)) {
+                return (T) convert.read(
+                    type,
+                    new ServletServerHttpRequest(request)
+                );
+            }
+        }
+
+        throw new IllegalStateException("no HttpMessageConverter be found for " + mediaType.toString());
     }
 
 }

@@ -45,15 +45,6 @@ public interface UserAuthorizationService<T extends Auth, ID extends Serializabl
     Message<Boolean> checkUser(User<T, ID> currentUser);
 
     /**
-     * 检查验证码
-     * @param loginUser 请求数据
-     * @return 是否通过验证
-     */
-    default boolean checkCaptcha(AbstractLogin loginUser) {
-        return true;
-    }
-
-    /**
      * 配置登陆时的用户数据
      * @param currentUser 当前用户
      */
@@ -69,16 +60,5 @@ public interface UserAuthorizationService<T extends Auth, ID extends Serializabl
      * @throws net.cofcool.chaos.server.common.security.exception.AuthorizationException 抛出相关权限异常
      */
     void checkPermission(ServletRequest servletRequest, ServletResponse servletResponse, Object authenticationInfo, String requestPath);
-
-    /**
-     * 报告授权验证异常信息
-     * <br>
-     * <b>TODO</b>: 使用事件监听方式替代, 参考<code>org.springframework.security.authentication.event.AuthenticationSuccessEvent</code>等
-     * @param authenticationInfo 授权信息
-     * @param authenticationException 异常信息
-     */
-    default void reportAuthenticationExceptionInfo(Object authenticationInfo, Throwable authenticationException) {
-
-    }
 
 }

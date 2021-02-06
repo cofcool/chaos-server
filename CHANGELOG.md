@@ -41,3 +41,22 @@
 **0.4.1**:
 
 * 新增 `ConfigurationSupport` 配置类, 简化 `ExceptionCodeManager` 等类的配置方式, 可自定义 `Message` 等接口类
+
+**0.5.0**:
+
+* 移除 MySQL 依赖
+* Spring Boot 升级到 v2.4.1
+* Shiro 升级到 v1.6.0
+* `Shiro` 的 `url` 配置由","改为";"分割
+* Shiro 优化登录操作, 可直接通过`Filter`进行登录
+* 优化 `ResponseBodyMessageConverter` 处理 `Result` 时的逻辑
+* 移除旧版验证码验证方式，改为由 `AbstractLogin` 处理
+* `UserRole` 删除 `roleId`
+* 移除 `UserAuthorizationService.reportAuthenticationExceptionInfo`, 改为使用事件机制
+* `DataAccess` 添加 `save()` 方法, `add` 方法重命名为 `insert`
+* `data-mybatis` 改为依赖 `MyBatis-Plus`
+* 内部数据的解析不再依赖 `MappingJackson2HttpMessageConverter`, 转为调用默认的 `HttpMessageConverter`
+* 移除 `data-redis` 模块
+* 添加 `extension` 模块, 封装 `Redis`, `MongoDB` 等相关操作
+* 优化 `ExceptionCodeDescriptor` 实现, 状态码和描述信息共用键
+* 修复 `LoggingInterceptor` 在 controller 调用发生异常时不打印日志问题

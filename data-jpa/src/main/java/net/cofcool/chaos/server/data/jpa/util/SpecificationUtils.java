@@ -33,10 +33,14 @@ import org.hibernate.engine.jdbc.spi.JdbcServices;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.internal.util.StringHelper;
+import org.hibernate.internal.util.collections.Stack;
+import org.hibernate.internal.util.collections.StandardStack;
 import org.hibernate.query.criteria.LiteralHandlingMode;
 import org.hibernate.query.criteria.internal.compile.ExplicitParameterInfo;
 import org.hibernate.query.criteria.internal.compile.RenderingContext;
+import org.hibernate.query.criteria.internal.expression.function.FunctionExpression;
 import org.hibernate.query.criteria.internal.predicate.CompoundPredicate;
+import org.hibernate.sql.ast.Clause;
 import org.hibernate.type.Type;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
@@ -183,6 +187,9 @@ public class SpecificationUtils {
 
         private final Map<ParameterExpression<?>, ExplicitParameterInfo<?>> explicitParameterInfoMap = new HashMap<>();
 
+        private final Stack<Clause> clauseStack = new StandardStack<>();
+        private final Stack<FunctionExpression> functionContextStack = new StandardStack<>();
+
         private String alias;
         private SessionImplementor entityManager;
         private Dialect dialect;
@@ -251,6 +258,16 @@ public class SpecificationUtils {
         @Override
         public LiteralHandlingMode getCriteriaLiteralHandlingMode() {
             return LiteralHandlingMode.INLINE;
+        }
+
+        @Override
+        public Stack<Clause> getClauseStack() {
+            return clauseStack;
+        }
+
+        @Override
+        public Stack<FunctionExpression> getFunctionStack() {
+            return functionContextStack;
         }
     }
 

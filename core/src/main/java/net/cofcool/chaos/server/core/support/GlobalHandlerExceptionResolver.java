@@ -16,25 +16,15 @@
 
 package net.cofcool.chaos.server.core.support;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.util.NoSuchElementException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import net.cofcool.chaos.server.common.core.ConfigurationSupport;
-import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
-import net.cofcool.chaos.server.common.core.ExceptionLevel;
-import net.cofcool.chaos.server.common.core.Message;
-import net.cofcool.chaos.server.common.core.ServiceException;
+import net.cofcool.chaos.server.common.core.*;
 import net.cofcool.chaos.server.common.util.WebUtils;
 import net.cofcool.chaos.server.core.aop.ValidateInterceptor;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.core.Ordered;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -43,9 +33,16 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.util.NoSuchElementException;
+
 /**
- * 异常处理器, 应用处于 {@link ConfigurationSupport#isDebug()} 时优先级低于Spring默认异常解析器的, 其它情况优先级最高,
- * 部分 {@linkplain Message 描述信息} 通过 {@link ConfigurationSupport#getMessageWithKey(String, String, Object)} 创建,
+ * 异常处理器, 把异常信息转换为 {@link Message}, "Content-Type" 为 "JSON", 应用处于 {@link ConfigurationSupport#isDebug()} 时
+ * 优先级低于Spring默认异常解析器的, 其它情况优先级最高,
+ * 部分 {@linkplain Message 描述信息} 通过 {@link ConfigurationSupport#getMessage(String, Object)} 创建,
  * 如 {@link ServiceException} 等
  *
  * @see DefaultHandlerExceptionResolver
@@ -72,7 +69,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         }
     }
 
-    private ObjectMapper jacksonObjectMapper;
+    private HttpMessageConverters httpMessageConverters;
 
     private ConfigurationSupport configuration;
 
@@ -88,12 +85,12 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         defaultExceptionResolver = new DefaultHandlerExceptionResolver();
     }
 
-    protected ObjectMapper getJacksonObjectMapper() {
-        return jacksonObjectMapper;
+    protected HttpMessageConverters getHttpMessageConverters() {
+        return httpMessageConverters;
     }
 
-    public void setJacksonObjectMapper(ObjectMapper jacksonObjectMapper) {
-        this.jacksonObjectMapper = jacksonObjectMapper;
+    public void setHttpMessageConverters(HttpMessageConverters httpMessageConverters) {
+        this.httpMessageConverters = httpMessageConverters;
     }
 
     protected HandlerExceptionResolver getDefaultExceptionResolver() {
@@ -103,12 +100,12 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     @Override
     protected ModelAndView doResolveException(HttpServletRequest request,
                                               HttpServletResponse response, Object handler, Exception ex) {
-        printExceptionLog(request, handler, ex);
-
         Exception throwable = ex;
         if (ex instanceof UndeclaredThrowableException) {
             throwable = (Exception) ((UndeclaredThrowableException) ex).getUndeclaredThrowable();
         }
+
+        printExceptionLog(request, handler, throwable);
 
         if (throwable instanceof ServiceException) {
             return handleServiceException(response, (ServiceException) throwable);
@@ -123,7 +120,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         } else if (springDataAccessException != null && springDataAccessException.isAssignableFrom(throwable.getClass())) {
             return handleSqlException(response, throwable);
         } else {
-            return resolveOthersException(request, response, handler, ex);
+            return resolveOthersException(request, response, handler, throwable);
         }
     }
 
@@ -131,8 +128,8 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         writeMessage(
             response,
             configuration.getMessage(
-                ExceptionCodeDescriptor.PARAM_NULL, true,
-                ValidateInterceptor.getFirstErrorString(ex.getBindingResult()), false,
+                ExceptionCodeDescriptor.PARAM_NULL,
+                ValidateInterceptor.getFirstErrorString(ex.getBindingResult()),
                 null
             )
         );
@@ -142,10 +139,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
 
     protected void printExceptionLog(HttpServletRequest request, Object handler, Exception ex) {
         if (logger.isErrorEnabled() && ((!(ex instanceof ExceptionLevel)) || ((ExceptionLevel) ex).showable())) {
-            OutputStream outputStream = new ByteArrayOutputStream();
-            ex.printStackTrace(new PrintStream(outputStream));
-
-            logger.error("exception log: path=[" + WebUtils.getRealRequestPath(request) + "];exception=[" + outputStream.toString() + "]");
+            logger.error("exception log: path=[" + WebUtils.getRealRequestPath(request) + "]", ex);
         }
     }
 
@@ -155,11 +149,9 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
             writeMessage(
                 response,
                 configuration.getMessage(
-                    ExceptionCodeDescriptor.OPERATION_ERR, true,
+                    ExceptionCodeDescriptor.OPERATION_ERR,
                     configuration.isDebug() ?
-                        ex.getMessage() :
-                        ExceptionCodeDescriptor.OPERATION_ERR_DESC,
-                    !configuration.isDebug(),
+                        ex.getMessage()  : configuration.getExceptionDescription(ExceptionCodeDescriptor.OPERATION_ERR),
                     null
                 )
             );
@@ -172,7 +164,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handleNullException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            configuration.getMessageWithKey(ExceptionCodeDescriptor.DATA_ERROR, ExceptionCodeDescriptor.DATA_ERROR_DESC, null)
+            configuration.getMessage(ExceptionCodeDescriptor.DATA_ERROR, null)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -181,7 +173,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handle5xxException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            configuration.getMessageWithKey(ExceptionCodeDescriptor.SERVER_ERR, ExceptionCodeDescriptor.SERVER_ERR_DESC, null)
+            configuration.getMessage(ExceptionCodeDescriptor.SERVER_ERR, null)
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -195,15 +187,13 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
      */
     protected ModelAndView handleSqlException(HttpServletResponse response, Exception ex) {
         writeMessage(
-            response,
-            configuration.getMessage(
-                ExceptionCodeDescriptor.DATA_ERROR, true,
-                configuration.isDebug() ?
-                    ex.getMessage() :
-                    ExceptionCodeDescriptor.DATA_ERROR_DESC,
-                !configuration.isDebug(),
-                null
-            )
+                response,
+                configuration.getMessage(
+                        ExceptionCodeDescriptor.DATA_ERROR,
+                        configuration.isDebug() ?
+                                ex.getMessage() : configuration.getExceptionDescription(ExceptionCodeDescriptor.DATA_ERROR),
+                        null
+                )
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -211,12 +201,12 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
 
     private ModelAndView handleServiceException(HttpServletResponse response, ServiceException ex) {
         writeMessage(
-            response,
-            configuration.getMessageWithKey(
-                ex.getCode() == null ? ExceptionCodeDescriptor.OPERATION_ERR : ex.getCode(),
-                ex.getMessage(),
-                null
-            )
+                response,
+                configuration.newMessage(
+                        ex.getCode() == null ? configuration.getExceptionCode(ExceptionCodeDescriptor.OPERATION_ERR) : ex.getCode(),
+                        ex.getMessage(),
+                        null
+                )
         );
 
         return EMPTY_MODEL_AND_VIEW;
@@ -225,9 +215,8 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     private ModelAndView handle4xxException(HttpServletResponse response, Exception ex) {
         writeMessage(
             response,
-            configuration.getMessageWithKey(
+            configuration.getMessage(
                 ExceptionCodeDescriptor.PARAM_ERROR,
-                ExceptionCodeDescriptor.PARAM_ERROR_DESC,
                 null
             )
         );
@@ -235,15 +224,14 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         return EMPTY_MODEL_AND_VIEW;
     }
 
+    @SuppressWarnings("rawtypes")
     protected void writeMessage(HttpServletResponse response, Message message) {
         try {
             response.setCharacterEncoding("utf-8");
-            response.setHeader("Content-Type", "application/json;charset=UTF-8");
-            response.getWriter().append(jacksonObjectMapper.writeValueAsString(message));
-            response.flushBuffer();
-        } catch (IOException e) {
+            WebUtils.writeObjToResponse(getHttpMessageConverters(), response, message, MediaType.APPLICATION_JSON);
+        } catch (IOException | HttpMessageNotWritableException e) {
             if (logger.isErrorEnabled()) {
-                logger.error("parse exception error: ",e);
+                logger.error("parse exception error: ", e);
             }
         }
     }
@@ -251,9 +239,11 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
     @Override
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(configuration, "configuration must be specified");
+        Assert.notNull(httpMessageConverters, "httpMessageConverters must be specified");
 
         if (!configuration.isDebug()) {
-            setOrder(Ordered.HIGHEST_PRECEDENCE);
+            // 允许自定义更高优先级的异常处理器
+            setOrder(Ordered.HIGHEST_PRECEDENCE + 100);
         }
     }
 }

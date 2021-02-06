@@ -17,6 +17,8 @@
 package net.cofcool.chaos.server.security.spring.authorization;
 
 import java.io.Serializable;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.security.AbstractLogin.DefaultLogin;
@@ -60,21 +62,85 @@ public interface SpringUserAuthorizationService<T extends Auth, ID extends Seria
         User<T, ID> user = queryUser(login);
 
         if (user == null) {
-            UsernameNotFoundException e = new UsernameNotFoundException(login.getUsername());
-            reportAuthenticationExceptionInfo(login, e);
-
-            throw e;
+            throw new UsernameNotFoundException(login.getUsername());
         }
 
         Message<Boolean> userState = checkUser(user);
         if (!userState.data()) {
-            LoginException exception = new LoginException(userState.message(), userState.code());
-            reportAuthenticationExceptionInfo(login, exception);
-
-            throw exception;
+            throw new LoginException(userState.message(), userState.code());
         }
 
         return UserDetail.of(user);
+    }
+
+
+    /**
+     * 转换 {@link UserAuthorizationService} 为 {@link SpringUserAuthorizationService},
+     * 注意: 不支持 {@link UserDetailsManager} 相关方法
+     * @param userAuthorizationService userAuthorizationService
+     * @param <T> 用户详细数据
+     * @param <ID> 用户 ID
+     * @return {@link SpringUserAuthorizationService} 实例
+     */
+    static <T extends Auth, ID extends Serializable>SpringUserAuthorizationService<T, ID> of(UserAuthorizationService<T, ID> userAuthorizationService) {
+        return new SimpleSpringUserAuthorizationService<>(userAuthorizationService);
+    }
+
+    final class SimpleSpringUserAuthorizationService<T extends Auth, ID extends Serializable> implements SpringUserAuthorizationService<T, ID> {
+
+        private final UserAuthorizationService<T, ID> delegate;
+
+        public SimpleSpringUserAuthorizationService(
+            UserAuthorizationService<T, ID> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public User<T, ID> queryUser(AbstractLogin loginUser) {
+            return delegate.queryUser(loginUser);
+        }
+
+        @Override
+        public Message<Boolean> checkUser(User<T, ID> currentUser) {
+            return delegate.checkUser(currentUser);
+        }
+
+        @Override
+        public void setupUserData(User<T, ID> currentUser) {
+            delegate.setupUserData(currentUser);
+        }
+
+        @Override
+        public void checkPermission(ServletRequest servletRequest, ServletResponse servletResponse,
+            Object authenticationInfo, String requestPath) {
+            delegate
+                .checkPermission(servletRequest, servletResponse, authenticationInfo, requestPath);
+        }
+
+        @Override
+        public void createUser(UserDetails user) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void updateUser(UserDetails user) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void deleteUser(String username) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void changePassword(String oldPassword, String newPassword) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean userExists(String username) {
+            throw new UnsupportedOperationException();
+        }
     }
 
 }

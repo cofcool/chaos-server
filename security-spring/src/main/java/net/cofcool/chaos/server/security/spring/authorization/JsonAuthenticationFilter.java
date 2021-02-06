@@ -21,10 +21,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.security.AbstractLogin;
 import net.cofcool.chaos.server.common.security.AbstractLogin.DefaultLogin;
-import org.springframework.http.converter.HttpMessageConverter;
+import net.cofcool.chaos.server.common.security.exception.CaptchaErrorException;
+import net.cofcool.chaos.server.common.util.WebUtils;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  */
 public class JsonAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    private  MappingJackson2HttpMessageConverter messageConverter;
+    private  HttpMessageConverters messageConverter;
 
     private Class<? extends AbstractLogin> LoginType;
 
@@ -47,11 +47,11 @@ public class JsonAuthenticationFilter extends AbstractAuthenticationProcessingFi
         super(new AntPathRequestMatcher("/login", "POST"));
     }
 
-    public HttpMessageConverter getMessageConverter() {
+    public HttpMessageConverters getMessageConverter() {
         return messageConverter;
     }
 
-    public void setMessageConverter(MappingJackson2HttpMessageConverter messageConverter) {
+    public void setMessageConverter(HttpMessageConverters messageConverter) {
         this.messageConverter = messageConverter;
     }
 
@@ -74,26 +74,20 @@ public class JsonAuthenticationFilter extends AbstractAuthenticationProcessingFi
                     "Authentication method not supported: " + request.getMethod());
         }
 
-        Object loginUser;
+        AbstractLogin loginUser;
         try {
-            /*
-             * 可通过 SecurityJackson2Modules 获取 Jackson 相关配置
-             * ObjectMapper mapper = new ObjectMapper();
-             * ClassLoader loader = getClass().getClassLoader();
-             * List<Module> modules = SecurityJackson2Modules.getModules(loader);
-             * mapper.registerModules(modules);
-             *
-             * mapper.readValue()
-             */
-            loginUser = messageConverter.read(getLoginType(), new ServletServerHttpRequest(request));
+            loginUser = WebUtils.readObjFromRequest(messageConverter, request, getLoginType());
         } catch (IOException | HttpMessageNotReadableException e) {
-            throw new AuthenticationServiceException("cannot parse the json request", e);
+            throw new AuthenticationServiceException("cannot parse the request", e);
         }
 
-        AbstractLogin login = (AbstractLogin) loginUser;
-        login.parseDevice(request);
+        try {
+            loginUser.parseDevice(request);
+        } catch (CaptchaErrorException e) {
+            throw new AuthenticationServiceException("captcha error", e);
+        }
 
-        JsonAuthenticationToken authRequest = new JsonAuthenticationToken(login);
+        JsonAuthenticationToken authRequest = new JsonAuthenticationToken(loginUser);
 
         setDetails(request, authRequest);
 

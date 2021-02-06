@@ -42,6 +42,8 @@ public interface ScannedMethodInterceptor {
 
     /**
      * MethodInvocation 调用之后调用
+     * @param invocation invocation
+     * @param returnValue 方法返回值，当发生异常时为异常对象
      */
     void postAfter(MethodInvocation invocation, Object returnValue) throws Throwable;
 

@@ -20,6 +20,8 @@ import lombok.Builder;
 import net.cofcool.chaos.server.common.core.Result.ResultState;
 import org.springframework.util.Assert;
 
+import java.util.Objects;
+
 /**
  * 基础配置支持, 包括 {@link ExceptionCodeManager}, {@link Message}, {@link Result}等,
  * 应用可通过 {@link ConfigurationCustomizer} 自定义 {@link Message} 等实现方式等
@@ -34,6 +36,8 @@ import org.springframework.util.Assert;
 @Builder
 public class ConfigurationSupport {
 
+    private static ConfigurationSupport INSTANCE;
+
     /**
      * 异常描述管理
      */
@@ -45,7 +49,7 @@ public class ConfigurationSupport {
     private final boolean isDebug;
 
     /**
-     *  自定义配置项
+     * 自定义配置项
      */
     private final ConfigurationCustomizer customizer;
 
@@ -58,6 +62,8 @@ public class ConfigurationSupport {
         this.exceptionCodeManager = exceptionCodeManager;
         this.isDebug = isDebug;
         this.customizer = customizer;
+
+        INSTANCE = this;
     }
 
     /**
@@ -83,7 +89,7 @@ public class ConfigurationSupport {
     }
 
 
-    private  <T> Message<T> creatingMessage(String code, String msg, T data) {
+    private <T> Message<T> creatingMessage(String code, String msg, T data) {
         return customizer.newMessage(code, msg, data);
     }
 
@@ -92,24 +98,24 @@ public class ConfigurationSupport {
      *
      * @param entity 结果数据
      * @param state 执行状态
-     * @param codeKey 描述码
-     * @param msgKey 描述信息
+     * @param messageKey 描述信息对应的键值
      * @param <T> 结果类型
-     * @return ExecuteResult 实例
+     * @return {@code ExecuteResult} 实例
      */
-    public <T> ExecuteResult<T> getExecuteResult(T entity, ResultState state, String codeKey, String msgKey) {
-        return customizer.newExecuteResult(
-            state,
-            getMessageWithKey(codeKey, msgKey, entity)
-        );
+    public <T> ExecuteResult<T> getExecuteResult(T entity, ResultState state, String messageKey) {
+        return customizer.newExecuteResult(state, getMessage(messageKey, entity));
     }
 
-    public <T> QueryResult<T, ?> getQueryResult(Page<T> page, String codeKey, String msgKey) {
-        return customizer.newQueryResult(
-            getMessageWithKey(
-                codeKey, msgKey, page
-            )
-        );
+    /**
+     * 创建 {@code QueryResult} 实例
+     *
+     * @param page 分页数据
+     * @param messageKey 描述信息对应的键值
+     * @param <T> 结果类型
+     * @return {@code QueryResult} 实例
+     */
+    public <T> QueryResult<T, ?> getQueryResult(Page<T> page, String messageKey) {
+        return customizer.newQueryResult(getMessage(messageKey, page));
     }
 
     /**
@@ -120,39 +126,33 @@ public class ConfigurationSupport {
      * @param <T> 携带数据类型
      * @return {@link Message} 实例
      */
-    public <T> Message<T> getMessage(String code, String msg, T data) {
+    public <T> Message<T> newMessage(String code, String msg, T data) {
         return creatingMessage(code, msg, data);
     }
 
     /**
-     * 创建 {@link Message} 实例, 通过 {@link ExceptionCodeManager} 获取对应的描述信息来创建
-     * @param code 状态码
-     * @param codeIsKey {@code code} 是否为 {@link ExceptionCodeManager} 的 {@code key}, 如果是则作为 {@code key} 获取对应的描述信息
+     * 创建 {@link Message} 实例
+     * @param codeKey 状态码对应的键值
      * @param msg 描述信息
-     * @param msgIsKey {@code msg} 是否为 {@link ExceptionCodeManager} 的 {@code key}, 如果是则作为 {@code key} 获取对应的描述信息
      * @param data 携带数据
      * @param <T> 携带数据类型
      * @return {@link Message} 实例
      */
-    public <T> Message<T> getMessage(String code, boolean codeIsKey, String msg, boolean msgIsKey, T data) {
-        return creatingMessage(
-            codeIsKey ? getExceptionCode(code) : code,
-            msgIsKey ? getExceptionDescription(msg) : msg,
-            data);
+    public <T> Message<T> getMessage(String codeKey, String msg, T data) {
+        return creatingMessage(getExceptionCode(codeKey), msg, data);
     }
 
     /**
      * 创建 {@link Message} 实例, 通过 {@link ExceptionCodeManager} 获取对应的描述信息来创建
-     * @param codeKey 状态码
-     * @param msgKey 描述信息
+     * @param messageKey 描述信息对应的键值
      * @param data 携带数据
      * @param <T> 携带数据类型
      * @return {@link Message} 实例
      */
-    public <T> Message<T> getMessageWithKey(String codeKey, String msgKey, T data) {
+    public <T> Message<T> getMessage(String messageKey, T data) {
         return creatingMessage(
-            getExceptionCode(codeKey),
-            getExceptionDescription(msgKey),
+            getExceptionCode(messageKey),
+            getExceptionDescription(messageKey),
             data
         );
     }
@@ -181,6 +181,17 @@ public class ConfigurationSupport {
      */
     public boolean isDebug() {
         return isDebug;
+    }
+
+    /**
+     * 获取 {@linkplain ConfigurationSupport configuration},
+     * 注意：如果多次调用 {@linkplain ConfigurationSupportBuilder#build() build},
+     * 会覆盖之前创建的实例, 只返回最近一次创建的实例
+     * @return configuration
+     */
+    public static ConfigurationSupport getConfiguration() {
+        Objects.requireNonNull(INSTANCE, "ConfigurationSupport do not configure");
+        return INSTANCE;
     }
 
 }

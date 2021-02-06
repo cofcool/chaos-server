@@ -71,6 +71,6 @@ public @interface Api {
      *
      * @see UserRole
      */
-    int[] userRoles() default { };
+    String[] userRoles() default { };
 
 }

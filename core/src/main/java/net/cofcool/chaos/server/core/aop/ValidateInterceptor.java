@@ -89,7 +89,7 @@ public class ValidateInterceptor extends AbstractScannedMethodInterceptor {
     }
 
     @Override
-    protected boolean doSupport(Method method, Class targetClass) {
+    protected boolean doSupport(Method method, Class<?> targetClass) {
         return BeanResourceHolder.findAnnotation(targetClass, Controller.class, false) != null;
     }
 

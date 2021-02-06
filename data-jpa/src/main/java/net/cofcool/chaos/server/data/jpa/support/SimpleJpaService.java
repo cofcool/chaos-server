@@ -16,13 +16,6 @@
 
 package net.cofcool.chaos.server.data.jpa.support;
 
-import static net.cofcool.chaos.server.common.util.BeanUtils.getPropertyDescriptors;
-
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.Optional;
-import javax.persistence.Transient;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExecuteResult;
 import net.cofcool.chaos.server.common.core.Page;
@@ -33,6 +26,14 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import javax.persistence.Transient;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Optional;
+
+import static net.cofcool.chaos.server.common.util.BeanUtils.getPropertyDescriptors;
 
 /**
  * 基于 {@link JpaRepository} 的简单 <b>Service</b> 实现
@@ -61,12 +62,11 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
     }
 
     @Override
-    public ExecuteResult<T> add(T entity) {
+    public ExecuteResult<T> insert(T entity) {
         return getConfiguration().getExecuteResult(
             jpaRepository.save(entity),
             ResultState.SUCCESSFUL,
-            ExceptionCodeDescriptor.SERVER_OK,
-            ExceptionCodeDescriptor.SERVER_OK_DESC
+            ExceptionCodeDescriptor.SERVER_OK
         );
     }
 
@@ -96,8 +96,7 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
             return getConfiguration().getExecuteResult(
                 null,
                 ResultState.FAILURE,
-                ExceptionCodeDescriptor.DATA_ERROR,
-                ExceptionCodeDescriptor.DATA_ERROR_DESC
+                ExceptionCodeDescriptor.DATA_ERROR
             );
         }
 
@@ -122,8 +121,7 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
         return getConfiguration().getExecuteResult(
             entity,
             ResultState.SUCCESSFUL,
-            ExceptionCodeDescriptor.SERVER_OK,
-            ExceptionCodeDescriptor.SERVER_OK_DESC
+            ExceptionCodeDescriptor.SERVER_OK
         );
     }
 
@@ -132,8 +130,7 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
         return getConfiguration().getExecuteResult(
             jpaRepository.findAll(Example.of(entity)),
             ResultState.SUCCESSFUL,
-            ExceptionCodeDescriptor.SERVER_OK,
-            ExceptionCodeDescriptor.SERVER_OK_DESC
+            ExceptionCodeDescriptor.SERVER_OK
         );
     }
 
@@ -145,17 +142,16 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
                 getConfiguration().getExecuteResult(
                     t,
                     ResultState.SUCCESSFUL,
-                    ExceptionCodeDescriptor.SERVER_OK,
-                    ExceptionCodeDescriptor.SERVER_OK_DESC
+                    ExceptionCodeDescriptor.SERVER_OK
                 )
             )
             .orElseGet(() ->
                 getConfiguration().getExecuteResult(
                     null,
                     ResultState.FAILURE,
-                    ExceptionCodeDescriptor.DATA_ERROR,
-                    ExceptionCodeDescriptor.DATA_ERROR_DESC
-                ));
+                    ExceptionCodeDescriptor.DATA_ERROR
+                )
+            );
     }
 
     /**

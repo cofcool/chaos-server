@@ -16,16 +16,18 @@
 
 package net.cofcool.chaos.server.core.support;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.Message;
 import net.cofcool.chaos.server.common.core.Result;
 import net.cofcool.chaos.server.common.core.Result.ResultState;
 import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
 
 /**
  * 处理响应数据(JSON), {@link Result} 等
@@ -50,29 +52,35 @@ public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConv
         if (object instanceof Result) {
             object = handleResult((Result) object);
         } else if (object instanceof Number || object instanceof String){
-            object = configuration.getMessageWithKey(
+            object = configuration.getMessage(
                 ExceptionCodeDescriptor.SERVER_OK,
-                ExceptionCodeDescriptor.SERVER_OK_DESC,
                 object
             );
         } else if (object instanceof Result.ResultState) {
             ResultState state = (ResultState) object;
             if (state == ResultState.SUCCESSFUL) {
-                object = configuration.getMessageWithKey(
+                object = configuration.getMessage(
                     ExceptionCodeDescriptor.SERVER_OK,
-                    ExceptionCodeDescriptor.SERVER_OK_DESC,
                     null
                 );
             } else {
-                object = configuration.getMessageWithKey(
+                object = configuration.getMessage(
                     ExceptionCodeDescriptor.OPERATION_ERR,
-                    ExceptionCodeDescriptor.OPERATION_ERR_DESC,
                     null
                 );
             }
         }
 
         super.writeInternal(object, type, outputMessage);
+    }
+
+    @Override
+    public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+        if (Result.class.isAssignableFrom(clazz)) {
+            return true;
+        }
+
+        return super.canWrite(clazz, mediaType);
     }
 
     private Message handleResult(Result result) {

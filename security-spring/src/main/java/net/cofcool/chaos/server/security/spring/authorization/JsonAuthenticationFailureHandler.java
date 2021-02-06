@@ -16,20 +16,20 @@
 
 package net.cofcool.chaos.server.security.spring.authorization;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.Message;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.server.ServletServerHttpResponse;
+import net.cofcool.chaos.server.common.security.exception.AuthorizationException;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 
 /**
@@ -41,35 +41,26 @@ public class JsonAuthenticationFailureHandler extends AbstractAuthenticationConf
 
     public JsonAuthenticationFailureHandler(
         ConfigurationSupport configuration,
-        MappingJackson2HttpMessageConverter messageConverter) {
+        HttpMessageConverters messageConverter) {
         super(configuration, messageConverter);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
         AuthenticationException exception) throws IOException, ServletException {
-        Message message;
+        Message<?> message;
         if (exception instanceof UsernameNotFoundException) {
-            message = getMessage(ExceptionCodeDescriptor.NO_LOGIN, ExceptionCodeDescriptor.NO_LOGIN_DESC);
+            message = getConfiguration().getMessage(ExceptionCodeDescriptor.USER_NOT_EXITS, null);
         } else if (exception instanceof BadCredentialsException) {
-            message = getMessage(ExceptionCodeDescriptor.USER_PASSWORD_ERROR, ExceptionCodeDescriptor.USER_PASSWORD_ERROR_DESC);
+            message = getConfiguration().getMessage(ExceptionCodeDescriptor.USER_PASSWORD_ERROR, null);
+        } else if (exception.getCause() instanceof AuthorizationException) {
+            AuthorizationException cause = (AuthorizationException) exception.getCause();
+            message = getConfiguration().newMessage(cause.getCode(), cause.getMessage(), null);
         } else {
-            message = getMessage(ExceptionCodeDescriptor.DENIAL_AUTH, ExceptionCodeDescriptor.DENIAL_AUTH_DESC);
+            message = getConfiguration().getMessage(ExceptionCodeDescriptor.AUTH_ERROR, exception.getMessage(), null);
         }
 
-        getMessageConverter().write(
-            message,
-            MediaType.APPLICATION_JSON,
-            new ServletServerHttpResponse(response)
-        );
+        writeToResponse(request, response, message);
     }
 
-    private Message getMessage(String codeKey, String descKey) {
-        return getConfiguration().getMessageWithKey(
-            codeKey,
-            descKey,
-            null
-        );
-    }
 }

@@ -17,9 +17,18 @@
 package net.cofcool.chaos.server.security.spring.authorization;
 
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
+import net.cofcool.chaos.server.common.core.Message;
+import net.cofcool.chaos.server.common.util.WebUtils;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.Assert;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * 针对 <code>Authentication</code> 的基本配置项
@@ -28,21 +37,38 @@ public abstract class AbstractAuthenticationConfigure {
 
     private final ConfigurationSupport configuration;
 
-    private final MappingJackson2HttpMessageConverter messageConverter;
+    private final HttpMessageConverters httpMessageConverters;
 
     public AbstractAuthenticationConfigure(ConfigurationSupport configuration,
-        MappingJackson2HttpMessageConverter messageConverter) {
+        HttpMessageConverters httpMessageConverters) {
         Assert.notNull(configuration, "configuration cannot be null");
-        Assert.notNull(messageConverter, "messageConverter cannot be null");
+        Assert.notNull(httpMessageConverters, "httpMessageConverters cannot be null");
         this.configuration = configuration;
-        this.messageConverter = messageConverter;
+        this.httpMessageConverters = httpMessageConverters;
     }
 
     protected ConfigurationSupport getConfiguration() {
         return configuration;
     }
 
-    protected HttpMessageConverter getMessageConverter() {
-        return messageConverter;
+    protected HttpMessageConverters getHttpMessageConverters() {
+        return httpMessageConverters;
+    }
+
+    @SuppressWarnings("rawtypes")
+    protected void writeMessageToResponse(HttpServletRequest request, HttpServletResponse response,
+        Authentication authentication) throws IOException, ServletException {
+        Object principal = authentication == null ? null : authentication.getPrincipal();
+        Message result = getConfiguration().getMessage(
+            ExceptionCodeDescriptor.SERVER_OK,
+            principal
+        );
+
+        writeToResponse(request, response, result);
+    }
+
+    protected void writeToResponse(HttpServletRequest request, HttpServletResponse response, Object result)
+        throws IOException {
+        WebUtils.writeObjToResponse(getHttpMessageConverters(), response, result, MediaType.APPLICATION_JSON);
     }
 }

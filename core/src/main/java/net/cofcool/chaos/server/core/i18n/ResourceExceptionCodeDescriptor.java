@@ -16,7 +16,6 @@
 
 package net.cofcool.chaos.server.core.i18n;
 
-import java.util.Locale;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
@@ -26,9 +25,18 @@ import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 
 /**
- * ExceptionCodeDescriptor 的实现, 通过 {@link MessageSource} 获取异常描述信息。
+ * ExceptionCodeDescriptor 的实现, 通过 {@link MessageSource} 获取异常描述信息.
+ * 资源文件格式为:
+ * <pre>SERVER_OK=00:serverOk</pre>
+ * 默认使用 {@literal :} 分割描述码和描述信息, 可通过 {@link #ResourceExceptionCodeDescriptor(String)} 定义该分隔符.
  * 国际化拦截器可参考 {@linkplain RequestLocaleChangeInterceptor localeChangeInterceptor}
  * <br>
  * 注意: 当描述信息不存在且调用 {@link MessageSource#getMessage(String, Object[], Locale)}
@@ -41,12 +49,26 @@ import org.springframework.util.Assert;
 public class ResourceExceptionCodeDescriptor implements ExceptionCodeDescriptor,
     MessageSourceAware {
 
-    private MessageSourceAccessor messageSource;
+    private MessageSourceAccessor messageSource = null;
+    private final Map<String, CodeMessage> cachedMessage = new HashMap<>();
+    private final String separator;
 
     private final MessageSource defaultMessageSource = initDefaultMessageSource();
 
+    /**
+     * 创建实例, key-value 分隔符默认为 {@code :}
+     */
     public ResourceExceptionCodeDescriptor() {
-        this.messageSource = null;
+        this.separator = ":";
+    }
+
+    /**
+     * 创建实例
+     * @param separator key-value 分隔符
+     */
+    public ResourceExceptionCodeDescriptor(String separator) {
+        Objects.requireNonNull(separator);
+        this.separator = separator;
     }
 
     private MessageSource initDefaultMessageSource() {
@@ -58,22 +80,32 @@ public class ResourceExceptionCodeDescriptor implements ExceptionCodeDescriptor,
         return defaultMessageSource;
     }
 
-    private String resolve(String type) {
+    private CodeMessage resolve(String type) {
+        return cachedMessage.computeIfAbsent(type, t -> {
+            String[] strings = StringUtils.split(getMessage(t), separator);
+            if (strings == null) {
+                strings = new String[]{t, t};
+            }
+            return ExceptionCodeDescriptor.message(strings[0], strings[1]);
+        });
+    }
+
+    private String getMessage(String key) {
         try {
-            return messageSource.getMessage(type);
+            return messageSource.getMessage(key);
         } catch (NoSuchMessageException e) {
-            return defaultMessageSource.getMessage(type, null, type, LocaleContextHolder.getLocale());
+            return defaultMessageSource.getMessage(key, null, key, LocaleContextHolder.getLocale());
         }
     }
 
     @Override
     public String code(String type) {
-        return resolve(type);
+        return resolve(type).code();
     }
 
     @Override
     public String description(String type) {
-        return resolve(type);
+        return resolve(type).desc();
     }
 
     @Override

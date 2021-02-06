@@ -3,7 +3,7 @@
 基于 Spring Boot 的 Java Web Server 框架, 简化开发, 封装了常见的企业级项目开发框架, 如 `Mybaits`, `Spring Security`, `Shiro`, `JPA`等。
 
 
-最新版本为 ![maven central](https://img.shields.io/maven-central/v/net.cofcool.chaos/chaos-server.svg), 通过`maven`引入
+最新版本为 ![maven central](https://img.shields.io/maven-central/v/net.cofcool.chaos/chaos-server.svg), Spring Boot 版本为 `2.4.1`, 通过`maven`引入
 
 ```
 <dependency>
@@ -20,20 +20,17 @@
 
 ### 模块说明
 
-
-1. common 该模块定义了基本接口和类等。
-2. core 核心实现，包括拦截器, 国际化，Json 解析等
-3. data-jpa `JPA`相关的基础`Service`和工具类等
-4. data-mybatis `Mybatis`相关的基础`Service`和工具类等
-5. data-redis 提供`Redis`所需依赖。
-6. security-shiro 封装了`Shiro`，简化开发流程。
-7. security-spring 封装了`Spring Security`，简化开发流程。
-8. actuator 提供监控所需依赖。
-9. component-processor 编译时扫描`BaseComponent`注解，该注解可标识基础组件, 避免组件调用混乱。
-10. boot-starter 根据`Spring Boot`规范进行自动化配置。
+1. common 该模块定义了基本接口和类等
+2. core 核心实现, 包括拦截器, 国际化, JSON 解析等
+3. data-jpa `JPA` 相关的基础 `Service` 和工具类等
+4. data-mybatis `Mybatis` 相关的基础 `Service` 和工具类等
+5. extension 封装 `Redis`, `MongoDB` 等相关操作
+6. security-shiro 封装了 `Shiro`, 简化开发流程
+7. security-spring 封装了 `Spring Security`, 简化开发流程
+8. component-processor 编译时扫描 `BaseComponent` 注解, 该注解可标识基础组件, 避免组件调用混乱
+9. boot-starter 根据 `Spring Boot` 规范进行自动化配置
 
 ### 配置 
-
 
 ```properties
 # 是否调试模式
@@ -44,8 +41,8 @@ chaos.development.version=100
 chaos.auth.using-captcha=false
 # 定义扫描 Scanned 注解的路径
 chaos.development.annotation-path=net.cofcool.chaos.server.demo
-# "Spring Security" 项目, 该配置为匿名访问路径; "Shiro" 为授权路径配置, 即"filterChainDefinitions"
-chaos.auth.urls=/auth/**\=anon,/error\=anon,/**\=authc
+# 授权路径配置, 用";"分割, "Spring Security" 项目, 该配置为匿名访问路径; "Shiro" 为授权路径配置, 即"filterChainDefinitions"
+chaos.auth.urls=/auth/**\=anon;/error\=anon;/**\=authc
 # 登陆路径
 chaos.auth.login-url=/auth/login
 # 注入数据key配置, 多个时以","分隔
@@ -59,7 +56,7 @@ chaos.auth.checked-keys=id
 
 使用`Page`类封装分页的相关数据, ORM模块的`Paging`继承并扩展。
 
-* Mybatis: 通过`PageHelper`分页。
+* Mybatis: 通过 `Mybatis Plus` 分页插件分页。
 * Jpa: 通过`Pageable`分页。
 
 **异常**处理时, 自定义业务相关异常需继承`ServiceException`。如需设定异常级别, 实现`ExceptionLevel`接口即可, 该级别影响异常的打印。`ServiceException`已实现该接口, 默认为最高级别。
@@ -70,13 +67,15 @@ chaos.auth.checked-keys=id
 
 <img src="./docs/auth_login.svg" alt="login"/>
 
-`AuthService`类定义了登录等操作, 应用不需要实现该类, 只需引用该组件即可, `Shiro`模块需要通过调用该类的`login`来实现登录，`Spring Security`的登录由"filter"完成，因此不需要调用该方法。
+`AuthService`类定义了登录等操作, 应用不需要实现该类, 只需引用该组件即可, 登录由"filter"完成，因此不需要主动调用该方法。
 
 `UserAuthorizationService`定义应用操作, 应用需实现该类。
 
 `PasswordProcessor`定义密码处理操作, 应用需实现该类。
 
 `User`存储用户信息。
+
+`spring-security` 配置时注意 `chaos.auth.cors-enabled` 和 `chaos.auth.csrf-enabled` 配置项。
 
 #### Service 层
 
@@ -128,9 +127,4 @@ chaos.auth.checked-keys=id
 `SimpleExceptionCodeDescriptor`为默认配置，包含了常见的描述代码和描述信息，例如操作成功，操作失败等。
 
 `ResourceExceptionCodeDescriptor` 从"messages"文件中读取配置的描述信息。
-
-
-### 后续计划
-
-- [ ] `data-mybatis`模块集成通用 Mapper
-- [ ] 完善单元测试
+ 

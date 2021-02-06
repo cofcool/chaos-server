@@ -17,20 +17,22 @@
 package net.cofcool.chaos.server.common.security;
 
 /**
- * {@link Device} 抽象实现
+ * {@link Device} 子类可继承该类, 简化代码,
+ * 如果不想使用此方式, 也可参考 {@link DefaultDevice}
  *
  * @author CofCool
  */
 public abstract class AbstractDevice implements Device {
 
-    private String identifier;
+    private final String identifier;
 
-    private String desc;
+    private final String desc;
 
-    private AbstractDevice() {
-
-    }
-
+    /**
+     * 创建 {@code Device}, 建议子类声明为 {@literal protect} 或 {@literal private}, 该类为不可变对象
+     * @param identifier 设备惟一标识
+     * @param desc 描述
+     */
     protected AbstractDevice(String identifier, String desc) {
         this.identifier = identifier;
         this.desc = desc;
@@ -46,4 +48,20 @@ public abstract class AbstractDevice implements Device {
         return desc;
     }
 
+    @Override
+    public String toString() {
+        return "AbstractDevice{" +
+            "identifier='" + identifier + '\'' +
+            ", desc='" + desc + '\'' +
+            '}';
+    }
+
+    // just for json serializer
+    public String getDesc() {
+        return desc;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
 }

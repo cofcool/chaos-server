@@ -18,9 +18,11 @@ package net.cofcool.chaos.server.common.security;
 
 import java.io.Serializable;
 import javax.servlet.http.HttpServletRequest;
+import net.cofcool.chaos.server.common.security.exception.CaptchaErrorException;
+import org.springframework.http.HttpHeaders;
 
 /**
- * 登陆数据
+ * 登陆数据, 账号密码等信息
  *
  * @author CofCool
  */
@@ -54,9 +56,11 @@ public abstract class AbstractLogin implements Serializable {
     /**
      * 解析请求设备
      * @param servletRequest 请求
+     * @throws CaptchaErrorException 验证码验证不通过时抛出该异常, 查看 {@link #checkCaptcha(HttpServletRequest, Device)}
      */
     public void parseDevice(HttpServletRequest servletRequest) {
         setDevice(checkRequestAgent(servletRequest));
+        checkCaptcha(servletRequest, device);
     }
 
     /**
@@ -65,6 +69,15 @@ public abstract class AbstractLogin implements Serializable {
      * @return 设备数据
      */
     protected abstract Device checkRequestAgent(HttpServletRequest servletRequest);
+
+    /**
+     * 检查验证码
+     * @param servletRequest 请求
+     * @param device 请求设备
+     * @throws CaptchaErrorException 验证不通过时抛出该异常
+     */
+    protected void checkCaptcha(HttpServletRequest servletRequest, Device device) {
+    }
 
     public Device getDevice() {
         return device;
@@ -90,6 +103,15 @@ public abstract class AbstractLogin implements Serializable {
         this.password = password;
     }
 
+    @Override
+    public String toString() {
+        return "AbstractLogin{" +
+            "username='" + username + '\'' +
+            ", password='" + password + '\'' +
+            ", device=" + device +
+            '}';
+    }
+
     /**
      * 默认登陆实现
      */
@@ -106,7 +128,8 @@ public abstract class AbstractLogin implements Serializable {
 
         @Override
         protected Device checkRequestAgent(HttpServletRequest servletRequest) {
-            return SimpleDevice.BROWSER;
+            String agent = servletRequest.getHeader(HttpHeaders.USER_AGENT);
+            return DefaultDevice.fromUserAgent(agent);
         }
 
     }

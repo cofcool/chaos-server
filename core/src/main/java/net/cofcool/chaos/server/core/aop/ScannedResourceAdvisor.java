@@ -16,13 +16,15 @@
 
 package net.cofcool.chaos.server.core.aop;
 
-import java.lang.reflect.Method;
+import net.cofcool.chaos.server.core.annotation.Scanned;
+import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.core.annotation.AnnotationUtils;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.cofcool.chaos.server.core.annotation.Scanned;
-import org.aopalliance.aop.Advice;
-import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
-import org.springframework.core.annotation.AnnotationUtils;
+import java.lang.reflect.Method;
 
 /**
  * 代理使用 {@link Scanned} 注解的类
@@ -36,7 +38,7 @@ public class ScannedResourceAdvisor extends StaticMethodMatcherPointcutAdvisor {
 
     private static final long serialVersionUID = -1753690870274688785L;
 
-    public ScannedResourceAdvisor(Advice advice) {
+    public ScannedResourceAdvisor(ScannedCompositeMethodInterceptor advice) {
         super(advice);
     }
 
@@ -49,5 +51,39 @@ public class ScannedResourceAdvisor extends StaticMethodMatcherPointcutAdvisor {
 
         return scanned != null;
     }
+
+
+    /**
+     * 实现 {@link BeanPostProcessor} 接口把 {@link ScannedMethodInterceptor} 实例注入到 {@link ScannedResourceAdvisor} 中,
+     * 不使用 "Spring Bean" 注入的原因是防止 {@code ScannedMethodInterceptor} 实例提早创建从而影响应用其它实例的生命周期
+     */
+    public final static class ScannedResourceAdvisorHelper implements BeanPostProcessor {
+
+        private final ScannedResourceAdvisor advisor;
+
+        private ScannedResourceAdvisorHelper(ScannedResourceAdvisor advisor) {
+            this.advisor = advisor;
+        }
+
+        @Override
+        public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+            if (bean instanceof ScannedMethodInterceptor) {
+                ((ScannedCompositeMethodInterceptor) advisor.getAdvice()).addInterceptor((ScannedMethodInterceptor) bean);
+            }
+
+            return bean;
+        }
+
+    }
+
+    /**
+     * 创建 ScannedResourceAdvisorHelper
+     * @param advisor ScannedResourceAdvisor
+     * @return ScannedResourceAdvisorHelper
+     */
+    public static ScannedResourceAdvisorHelper createHelper(ScannedResourceAdvisor advisor) {
+        return new ScannedResourceAdvisorHelper(advisor);
+    }
+
 
 }

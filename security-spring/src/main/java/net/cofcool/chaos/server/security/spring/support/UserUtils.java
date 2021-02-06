@@ -59,11 +59,6 @@ public class UserUtils {
         }
 
         @Override
-        public int roleId() {
-            return role.roleId();
-        }
-
-        @Override
         public String roleName() {
             return role.roleName();
         }
@@ -74,8 +69,23 @@ public class UserUtils {
         }
 
         @Override
-        public boolean contains(@Nonnull int[] roles) {
+        public boolean contains(@Nonnull String[] roles) {
             return role.contains(roles);
+        }
+
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof UserRole) {
+                return role.roleName().equals(((UserRole) o).roleName());
+            }
+
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return role.roleName().hashCode();
         }
     }
 

@@ -28,11 +28,15 @@ public abstract class AbstractRequestChecker implements RequestChecker {
 
     /**
      * 参数名
+     *
+     * @return 参数名
      */
     protected abstract String getName();
 
     /**
      * 校验
+     * @param value 待检查值
+     * @return 检查是否正常
      */
     protected abstract boolean check(@Nullable String value);
 

@@ -17,7 +17,6 @@
 package net.cofcool.chaos.server.common.core;
 
 import java.util.NoSuchElementException;
-import java.util.Objects;
 
 /**
  * ExecuteResult 简单实现
@@ -28,11 +27,11 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
 
     private static final long serialVersionUID = 345300521174121626L;
 
-    private T entity;
+    private final T entity;
 
-    private ResultState state;
+    private final ResultState state;
 
-    private Message<T> message;
+    private final Message<T> message;
 
 
     public SimpleExecuteResult(ResultState state, Message<T> message) {
@@ -60,14 +59,16 @@ public class SimpleExecuteResult<T> implements ExecuteResult<T> {
         return entity == null ? newVal : entity;
     }
 
-    public void setMessage(Message<T> message) {
-        Objects.requireNonNull(message);
-        this.message = message;
-        this.entity = message.data();
-    }
-
     @Override
     public Message<T> result() {
         return message;
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleExecuteResult{" +
+            "state=" + state +
+            ", message=" + message +
+            '}';
     }
 }

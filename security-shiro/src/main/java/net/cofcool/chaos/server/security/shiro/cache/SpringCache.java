@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache.ValueWrapper;
 
 /**
- * 参考 {@link org.apache.shiro.cache.ehcache.EhCache} 实现
+ * 参考 {@code org.apache.shiro.cache.ehcache.EhCache} 实现
  *
  * @author CofCool
  */

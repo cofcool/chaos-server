@@ -37,12 +37,16 @@ public interface AuthService<T extends Auth, ID extends Serializable> {
      * @param loginUser 登陆时携带的参数
      * @return 登陆数据
      */
-    Message<User<T, ID>> login(HttpServletRequest request, HttpServletResponse response, AbstractLogin loginUser);
+    default Message<User<T, ID>> login(HttpServletRequest request, HttpServletResponse response, AbstractLogin loginUser) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * 退出登陆
      */
-    void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
+    default void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * 读取当前登陆用户数据

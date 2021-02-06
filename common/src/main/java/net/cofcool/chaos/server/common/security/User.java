@@ -195,7 +195,7 @@ public class User <T extends Auth, ID extends Serializable> implements Serializa
         this.roles.add(userRole);
     }
 
-    public void addRoles(Collection<UserRole> userRoles) {
+    public void addRoles(Collection<? extends UserRole> userRoles) {
         this.roles.addAll(userRoles);
     }
 

@@ -22,10 +22,9 @@ import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.security.User;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
 import net.cofcool.chaos.server.common.security.UserStatus;
-import net.cofcool.chaos.server.common.security.exception.CaptchaErrorException;
 import net.cofcool.chaos.server.common.security.exception.LoginException;
 import net.cofcool.chaos.server.common.security.exception.UserNotExistException;
-import net.cofcool.chaos.server.security.shiro.authorization.CaptchaUsernamePasswordToken;
+import net.cofcool.chaos.server.security.shiro.authorization.LoginUsernamePasswordToken;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -38,24 +37,12 @@ import org.springframework.util.Assert;
 
 
 @Slf4j
+@SuppressWarnings("rawtypes")
 public class AuthRealm extends AuthorizingRealm implements InitializingBean {
 
     private UserAuthorizationService userAuthorizationService;
 
     private ConfigurationSupport configuration;
-
-    /**
-     * 是否使用验证码
-     */
-    private boolean usingCaptcha = false;
-
-    public boolean isUsingCaptcha() {
-        return usingCaptcha;
-    }
-
-    public void setUsingCaptcha(boolean usingCaptcha) {
-        this.usingCaptcha = usingCaptcha;
-    }
 
     public UserAuthorizationService getUserAuthorizationService() {
         return userAuthorizationService;
@@ -88,22 +75,20 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authcToken) throws AuthenticationException {
-        CaptchaUsernamePasswordToken token = (CaptchaUsernamePasswordToken) authcToken;
-
-        checkCaptcha(token);
+        LoginUsernamePasswordToken token = (LoginUsernamePasswordToken) authcToken;
 
         User user = getUserAuthorizationService().queryUser(token.getLogin());
 
         if (user == null) {
             throw new UserNotExistException(
-                getExceptionDesc(ExceptionCodeDescriptor.USER_NOT_EXITS_DESC),
+                getExceptionDesc(ExceptionCodeDescriptor.USER_NOT_EXITS),
                 getExceptionCode(ExceptionCodeDescriptor.USER_NOT_EXITS)
             );
         }
 
         if (user.getUserStatuses().contains(UserStatus.LOCKED) || user.getUserStatuses().contains(UserStatus.CANCEL)) {
             throw new LoginException(
-                getExceptionDesc(ExceptionCodeDescriptor.DENIAL_AUTH_DESC),
+                getExceptionDesc(ExceptionCodeDescriptor.DENIAL_AUTH),
                 getExceptionCode(ExceptionCodeDescriptor.DENIAL_AUTH)
             );
         }
@@ -117,17 +102,6 @@ public class AuthRealm extends AuthorizingRealm implements InitializingBean {
 
     private String getExceptionDesc(String type) {
         return configuration.getExceptionDescription(type);
-    }
-
-    private void checkCaptcha(CaptchaUsernamePasswordToken token) {
-        if (isUsingCaptcha() && token.getLogin().getDevice().shouldValidate()) {
-            if (!userAuthorizationService.checkCaptcha(token.getLogin())) {
-                throw new CaptchaErrorException(
-                    getExceptionDesc(ExceptionCodeDescriptor.CAPTCHA_ERROR_DESC),
-                    getExceptionCode(ExceptionCodeDescriptor.CAPTCHA_ERROR)
-                );
-            }
-        }
     }
 
     @Override

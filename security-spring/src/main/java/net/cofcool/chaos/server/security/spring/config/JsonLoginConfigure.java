@@ -22,6 +22,7 @@ import net.cofcool.chaos.server.security.spring.authorization.JsonAuthentication
 import net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter;
 import net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationSuccessHandler;
 import net.cofcool.chaos.server.security.spring.authorization.JsonUnAuthEntryPoint;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
@@ -41,7 +42,7 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
         AbstractAuthenticationFilterConfigurer<H, JsonLoginConfigure<H>, JsonAuthenticationFilter> {
 
     private ConfigurationSupport configuration;
-    private MappingJackson2HttpMessageConverter messageConverter;
+    private HttpMessageConverters messageConverter;
 
     private String unAuthUrl = "/unauth";
     private String unLoginUrl = "/unlogin";
@@ -63,7 +64,7 @@ public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
         return this;
     }
 
-    public JsonLoginConfigure<H> messageConverter(MappingJackson2HttpMessageConverter messageConverter) {
+    public JsonLoginConfigure<H> messageConverter(HttpMessageConverters messageConverter) {
         this.messageConverter = messageConverter;
         getAuthenticationFilter().setMessageConverter(messageConverter);
 
