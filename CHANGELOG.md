@@ -60,3 +60,7 @@
 * 添加 `extension` 模块, 封装 `Redis`, `MongoDB` 等相关操作
 * 优化 `ExceptionCodeDescriptor` 实现, 状态码和描述信息共用键
 * 修复 `LoggingInterceptor` 在 controller 调用发生异常时不打印日志问题
+
+**0.5.1**:
+
+* 升级 `shiro-web` 到 v1.7.1
