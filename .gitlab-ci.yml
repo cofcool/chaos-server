@@ -9,4 +9,4 @@ before_script:
 deploy1:
   stage: deploy
   script:
-    - mvn deploy
+    - mvn clean deploy

@@ -26,17 +26,24 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.support.JpaEntityInformation;
+import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport;
+import org.springframework.data.repository.core.EntityInformation;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Transient;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static net.cofcool.chaos.server.common.util.BeanUtils.getPropertyDescriptors;
 
 /**
- * 基于 {@link JpaRepository} 的简单 <b>Service</b> 实现
+ * 基于 {@link JpaRepository} 的简单 {@link net.cofcool.chaos.server.common.core.DataAccess} 实现
  *
  * @param <T> 实体
  * @param <ID> 实体的 ID
@@ -45,8 +52,16 @@ import static net.cofcool.chaos.server.common.util.BeanUtils.getPropertyDescript
  */
 public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> extends SimpleService<T> implements InitializingBean {
 
+    private static final Map<Class<?>, EntityInformation<?, ?>> CACHED_ENTITY_INFORMATION = new ConcurrentHashMap<>();
+
     private J jpaRepository;
 
+    private EntityManager entityManager;
+
+    /**
+     * 获取当前实体对应的 {@link JpaRepository}
+     * @return 当前实体对应的 {@link JpaRepository}
+     */
     protected J getJpaRepository() {
         return jpaRepository;
     }
@@ -54,6 +69,19 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
     @Autowired
     public void setJpaRepository(J jpaRepository) {
         this.jpaRepository = jpaRepository;
+    }
+
+    /**
+     * 获取 {@link EntityManager}
+     * @return {@link EntityManager}
+     */
+    protected EntityManager getEntityManager() {
+        return entityManager;
+    }
+
+    @PersistenceContext
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -164,9 +192,21 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
     }
 
     /**
-     * 读取实体主键
+     * 获取实体主键
+     *
+     * @see EntityInformation#getRequiredId(Object)
+     * @see org.springframework.data.jpa.repository.support.JpaRepositoryFactory
+     * @see org.springframework.data.repository.core.support.RepositoryFactorySupport#getEntityInformation(Class)
      */
-    protected abstract ID getEntityId(T entity);
+    @SuppressWarnings("unchecked")
+    protected ID getEntityId(T entity) {
+        JpaEntityInformation<T, ID> information = (JpaEntityInformation<T, ID>) CACHED_ENTITY_INFORMATION
+                .computeIfAbsent(
+                        entity.getClass(),
+                        k -> JpaEntityInformationSupport.getEntityInformation(entity.getClass(), entityManager)
+                );
+        return information.getRequiredId(entity);
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {
