@@ -66,5 +66,6 @@
 
 **0.6.0-SNAPSHOT**:
 
+* Spring Boot 升级到 v2.4.6
 * 添加 `extension` 模块, 封装 `Redis`, `MongoDB` 等相关操作
 * `优化 SimpleJpaService`
