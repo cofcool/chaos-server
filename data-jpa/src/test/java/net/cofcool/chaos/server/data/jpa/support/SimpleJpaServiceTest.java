@@ -81,8 +81,11 @@ class SimpleJpaServiceTest {
 
     @Test
     void update() {
-        person.setDesc("update");
-        assertTrue(personService.update(person).successful());
+        Person update = new Person()
+                .setId(person.getId())
+                .setDesc("update" + UUID.randomUUID());
+        assertTrue(personService.update(update).successful());
+        assertEquals(update.getDesc(), personService.queryById(update).entity().getDesc());
     }
 
     @Test

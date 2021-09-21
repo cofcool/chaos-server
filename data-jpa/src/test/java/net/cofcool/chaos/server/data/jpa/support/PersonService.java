@@ -21,7 +21,7 @@ package net.cofcool.chaos.server.data.jpa.support;
 import org.springframework.stereotype.Service;
 
 /**
- * "person" 对应的 service
+ * Person 对应的 service
  *
  * @author CofCool
  */
