@@ -36,6 +36,8 @@ import org.springframework.stereotype.Controller;
  */
 public class LoggingInterceptor extends AbstractScannedMethodInterceptor {
 
+    private static final int PRINT_OBJECT_VALUE_LENGTH = 512;
+
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
 
@@ -45,9 +47,14 @@ public class LoggingInterceptor extends AbstractScannedMethodInterceptor {
         } else {
             sb.append(";result=[");
         }
-        sb.append(returnValue).append("]");
+        sb.append(checkPrintValue(returnValue)).append("]");
 
         return sb;
+    }
+
+    protected String checkPrintValue(Object val) {
+        String s = String.valueOf(val);
+        return s.length() > PRINT_OBJECT_VALUE_LENGTH ? s.substring(0, PRINT_OBJECT_VALUE_LENGTH) : s;
     }
 
     protected StringBuilder creatingLog(MethodInvocation invocation) {
@@ -74,7 +81,7 @@ public class LoggingInterceptor extends AbstractScannedMethodInterceptor {
                 continue;
             }
 
-            String value = String.valueOf(obj);
+            String value = checkPrintValue(obj);
             if (i == length - 1) {
                 builder.append(value);
             } else {

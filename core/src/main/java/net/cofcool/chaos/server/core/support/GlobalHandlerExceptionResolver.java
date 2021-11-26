@@ -131,7 +131,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         writeMessage(
             response,
             configuration.getMessage(
-                ExceptionCodeDescriptor.PARAM_NULL,
+                ExceptionCodeDescriptor.PARAM_ERROR,
                 ValidateInterceptor.getFirstErrorString(ex.getBindingResult()),
                 null
             )
