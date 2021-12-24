@@ -16,18 +16,18 @@
 
 package net.cofcool.chaos.server.core.support;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
-import net.cofcool.chaos.server.common.core.Message;
+import net.cofcool.chaos.server.common.core.Message.MessageWrapped;
 import net.cofcool.chaos.server.common.core.Result;
 import net.cofcool.chaos.server.common.core.Result.ResultState;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-
-import java.io.IOException;
-import java.lang.reflect.Type;
 
 /**
  * 处理响应数据(JSON), {@link Result} 等
@@ -50,7 +50,7 @@ public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConv
     protected void writeInternal(Object object, Type type, HttpOutputMessage outputMessage)
         throws IOException, HttpMessageNotWritableException {
         if (object instanceof Result) {
-            object = handleResult((Result) object);
+            object = ((Result) object).result();
         } else if (object instanceof Number || object instanceof String){
             object = configuration.getMessage(
                 ExceptionCodeDescriptor.SERVER_OK,
@@ -69,6 +69,8 @@ public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConv
                     null
                 );
             }
+        } else if (AnnotatedElementUtils.hasAnnotation(object.getClass(), MessageWrapped.class)) {
+            object = configuration.getMessage(ExceptionCodeDescriptor.SERVER_OK, object);
         }
 
         super.writeInternal(object, type, outputMessage);
@@ -81,10 +83,6 @@ public class ResponseBodyMessageConverter extends MappingJackson2HttpMessageConv
         }
 
         return super.canWrite(clazz, mediaType);
-    }
-
-    private Message handleResult(Result result) {
-        return result.result();
     }
 
 }

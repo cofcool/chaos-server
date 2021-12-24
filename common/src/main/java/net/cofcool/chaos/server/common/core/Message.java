@@ -17,6 +17,11 @@
 package net.cofcool.chaos.server.common.core;
 
 import java.io.Serializable;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * 封装数据, 包含状态与描述
@@ -39,6 +44,22 @@ public interface Message<T> extends Serializable {
      * 携带数据
      */
     T data();
+
+    /**
+     * 标记数据是否需要被 {@link Message} 包裹, 状态和描述参考 {@link ExceptionCodeDescriptor#SERVER_OK}, 具体实现参考 {@code net.cofcool.chaos.server.core.support.ResponseBodyMessageConverter}, 使用示例:
+     * <pre>
+     *     &#064;MessageWrapped
+     *     class Example {
+     *
+     *     }
+     * </pre>
+     */
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(value = ElementType.TYPE)
+    @interface MessageWrapped {
+
+    }
 
 
     /**
