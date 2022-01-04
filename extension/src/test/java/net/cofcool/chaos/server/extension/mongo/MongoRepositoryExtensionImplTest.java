@@ -15,54 +15,87 @@
  */
 package net.cofcool.chaos.server.extension.mongo;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import javax.annotation.Resource;
+import net.cofcool.chaos.server.extension.Paging;
 import net.cofcool.chaos.server.extension.Person;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @DataMongoTest(properties = "application-mongo.properties")
-@SpringBootConfiguration
 @EnableMongoRepositories(repositoryBaseClass = MongoRepositoryExtensionImpl.class)
 @ExtendWith(SpringExtension.class)
 class MongoRepositoryExtensionImplTest {
 
+    public static final String NEW_NAME = "John 117";
+
     @Resource
     PersonRepository personRepository;
 
+    Person entity;
+
     @BeforeEach
     void setUp() {
-        personRepository.insert(new Person(null, "117", "Earth UNSC", "test data"));
+        entity = personRepository.insert(new Person(null, "117", "Earth UNSC", "test data", null));
+    }
+
+    @AfterEach
+    void tearDown() {
+        personRepository.delete(entity);
     }
 
 
     @Test
     void findAll() {
-        Assertions.assertTrue(personRepository.findAll().size() > 0);
+        assertFalse(personRepository.findAll().isEmpty());
     }
 
     @Test
-    void testFindAll() {
+    void findAllWithPage() {
+        assertEquals(1, personRepository.findAll(new Query(), Paging.getPageable(0, 10)).getTotalPages());
     }
 
     @Test
     void update() {
+        Person condition = new Person();
+        condition.setId(entity.getId());
+        assertTrue(personRepository.update(condition, new Update().set("name", NEW_NAME)));
+        assertEquals(NEW_NAME, personRepository.findById(entity.getId()).get().getName());
     }
 
     @Test
-    void testUpdate() {
+    void updateWithQuery() {
+        assertTrue(personRepository.update(new Query(Criteria.where("_id").is(entity.getId())), new Update().set("name", NEW_NAME)));
+        assertEquals(NEW_NAME, personRepository.findById(entity.getId()).get().getName());
     }
 
     @Test
     void updateById() {
+        assertTrue(personRepository.updateById(entity.getId(), new Update().set("name", NEW_NAME)));
+        assertEquals(NEW_NAME, personRepository.findById(entity.getId()).get().getName());
     }
 
     @Test
-    void testUpdateById() {
+    void updateByIdWithEntity() {
+        Person newEntity = new Person();
+        newEntity.setName(NEW_NAME);
+        newEntity.setId(entity.getId());
+        newEntity.setParent(new Person());
+        assertTrue(personRepository.updateById(newEntity));
+        Person findPerson = personRepository.findById(entity.getId()).get();
+        assertEquals(NEW_NAME, findPerson.getName());
+        assertNull(findPerson.getParent());
     }
 }

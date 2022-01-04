@@ -16,6 +16,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>net.cofcool.chaos</groupId>
+            <artifactId>chaos-server-core</artifactId>
+            <version>${chaos.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
             <optional>true</optional>

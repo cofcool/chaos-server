@@ -38,9 +38,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
- *
- * @param <T>
- * @param <ID>
+ * 增强 {@link org.springframework.data.mongodb.repository.MongoRepository} 实现
  * @author CofCool
  */
 public class MongoRepositoryExtensionImpl<T, ID>  extends SimpleMongoRepository<T, ID> implements MongoRepositoryExtension<T, ID> {
@@ -80,7 +78,7 @@ public class MongoRepositoryExtensionImpl<T, ID>  extends SimpleMongoRepository<
 
     @Override
     public boolean update(Query query, UpdateDefinition update) {
-        return mongoOperations.updateFirst(query, update, entityInformation.getJavaType()).getModifiedCount() == 1;
+        return mongoOperations.updateMulti(query, update, entityInformation.getJavaType()).getModifiedCount() >= 1;
     }
 
     @Override
@@ -89,31 +87,50 @@ public class MongoRepositoryExtensionImpl<T, ID>  extends SimpleMongoRepository<
         String idAttribute = entityInformation.getIdAttribute();
 
         Update definition = Update.fromDocument(Document.parse("{}"));
-        fieldsCache.computeIfAbsent(entity.getClass(), k -> {
-            List<Field> fields = new ArrayList<>();
-            ReflectionUtils.doWithFields(
+        fieldsCache
+            .computeIfAbsent(entity.getClass(), k -> {
+                List<Field> fields = new ArrayList<>();
+                ReflectionUtils.doWithFields(
                     k,
                     f -> {
                         f.setAccessible(true);
                         fields.add(f);
                     },
-                    field -> !field.getName().equals(idAttribute) || !AnnotatedElementUtils.hasAnnotation(field, Transient.class)
-            );
+                    field -> !field.getName().equals(idAttribute)
+                        || !AnnotatedElementUtils.hasAnnotation(field, Transient.class)
+                );
 
-            return fields;
-        }).forEach(f -> {
-            Object value = ReflectionUtils.getField(f, entity);
-            if (value != null) {
-                definition.set(f.getName(), value);
-            }
-        });
+                return fields;
+            })
+            .forEach(f -> {
+                Object value = ReflectionUtils.getField(f, entity);
+                if (value != null) {
+                    definition.set(f.getName(), value);
+                }
+            });
 
-        return update(Query.query(Criteria.where(idAttribute).is(id)), definition);
+        return updateById(id, definition);
     }
 
     @Override
     public boolean updateById(ID id, UpdateDefinition update) {
-        return false;
+        return mongoOperations
+            .updateFirst(
+                new Query(Criteria.where(entityInformation.getIdAttribute()).is(id)),
+                update,
+                entityInformation.getJavaType()
+            )
+            .getModifiedCount() == 1;
+    }
+
+    @Override
+    public <S extends T> ID getId(S entity) {
+        return entityInformation.getId(entity);
+    }
+
+    @Override
+    public <S extends T> ID getRequiredId(S entity) {
+        return entityInformation.getRequiredId(entity);
     }
 
 }

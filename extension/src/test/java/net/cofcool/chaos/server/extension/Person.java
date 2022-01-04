@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Transient;
 
 @Data
 @AllArgsConstructor
@@ -28,4 +29,6 @@ public class Person {
     private String name;
     private String address;
     private String desc;
+    @Transient
+    private Person parent;
 }
