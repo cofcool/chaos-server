@@ -93,7 +93,7 @@ public interface ExecuteResult<T> extends Result<T> {
      * @return ExecuteResult 实例
      *
      * @see SimpleExecuteResult
-     * @see ConfigurationSupport#getExecuteResult(Object, ResultState, String, String)
+     * @see ConfigurationSupport#getExecuteResult(Object, ResultState, String)
      */
     static <T> ExecuteResult<T> of(T entity, ResultState state, String code, String msg) {
         return new SimpleExecuteResult<>(state, Message.of(code, msg, entity));

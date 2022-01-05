@@ -35,9 +35,9 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @DataMongoTest(properties = "application-mongo.properties")
-@EnableMongoRepositories(repositoryBaseClass = MongoRepositoryExtensionImpl.class)
+@EnableMongoRepositories(repositoryBaseClass = SimpleMongoRepositoryExtension.class)
 @ExtendWith(SpringExtension.class)
-class MongoRepositoryExtensionImplTest {
+class SimpleMongoRepositoryExtensionTest {
 
     public static final String NEW_NAME = "John 117";
 

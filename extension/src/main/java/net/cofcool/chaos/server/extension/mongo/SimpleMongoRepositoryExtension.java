@@ -41,13 +41,13 @@ import org.springframework.util.ReflectionUtils;
  * 增强 {@link org.springframework.data.mongodb.repository.MongoRepository} 实现
  * @author CofCool
  */
-public class MongoRepositoryExtensionImpl<T, ID>  extends SimpleMongoRepository<T, ID> implements MongoRepositoryExtension<T, ID> {
+public class SimpleMongoRepositoryExtension<T, ID>  extends SimpleMongoRepository<T, ID> implements MongoRepositoryExtension<T, ID> {
 
     private final MongoOperations mongoOperations;
     private final MongoEntityInformation<T, ID> entityInformation;
     private final Map<Class<?>, List<Field>> fieldsCache = new ConcurrentReferenceHashMap<>(8);
 
-    public MongoRepositoryExtensionImpl(MongoEntityInformation<T, ID> metadata, MongoOperations mongoOperations) {
+    public SimpleMongoRepositoryExtension(MongoEntityInformation<T, ID> metadata, MongoOperations mongoOperations) {
         super(metadata, mongoOperations);
         this.mongoOperations = mongoOperations;
         this.entityInformation = metadata;
