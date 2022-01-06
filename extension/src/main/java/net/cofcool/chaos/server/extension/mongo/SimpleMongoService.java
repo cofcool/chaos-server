@@ -95,9 +95,9 @@ public abstract class SimpleMongoService<T, ID, R extends MongoRepositoryExtensi
 
     @Override
     public ResultState delete(T entity) {
-        Optional<T> result = findById(entity);
-        if (result.isPresent()) {
-            mongoRepository.delete(result.get());
+        Optional<ID> id = existsById(entity);
+        if (id.isPresent()) {
+            mongoRepository.deleteById(id.get());
             return ResultState.SUCCESSFUL;
         } else {
             return ResultState.FAILURE;
@@ -106,9 +106,13 @@ public abstract class SimpleMongoService<T, ID, R extends MongoRepositoryExtensi
 
     @Override
     public ExecuteResult<T> update(T entity) {
-        ExecuteResult<T> result = queryById(entity);
-        if (!result.successful()) {
-            return result;
+        Optional<ID> result = existsById(entity);
+        if (!result.isPresent()) {
+            return getConfiguration().getExecuteResult(
+                null,
+                ResultState.FAILURE,
+                ExceptionCodeDescriptor.DATA_ERROR
+            );
         }
 
         boolean update = mongoRepository.updateById(entity);
@@ -163,6 +167,16 @@ public abstract class SimpleMongoService<T, ID, R extends MongoRepositoryExtensi
      */
     protected Optional<T> findById(T entity) {
         return mongoRepository.findById(mongoRepository.getRequiredId(entity));
+    }
+
+    /**
+     * 根据实体的"ID"判断数据是否存在
+     * @param entity 实体
+     * @return 查询结果, 如果存在则返回 ID, 否则为空
+     */
+    protected Optional<ID> existsById(T entity) {
+        ID id = mongoRepository.getRequiredId(entity);
+        return mongoRepository.existsById(id) ? Optional.of(id) : Optional.empty();
     }
 
     @Override
