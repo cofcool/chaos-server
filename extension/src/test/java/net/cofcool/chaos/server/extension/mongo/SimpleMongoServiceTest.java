@@ -36,7 +36,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  * 测试 {@link SimpleMongoService}
  * @author CofCool
  */
-@DataMongoTest(properties = "application-mongo.properties")
+@DataMongoTest(properties = "spring.mongodb.embedded.version=latest")
 @EnableMongoRepositories(repositoryBaseClass = SimpleMongoRepositoryExtension.class)
 class SimpleMongoServiceTest {
 

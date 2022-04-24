@@ -34,7 +34,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@DataMongoTest(properties = "application-mongo.properties")
+@DataMongoTest(properties = "spring.mongodb.embedded.version=latest")
 @EnableMongoRepositories(repositoryBaseClass = SimpleMongoRepositoryExtension.class)
 @ExtendWith(SpringExtension.class)
 class SimpleMongoRepositoryExtensionTest {

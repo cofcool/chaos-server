@@ -79,14 +79,14 @@ class ResponseBodyMessageConverterTest {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    static class Example {
+    public static class Example {
         private String desc;
     }
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    static class ExampleNoWrapped {
+    public static class ExampleNoWrapped {
         private String desc;
     }
 }
