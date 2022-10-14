@@ -16,13 +16,13 @@
 
 package net.cofcool.chaos.server.core.support;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.Collections;
+import java.util.Map;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * 测试 SimpleExceptionCodeDescriptor
@@ -59,7 +59,7 @@ class SimpleExceptionCodeDescriptorTest {
     private static class CustomizeTest extends SimpleExceptionCodeDescriptor {
         @Override
         protected Map<String, CodeMessage> customize() {
-            return Map.of("test", ExceptionCodeDescriptor.message("testCode", "testDesc"));
+            return Collections.singletonMap("test", ExceptionCodeDescriptor.message("testCode", "testDesc"));
         }
     }
 }

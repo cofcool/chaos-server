@@ -64,3 +64,7 @@
 **0.5.1**:
 
 * 升级 `shiro-web` 到 v1.7.1
+
+**0.5.2**:
+
+* 修复未引入 `Spring Security` 模块时 `SpringSecurityConfig` 自动配置错误
