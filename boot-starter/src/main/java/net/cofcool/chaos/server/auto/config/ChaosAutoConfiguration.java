@@ -405,7 +405,7 @@ public class ChaosAutoConfiguration implements ApplicationContextAware {
          * Spring Security 配置, 若不使用本配置注意移除 {@link JsonLoginConfigure}, 如 {@code httpSecurity.removeConfigurer(JsonLoginConfigure.class)}
          */
         @Configuration
-        @ConditionalOnClass(DefaultAuthenticationEventPublisher.class)
+        @ConditionalOnClass(value = {DefaultAuthenticationEventPublisher.class, SpringUserAuthorizationService.class})
         @ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
         class SpringSecurityConfig {
 

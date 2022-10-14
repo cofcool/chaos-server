@@ -64,6 +64,10 @@
 
 * 升级 `shiro-web` 到 v1.7.1
 
+**0.5.2**:
+
+* 修复未引入 `Spring Security` 模块时 `SpringSecurityConfig` 自动配置错误
+
 **0.6.0-SNAPSHOT**:
 
 * Spring Boot 升级到 v2.6.7
