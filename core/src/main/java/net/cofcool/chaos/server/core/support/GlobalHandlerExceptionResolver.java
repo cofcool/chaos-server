@@ -16,11 +16,22 @@
 
 package net.cofcool.chaos.server.core.support;
 
-import net.cofcool.chaos.server.common.core.*;
+import java.io.IOException;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.util.NoSuchElementException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import net.cofcool.chaos.server.common.core.ConfigurationSupport;
+import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
+import net.cofcool.chaos.server.common.core.ExceptionLevel;
+import net.cofcool.chaos.server.common.core.Message;
+import net.cofcool.chaos.server.common.core.ServiceException;
 import net.cofcool.chaos.server.common.util.WebUtils;
 import net.cofcool.chaos.server.core.aop.ValidateInterceptor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.core.Ordered;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -33,17 +44,11 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.util.NoSuchElementException;
-
 /**
  * 异常处理器, 把异常信息转换为 {@link Message}, "Content-Type" 为 "JSON", 应用处于 {@link ConfigurationSupport#isDebug()} 时
  * 优先级低于Spring默认异常解析器的, 其它情况优先级最高,
  * 部分 {@linkplain Message 描述信息} 通过 {@link ConfigurationSupport#getMessage(String, Object)} 创建,
- * 如 {@link ServiceException} 等
+ * 如 {@link ServiceException} 等, 发生异常时发送 {@link HttpRequestExceptionEvent} 事件
  *
  * @see DefaultHandlerExceptionResolver
  * @see org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver
@@ -52,7 +57,7 @@ import java.util.NoSuchElementException;
  *
  * @author CofCool
  */
-public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionResolver implements InitializingBean {
+public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionResolver implements InitializingBean, ApplicationEventPublisherAware {
 
     private final HandlerExceptionResolver defaultExceptionResolver;
 
@@ -68,6 +73,8 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
             springDataAccessException = null;
         }
     }
+
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private HttpMessageConverters httpMessageConverters;
 
@@ -106,6 +113,8 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         }
 
         printExceptionLog(request, handler, throwable);
+
+        applicationEventPublisher.publishEvent(new HttpRequestExceptionEvent(request, response, throwable));
 
         if (throwable instanceof ServiceException) {
             return handleServiceException(response, (ServiceException) throwable);
@@ -245,5 +254,10 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
             // 允许自定义更高优先级的异常处理器
             setOrder(Ordered.HIGHEST_PRECEDENCE + 100);
         }
+    }
+
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 }
