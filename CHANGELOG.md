@@ -68,6 +68,10 @@
 
 * 修复未引入 `Spring Security` 模块时 `SpringSecurityConfig` 自动配置错误
 
+**0.5.3**:
+
+* HTTP 请求异常时发送异常事件
+
 **0.6.0-SNAPSHOT**:
 
 * Spring Boot 升级到 v2.6.12
