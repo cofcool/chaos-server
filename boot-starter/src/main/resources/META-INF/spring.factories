@@ -1,1 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=net.cofcool.chaos.server.auto.config.ChaosAutoConfiguration
