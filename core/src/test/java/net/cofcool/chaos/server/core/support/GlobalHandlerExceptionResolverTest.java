@@ -16,6 +16,7 @@
 
 package net.cofcool.chaos.server.core.support;
 
+import java.net.UnknownHostException;
 import javax.annotation.Resource;
 import net.cofcool.chaos.server.common.core.ConfigurationCustomizer;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
@@ -48,7 +49,13 @@ class GlobalHandlerExceptionResolverTest {
 
     @Test
     void resolveException() {
-        exceptionResolver.resolveException(new MockHttpServletRequest(), new MockHttpServletResponse(), new Object(), new NullPointerException());
+        Assertions.assertNotNull(exceptionResolver.resolveException(new MockHttpServletRequest(), new MockHttpServletResponse(), new Object(), new NullPointerException()));
+    }
+
+    @Test
+    void resolveUnknownException() {
+        exceptionResolver.setIgnoreUnknownException(true);
+        Assertions.assertNull(exceptionResolver.resolveException(new MockHttpServletRequest(), new MockHttpServletResponse(), new Object(), new UnknownHostException()));
     }
 
     @Configuration
@@ -56,7 +63,7 @@ class GlobalHandlerExceptionResolverTest {
 
         @EventListener(HttpRequestExceptionEvent.class)
         public void handlerHttpExceptionEvent(HttpRequestExceptionEvent event) {
-            Assertions.assertTrue(event.getSource() instanceof NullPointerException);
+            Assertions.assertNotNull(event.getSource());
         }
 
         @Bean

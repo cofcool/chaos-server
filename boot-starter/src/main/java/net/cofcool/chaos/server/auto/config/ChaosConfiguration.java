@@ -151,12 +151,12 @@ public class ChaosConfiguration implements ApplicationContextAware {
 
     @Bean
     @ConditionalOnMissingBean
-    public GlobalHandlerExceptionResolver GlobalHandlerExceptionResolver(
-        ConfigurationSupport configurationSupport, HttpMessageConverters httpMessageConverters) {
+    public GlobalHandlerExceptionResolver globalHandlerExceptionResolver(
+        ConfigurationSupport configurationSupport, HttpMessageConverters httpMessageConverters, ChaosProperties chaosProperties) {
         GlobalHandlerExceptionResolver ex = new GlobalHandlerExceptionResolver();
         ex.setConfiguration(configurationSupport);
         ex.setHttpMessageConverters(httpMessageConverters);
-
+        ex.setIgnoreUnknownException(chaosProperties.getDevelopment().getIgnoreUnknownException());
         return ex;
     }
 

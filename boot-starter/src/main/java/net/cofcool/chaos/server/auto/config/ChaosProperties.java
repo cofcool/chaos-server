@@ -20,6 +20,7 @@ import java.util.Map;
 import net.cofcool.chaos.server.common.security.AuthConfig;
 import net.cofcool.chaos.server.core.annotation.ApiVersion;
 import net.cofcool.chaos.server.core.annotation.Scanned;
+import net.cofcool.chaos.server.core.support.GlobalHandlerExceptionResolver;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -80,6 +81,11 @@ public class ChaosProperties {
          */
         private String annotationPath;
 
+        /**
+         * 是否忽略 {@link GlobalHandlerExceptionResolver} 不能处理的异常
+         */
+        private Boolean ignoreUnknownException = false;
+
         public Boolean getLoggingEnabled() {
             return loggingEnabled;
         }
@@ -118,6 +124,14 @@ public class ChaosProperties {
 
         public void setVersion(Integer version) {
             this.version = version;
+        }
+
+        public Boolean getIgnoreUnknownException() {
+            return ignoreUnknownException;
+        }
+
+        public void setIgnoreUnknownException(Boolean ignoreUnknownException) {
+            this.ignoreUnknownException = ignoreUnknownException;
         }
 
         /**

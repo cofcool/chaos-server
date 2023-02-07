@@ -80,12 +80,22 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
 
     private ConfigurationSupport configuration;
 
+    private boolean ignoreUnknownException = false;
+
     protected ConfigurationSupport getConfiguration() {
         return configuration;
     }
 
     public void setConfiguration(ConfigurationSupport configuration) {
         this.configuration = configuration;
+    }
+
+    public boolean isIgnoreUnknownException() {
+        return ignoreUnknownException;
+    }
+
+    public void setIgnoreUnknownException(boolean ignoreUnknownException) {
+        this.ignoreUnknownException = ignoreUnknownException;
     }
 
     public GlobalHandlerExceptionResolver() {
@@ -154,7 +164,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
 
     protected ModelAndView resolveOthersException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         ModelAndView modelAndView = this.defaultExceptionResolver.resolveException(request, response, handler, ex);
-        if (modelAndView == null) {
+        if (!ignoreUnknownException && modelAndView == null) {
             writeMessage(
                 response,
                 configuration.getMessage(
