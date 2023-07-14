@@ -3,7 +3,7 @@
 **Chaos Server**, 基于 Spring Boot 的 Java Web Server 框架, 简化开发, 封装了常见的企业级项目开发框架, 如 `Mybaits`, `Spring Security`, `Shiro`, `JPA`等。
 
 
-最新版本为 ![maven central](https://img.shields.io/maven-central/v/net.cofcool.chaos/chaos-server.svg), Spring Boot 版本为 `2.7.6`, 通过`maven`引入
+最新版本为 ![maven central](https://img.shields.io/maven-central/v/net.cofcool.chaos/chaos-server.svg), Spring Boot 版本为 `3.1.1`, 通过`maven`引入
 
 ```
 <dependency>
@@ -23,9 +23,7 @@
 1. common 该模块定义了基本接口和类等
 2. core 核心实现, 包括拦截器, 国际化, JSON 解析等
 3. data-jpa `JPA` 相关的基础 `Service` 和工具类等
-4. data-mybatis `Mybatis` 相关的基础 `Service` 和工具类等
 5. extension 封装 `Redis`, `MongoDB` 等相关操作
-6. security-shiro 封装了 `Shiro`, 简化开发流程
 7. security-spring 封装了 `Spring Security`, 简化开发流程
 8. component-processor 编译时扫描 `BaseComponent` 注解, 该注解可标识基础组件, 避免组件调用混乱
 9. boot-starter 根据 `Spring Boot` 规范进行自动化配置
