@@ -15,6 +15,11 @@
  */
 package net.cofcool.chaos.server.data.jpa.support;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import jakarta.annotation.Resource;
+import java.util.UUID;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport.DefaultConfigurationCustomizer;
 import net.cofcool.chaos.server.common.core.ExceptionCodeManager;
@@ -31,12 +36,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-
-import javax.annotation.Resource;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * 测试 {@link SimpleJpaService}

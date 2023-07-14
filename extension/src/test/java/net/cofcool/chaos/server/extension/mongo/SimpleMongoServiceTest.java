@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import net.cofcool.chaos.server.common.core.ExecuteResult;
 import net.cofcool.chaos.server.common.core.Result.ResultState;
 import net.cofcool.chaos.server.common.core.SimplePage;
@@ -36,7 +36,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  * 测试 {@link SimpleMongoService}
  * @author CofCool
  */
-@DataMongoTest(properties = "spring.mongodb.embedded.version=5.0.13")
+@DataMongoTest(properties = "de.flapdoodle.mongodb.embedded.version=6.3.1")
 @EnableMongoRepositories(repositoryBaseClass = SimpleMongoRepositoryExtension.class)
 class SimpleMongoServiceTest {
 

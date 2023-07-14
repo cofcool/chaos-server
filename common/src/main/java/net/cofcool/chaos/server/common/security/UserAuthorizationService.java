@@ -16,9 +16,9 @@
 
 package net.cofcool.chaos.server.common.security;
 
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import java.io.Serializable;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import net.cofcool.chaos.server.common.core.Message;
 
 /**

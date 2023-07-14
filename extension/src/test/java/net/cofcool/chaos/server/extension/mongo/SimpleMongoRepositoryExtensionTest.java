@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import net.cofcool.chaos.server.extension.Paging;
 import net.cofcool.chaos.server.extension.Person;
 import org.junit.jupiter.api.AfterEach;
@@ -34,7 +34,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@DataMongoTest(properties = "spring.mongodb.embedded.version=5.0.13")
+@DataMongoTest(properties = "de.flapdoodle.mongodb.embedded.version=6.3.1")
 @EnableMongoRepositories(repositoryBaseClass = SimpleMongoRepositoryExtension.class)
 @ExtendWith(SpringExtension.class)
 class SimpleMongoRepositoryExtensionTest {

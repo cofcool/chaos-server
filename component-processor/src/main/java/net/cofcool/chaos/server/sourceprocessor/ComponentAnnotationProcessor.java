@@ -44,7 +44,7 @@ public class ComponentAnnotationProcessor extends AbstractProcessor {
     public static final String SPRING_SERVICE_ANNOTATION = "org.springframework.stereotype.Service";
 
     public static final String SPRING_COMPONENT_ANNOTATION = "org.springframework.stereotype.Component";
-    public static final String JAVA_RESOURCE_ANNOTATION = "javax.annotation.Resource";
+    public static final String JAVA_RESOURCE_ANNOTATION = "jakarta.annotation.Resource";
 
     public ComponentAnnotationProcessor() {
     }

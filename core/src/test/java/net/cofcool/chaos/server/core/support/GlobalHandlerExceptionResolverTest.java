@@ -16,8 +16,8 @@
 
 package net.cofcool.chaos.server.core.support;
 
+import jakarta.annotation.Resource;
 import java.net.UnknownHostException;
-import javax.annotation.Resource;
 import net.cofcool.chaos.server.common.core.ConfigurationCustomizer;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport.DefaultConfigurationCustomizer;

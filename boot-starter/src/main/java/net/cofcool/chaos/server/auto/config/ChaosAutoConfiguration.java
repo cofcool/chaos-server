@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
  * @author CofCool
  */
 @AutoConfiguration(after = JacksonAutoConfiguration.class)
-@Import({ChaosConfiguration.class, SpringSecurityAutoConfiguration.class, ShiroAutoConfiguration.class, MybatisAutoConfiguration.class})
+@Import({ChaosConfiguration.class, SpringSecurityAutoConfiguration.class})
 public class ChaosAutoConfiguration {
 
 

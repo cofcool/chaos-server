@@ -18,39 +18,35 @@ package net.cofcool.chaos.server.security.spring.config;
 
 import static org.springframework.util.StringUtils.delimitedListToStringArray;
 
-import java.util.ArrayList;
-import java.util.List;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.security.AuthConfig;
 import net.cofcool.chaos.server.common.security.PasswordProcessor;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
+import net.cofcool.chaos.server.common.security.exception.AuthorizationException;
+import net.cofcool.chaos.server.common.util.WebUtils;
 import net.cofcool.chaos.server.security.spring.authorization.JsonAuthenticationFilter;
 import net.cofcool.chaos.server.security.spring.authorization.JsonLogoutSuccessHandler;
 import net.cofcool.chaos.server.security.spring.authorization.SpringDaoAuthenticationProvider;
 import net.cofcool.chaos.server.security.spring.authorization.SpringUserAuthorizationService;
-import net.cofcool.chaos.server.security.spring.authorization.UrlBased;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
-import org.springframework.context.ApplicationContext;
-import org.springframework.security.access.AccessDecisionVoter;
-import org.springframework.security.access.PermissionEvaluator;
-import org.springframework.security.access.expression.SecurityExpressionHandler;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.AuthenticationTrustResolver;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.core.GrantedAuthorityDefaults;
-import org.springframework.security.web.FilterInvocation;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
-import org.springframework.security.web.access.expression.WebExpressionVoter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.Assert;
+import org.springframework.web.cors.CorsConfiguration;
 
 /**
  * Security 相关配置
  */
 @SuppressWarnings("rawtypes")
 public class SpringSecurityConfiguration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("");
 
     private final HttpMessageConverters messageConverter;
 
@@ -87,89 +83,60 @@ public class SpringSecurityConfiguration {
         JsonAuthenticationFilter authenticationFilter = new JsonAuthenticationFilter();
 
         if (authConfig.getCorsEnabled()) {
-            http.cors();
+            http.cors(cors -> cors.configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues()));
         }
 
         if (!authConfig.getCsrfEnabled()) {
-            http.csrf().disable();
+            http.csrf(AbstractHttpConfigurer::disable);
         }
 
         http
             .authenticationProvider(authenticationProvider(passwordProcessor))
-            .rememberMe()
-            .and()
-            .authorizeRequests()
-            .antMatchers(
-                delimitedListToStringArray(authConfig.springExcludeUrl(), ",")
-            ).permitAll()
-            .antMatchers("/**").authenticated()
-            .accessDecisionManager(
-                new UrlBased(getDecisionVoters(http), userAuthorizationService, true)
+            .rememberMe(r  ->  r.useSecureCookie(true))
+            .authorizeHttpRequests(r ->
+                r
+                    .requestMatchers(delimitedListToStringArray(authConfig.springExcludeUrl(), ",")).permitAll()
+                    .requestMatchers("/**").authenticated()
+                    .requestMatchers("/**").access((authentication, context) -> {
+                            boolean check = true;
+                            try {
+                                userAuthorizationService.checkPermission(
+                                    context.getRequest(),
+                                    null,
+                                    authentication.get(),
+                                    WebUtils.getRealRequestPath(context.getRequest())
+                                );
+                            } catch (AuthorizationException e) {
+                                LOGGER.info("userAuthorizationService.checkPermission fail", e);
+                                check = false;
+                            }
+                            return new AuthorizationDecision(check);
+                        }
+                    )
             )
-            .and()
+            .logout(l ->
+                l
+                    .logoutUrl(authConfig.getLogoutUrl())
+                    .logoutSuccessHandler(new JsonLogoutSuccessHandler(configurationSupport, messageConverter))
+                    .permitAll()
+            )
+            .sessionManagement(s ->
+                s.maximumSessions(10).expiredUrl(authConfig.getExpiredUrl())
+            )
             .addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .apply(new JsonLoginConfigure<>(authenticationFilter))
-            .loginProcessingUrl(authConfig.getLoginUrl())
-            .configuration(configurationSupport)
-            .messageConverter(messageConverter)
-            .filterSupportsLoginType(authConfig.getLoginObjectType())
-            .unAuthUrl(authConfig.getUnauthUrl())
-            .unLoginUrl(authConfig.getUnLoginUrl())
-            .and()
-            .logout()
-            .logoutUrl(authConfig.getLogoutUrl())
-            .logoutSuccessHandler(new JsonLogoutSuccessHandler(configurationSupport, messageConverter))
-            .permitAll()
-            .and()
-            .sessionManagement()
-            .maximumSessions(10)
-            .expiredUrl(authConfig.getExpiredUrl());
+            .apply(
+                new JsonLoginConfigure<HttpSecurity>(authenticationFilter)
+                    .loginProcessingUrl(authConfig.getLoginUrl())
+                    .configuration(configurationSupport)
+                    .messageConverter(messageConverter)
+                    .filterSupportsLoginType(authConfig.getLoginObjectType())
+                    .unAuthUrl(authConfig.getUnauthUrl())
+                    .unLoginUrl(authConfig.getUnLoginUrl())
+            );
 
         return http;
     }
 
-    private List<AccessDecisionVoter<? extends Object>> getDecisionVoters(HttpSecurity http) {
-        List<AccessDecisionVoter<? extends Object>> decisionVoters = new ArrayList<>();
-
-        WebExpressionVoter expressionVoter = new WebExpressionVoter();
-        expressionVoter.setExpressionHandler(getExpressionHandler(http));
-        decisionVoters.add(expressionVoter);
-
-        return decisionVoters;
-    }
-
-    private SecurityExpressionHandler<FilterInvocation> getExpressionHandler(HttpSecurity http) {
-        DefaultWebSecurityExpressionHandler defaultHandler = new DefaultWebSecurityExpressionHandler();
-        AuthenticationTrustResolver trustResolver = http
-            .getSharedObject(AuthenticationTrustResolver.class);
-        if (trustResolver != null) {
-            defaultHandler.setTrustResolver(trustResolver);
-        }
-        ApplicationContext context = http.getSharedObject(ApplicationContext.class);
-        if (context != null) {
-            String[] roleHiearchyBeanNames = context.getBeanNamesForType(RoleHierarchy.class);
-            if (roleHiearchyBeanNames.length == 1) {
-                defaultHandler.setRoleHierarchy(
-                    context.getBean(roleHiearchyBeanNames[0], RoleHierarchy.class));
-            }
-            String[] grantedAuthorityDefaultsBeanNames = context.getBeanNamesForType(
-                GrantedAuthorityDefaults.class);
-            if (grantedAuthorityDefaultsBeanNames.length == 1) {
-                GrantedAuthorityDefaults grantedAuthorityDefaults = context.getBean(
-                    grantedAuthorityDefaultsBeanNames[0], GrantedAuthorityDefaults.class);
-                defaultHandler.setDefaultRolePrefix(grantedAuthorityDefaults.getRolePrefix());
-            }
-            String[] permissionEvaluatorBeanNames = context.getBeanNamesForType(
-                PermissionEvaluator.class);
-            if (permissionEvaluatorBeanNames.length == 1) {
-                PermissionEvaluator permissionEvaluator = context.getBean(
-                    permissionEvaluatorBeanNames[0], PermissionEvaluator.class);
-                defaultHandler.setPermissionEvaluator(permissionEvaluator);
-            }
-        }
-
-        return defaultHandler;
-    }
 
     public AuthenticationProvider authenticationProvider(PasswordProcessor passwordProcessor) {
         SpringDaoAuthenticationProvider p = new SpringDaoAuthenticationProvider();

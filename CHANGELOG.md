@@ -74,7 +74,10 @@
 
 **0.6.0-SNAPSHOT**:
 
-* Spring Boot 升级到 v2.7.6
+* Spring Boot 升级到 v3.1.1
+* JDK 版本要求 17 及以上
 * 添加 `extension` 模块, 封装 `Redis`, `MongoDB` 等相关操作
 * `优化 SimpleJpaService`
 * 添加 `@MessageWrapped` 可使任何类型的返回数据结构序列化(JSON)为 `Message` 结构
+* 移除 `data-mybatis`、`security-shiro`
+* `GlobalHandlerExceptionResolver` 可配置是否处理未知异常
