@@ -81,3 +81,5 @@
 * 添加 `@MessageWrapped` 可使任何类型的返回数据结构序列化(JSON)为 `Message` 结构
 * 移除 `data-mybatis`、`security-shiro`
 * `GlobalHandlerExceptionResolver` 可配置是否处理未知异常
+
+**0.6.1-SNAPSHOT**:
