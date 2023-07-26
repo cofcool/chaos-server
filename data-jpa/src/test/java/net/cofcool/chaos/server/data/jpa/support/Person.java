@@ -14,15 +14,27 @@
  * limitations under the License.
  */
 
-package net.cofcool.chaos.server.test;
+package net.cofcool.chaos.server.data.jpa.support;
 
-import org.junit.jupiter.api.Test;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
-public class MybatisAutoConfigurationTest {
-
-    @Test
-    public void run() {
-
-    }
-
+/**
+ * 测试表 "person"
+ *
+ * @author CofCool
+ */
+@Entity
+@Table(name = "person")
+@Data
+@Accessors(chain = true)
+public class Person {
+    @Id
+    private String id;
+    private String name;
+    private String address;
+    private String desc;
 }

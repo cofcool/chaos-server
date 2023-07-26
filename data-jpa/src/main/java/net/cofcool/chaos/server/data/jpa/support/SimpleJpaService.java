@@ -16,27 +16,35 @@
 
 package net.cofcool.chaos.server.data.jpa.support;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.metamodel.ManagedType;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExecuteResult;
 import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.core.Result.ResultState;
 import net.cofcool.chaos.server.common.core.SimpleService;
-import org.hibernate.event.spi.FlushEntityEvent;
+import net.cofcool.chaos.server.common.util.BeanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import javax.persistence.Transient;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.Optional;
-
-import static net.cofcool.chaos.server.common.util.BeanUtils.getPropertyDescriptors;
+import org.springframework.data.jpa.repository.support.JpaEntityInformation;
+import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport;
+import org.springframework.data.repository.core.EntityInformation;
 
 /**
- * 基于 {@link JpaRepository} 的简单 <b>Service</b> 实现
+ * 基于 {@link JpaRepository} 的简单 {@link net.cofcool.chaos.server.common.core.DataAccess} 实现
  *
  * @param <T> 实体
  * @param <ID> 实体的 ID
@@ -45,8 +53,18 @@ import static net.cofcool.chaos.server.common.util.BeanUtils.getPropertyDescript
  */
 public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> extends SimpleService<T> implements InitializingBean {
 
+    protected final Logger log = LoggerFactory.getLogger(getClass());
+
+    private static final Map<Class<?>, EntityInformation<?, ?>> CACHED_ENTITY_INFORMATION = new ConcurrentHashMap<>();
+
     private J jpaRepository;
 
+    private EntityManager entityManager;
+
+    /**
+     * 获取当前实体对应的 {@link JpaRepository}
+     * @return 当前实体对应的 {@link JpaRepository}
+     */
     protected J getJpaRepository() {
         return jpaRepository;
     }
@@ -54,6 +72,19 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
     @Autowired
     public void setJpaRepository(J jpaRepository) {
         this.jpaRepository = jpaRepository;
+    }
+
+    /**
+     * 获取 {@link EntityManager}
+     * @return {@link EntityManager}
+     */
+    protected EntityManager getEntityManager() {
+        return entityManager;
+    }
+
+    @PersistenceContext
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -82,12 +113,7 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
     }
 
     /**
-     * {@inheritDoc}, 方法返回值中的"entity"为传入的"entity"
-     * <br>
-     *
-     * 除了手动更新数据外, 也可直接修改查询到的实体数据("set"操作), 当"Hibernate"执行"flush"操作时,
-     * {@link org.hibernate.event.internal.DefaultFlushEntityEventListener#onFlushEntity(FlushEntityEvent)} 会检查实体是否需要更新数据,
-     * 但该操作可能耗时严重, 因此尽量避免触发自动更新操作
+     * {@inheritDoc}, 方法返回值中的 entity 为传入的 entity
      */
     @Override
     public ExecuteResult<T> update(T entity) {
@@ -102,19 +128,39 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
 
         T dirtyEntity = result.get();
 
-        for (PropertyDescriptor descriptor : getPropertyDescriptors(dirtyEntity.getClass())) {
-            try {
-                if (descriptor.getReadMethod() != null
-                        && descriptor.getWriteMethod() != null
-                        && !descriptor.getReadMethod().isAnnotationPresent(Transient.class)
-                ) {
-                    Object val = descriptor.getReadMethod().invoke(entity);
+        JpaEntityInformation<T, ID> information = getEntityInformation(entity.getClass());
+        ManagedType<? super T> declaringType = information.getIdAttribute().getDeclaringType();
+        declaringType.getAttributes().forEach(a -> {
+            final Member member = a.getJavaMember();
+            if (member instanceof Field) {
+                try {
+                    Object val = ((Field) member).get(entity);
                     if (val != null) {
-                        descriptor.getWriteMethod().invoke(dirtyEntity, val);
+                        ((Field) member).set(dirtyEntity, val);
+                    }
+                } catch (IllegalAccessException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("SimpleJpaService#update set field error", e);
                     }
                 }
-            } catch (IllegalAccessException | InvocationTargetException ignore) {}
-        }
+            } else if (member instanceof Method) {
+                try {
+                    Object val = ((Method) member).invoke(entity);
+                    if (val != null) {
+                        String memberName = member.getName();
+                        member.getDeclaringClass().getMethod(BeanUtils.getterToSetter(memberName), val.getClass()).invoke(dirtyEntity, val);
+                    }
+                } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("SimpleJpaService#update invoke property method error", e);
+                    }
+                }
+            } else {
+                if (log.isWarnEnabled()) {
+                    log.warn("SimpleJpaService#update do not support property attribute is {} type", member);
+                }
+            }
+        });
 
         jpaRepository.save(dirtyEntity);
 
@@ -164,9 +210,30 @@ public abstract class SimpleJpaService<T, ID, J extends JpaRepository<T, ID>> ex
     }
 
     /**
-     * 读取实体主键
+     * 获取实体主键
+     *
+     * @see EntityInformation#getRequiredId(Object)
      */
-    protected abstract ID getEntityId(T entity);
+    protected ID getEntityId(T entity) {
+        return getEntityInformation(entity.getClass()).getRequiredId(entity);
+    }
+
+    /**
+     * 获取 {@link JpaEntityInformation}
+     * @param domainClass 实体类型
+     * @return {@link JpaEntityInformation}
+     *
+     * @see org.springframework.data.jpa.repository.support.JpaRepositoryFactory
+     * @see org.springframework.data.repository.core.support.RepositoryFactorySupport#getEntityInformation(Class)
+     */
+    @SuppressWarnings("unchecked")
+    protected JpaEntityInformation<T, ID> getEntityInformation(Class<?> domainClass) {
+        return (JpaEntityInformation<T, ID>) CACHED_ENTITY_INFORMATION
+                .computeIfAbsent(
+                        domainClass,
+                        k -> JpaEntityInformationSupport.getEntityInformation(domainClass, entityManager)
+                );
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {

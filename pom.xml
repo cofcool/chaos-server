@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2019 cofcool
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -7,34 +23,34 @@
     <groupId>net.cofcool.chaos</groupId>
     <artifactId>chaos-server</artifactId>
     <packaging>pom</packaging>
-    <version>0.5.3</version>
+    <version>0.6.0</version>
     <description>Chaos Web Server</description>
     <url>https://github.com/cofcool/chaos-server</url>
+    <name>chaos-server</name>
+    <developers>
+        <developer>
+            <id>cofcool</id>
+            <name>CofCool</name>
+            <url>https://github.com/cofcool</url>
+        </developer>
+    </developers>
 
     <scm>
         <url>https://github.com/cofcool/chaos-server</url>
     </scm>
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.4.1</version>
-    </parent>
-
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
     </licenses>
 
     <modules>
         <module>common</module>
         <module>core</module>
-        <module>security-shiro</module>
         <module>security-spring</module>
         <module>data-jpa</module>
-        <module>data-mybatis</module>
         <module>extension</module>
         <module>component-processor</module>
         <module>boot-starter</module>
@@ -112,15 +128,13 @@
         <java-encoding>UTF-8</java-encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <downloadSources>true</downloadSources>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.compilerVersion>17</maven.compiler.compilerVersion>
 
-        <spring-boot.version>2.4.1</spring-boot.version>
+        <spring-boot.version>3.1.1</spring-boot.version>
 
-        <servlet-api.version>4.0.0</servlet-api.version>
-
-        <chaos.version>0.5.3</chaos.version>
+        <chaos.version>0.6.0</chaos.version>
     </properties>
 
     <dependencies>
@@ -128,10 +142,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <!--
-            2.3.x 移除了 validation 包, 详情参考 https://github.com/spring-projects/spring-boot/commit/18ccbf031ae85fe0aec2a8ba0577a64efae1c6da
-            本项目
-        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
@@ -148,8 +158,8 @@
         </dependency>
 
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
 
         <dependency>
@@ -169,13 +179,26 @@
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-parent</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.0</version>
                 <executions> <execution>
                     <id>attach-sources</id>
                     <goals>
@@ -186,6 +209,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.1</version>
                 <executions>
                     <execution>
                         <id>default-deploy</id>
@@ -199,6 +223,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.5.0</version>
                 <configuration>
                     <failOnError>false</failOnError>
                 </configuration>
@@ -210,6 +235,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
             </plugin>
         </plugins>
     </build>

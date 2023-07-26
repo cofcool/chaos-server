@@ -25,9 +25,9 @@ import org.apache.shiro.web.filter.authc.LogoutFilter;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.http.MediaType;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * 覆盖默认的退出登录逻辑, 不会跳转到登录路径, 直接返回退出成功信息

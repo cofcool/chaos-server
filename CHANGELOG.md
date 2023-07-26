@@ -57,7 +57,6 @@
 * `data-mybatis` 改为依赖 `MyBatis-Plus`
 * 内部数据的解析不再依赖 `MappingJackson2HttpMessageConverter`, 转为调用默认的 `HttpMessageConverter`
 * 移除 `data-redis` 模块
-* 添加 `extension` 模块, 封装 `Redis`, `MongoDB` 等相关操作
 * 优化 `ExceptionCodeDescriptor` 实现, 状态码和描述信息共用键
 * 修复 `LoggingInterceptor` 在 controller 调用发生异常时不打印日志问题
 
@@ -72,3 +71,13 @@
 **0.5.3**:
 
 * HTTP 请求异常时发送异常事件
+
+**0.6.0**:
+
+* Spring Boot 升级到 v3.1.1
+* JDK 版本要求 17 及以上
+* 添加 `extension` 模块, 封装 `Redis`, `MongoDB` 等相关操作
+* `优化 SimpleJpaService`
+* 添加 `@MessageWrapped` 可使任何类型的返回数据结构序列化(JSON)为 `Message` 结构
+* 移除 `data-mybatis`、`security-shiro`
+* `GlobalHandlerExceptionResolver` 可配置是否处理未知异常

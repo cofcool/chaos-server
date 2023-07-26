@@ -16,25 +16,22 @@
 
 package net.cofcool.chaos.server.auto.config;
 
-import net.cofcool.chaos.server.common.security.AbstractLogin;
-import net.cofcool.chaos.server.common.util.StringUtils;
+import java.util.Map;
+import net.cofcool.chaos.server.common.security.AuthConfig;
 import net.cofcool.chaos.server.core.annotation.ApiVersion;
 import net.cofcool.chaos.server.core.annotation.Scanned;
+import net.cofcool.chaos.server.core.support.GlobalHandlerExceptionResolver;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import java.util.Map;
-
-import static net.cofcool.chaos.server.auto.config.ChaosAutoConfiguration.PROJECT_CONFIGURE_PREFIX;
 
 /**
  * 项目可配置项
  *
  * @author CofCool
  */
-@ConfigurationProperties(prefix = PROJECT_CONFIGURE_PREFIX)
+@ConfigurationProperties(prefix = ChaosConfiguration.PROJECT_CONFIGURE_PREFIX)
 public class ChaosProperties {
 
-    private Auth auth = new Auth();
+    private AuthConfig auth = new AuthConfig();
 
     private Development development = new Development();
 
@@ -42,208 +39,6 @@ public class ChaosProperties {
      * 应用自定义配置
      */
     private Map<String, String> properties;
-
-    public static final class Auth {
-
-        /**
-         * 注入数据key配置, 多个时以","分隔
-         */
-        private String checkedKeys = "";
-
-        /**
-         * 默认用户的用户名
-         */
-        private String defaultUsername;
-
-        /**
-         * 默认用户的密码
-         */
-        private String defaultPassword;
-
-        /**
-         * 授权路径配置, 用";"分割
-         * <br>
-         * <b>注意</b>: "Spring Security" 项目, 该配置为匿名访问路径; "Shiro" 为授权路径配置, 即"filterChainDefinitions"
-         */
-        private String urls;
-
-        /**
-         * 登陆路径
-         */
-        private String loginUrl = "/auth/login";
-
-        /**
-         * 退出登陆路径
-         */
-        private String logoutUrl = "/auth/logout";
-
-        /**
-         * 登陆过期路径
-         */
-        private String expiredUrl = "/auth/unlogin";
-
-        /**
-         * 没有访问权限路径
-         */
-        private String unauthUrl = "/auth/unauth";
-
-        /**
-         * 未登录时跳转路径
-         */
-        private String unLoginUrl = expiredUrl;
-
-        /**
-         * 是否启用 {@link  org.springframework.web.filter.CorsFilter CORS}, 默认关闭
-         */
-        private Boolean corsEnabled = false;
-
-
-        /**
-         * 是否启用 {@link org.springframework.security.web.csrf.CsrfFilter CSRF} , 默认启用
-         */
-        private Boolean csrfEnabled = true;
-
-        /**
-         * 配置 {@link net.cofcool.chaos.server.common.security.UserAuthorizationService#queryUser(AbstractLogin)} 参数的类型
-         */
-        private Class<? extends AbstractLogin> loginObjectType;
-
-        public Class<? extends AbstractLogin> getLoginObjectType() {
-            return loginObjectType;
-        }
-
-        public void setLoginObjectType(
-            Class<? extends AbstractLogin> loginObjectType) {
-            this.loginObjectType = loginObjectType;
-        }
-
-        public Boolean getCorsEnabled() {
-            return corsEnabled;
-        }
-
-        public void setCorsEnabled(Boolean corsEnabled) {
-            this.corsEnabled = corsEnabled;
-        }
-
-        public Boolean getCsrfEnabled() {
-            return csrfEnabled;
-        }
-
-        public void setCsrfEnabled(Boolean csrfEnabled) {
-            this.csrfEnabled = csrfEnabled;
-        }
-
-        public String getCheckedKeys() {
-            return checkedKeys;
-        }
-
-        public void setCheckedKeys(String checkedKeys) {
-            this.checkedKeys = checkedKeys;
-        }
-
-        public String getUrls() {
-            return urls;
-        }
-
-        public void setUrls(String urls) {
-            this.urls = urls;
-        }
-
-        public String getDefaultUsername() {
-            return defaultUsername;
-        }
-
-        public void setDefaultUsername(String defaultUsername) {
-            this.defaultUsername = defaultUsername;
-        }
-
-        public String getDefaultPassword() {
-            return defaultPassword;
-        }
-
-        public void setDefaultPassword(String defaultPassword) {
-            this.defaultPassword = defaultPassword;
-        }
-
-        public String getLoginUrl() {
-            return loginUrl;
-        }
-
-        public void setLoginUrl(String loginUrl) {
-            this.loginUrl = loginUrl;
-        }
-
-        public String getLogoutUrl() {
-            return logoutUrl;
-        }
-
-        public void setLogoutUrl(String logoutUrl) {
-            this.logoutUrl = logoutUrl;
-        }
-
-        public String getExpiredUrl() {
-            return expiredUrl;
-        }
-
-        public void setExpiredUrl(String expiredUrl) {
-            this.expiredUrl = expiredUrl;
-        }
-
-        public String getUnauthUrl() {
-            return unauthUrl;
-        }
-
-        public void setUnauthUrl(String unauthUrl) {
-            this.unauthUrl = unauthUrl;
-        }
-
-        public String getUnLoginUrl() {
-            return unLoginUrl;
-        }
-
-        public void setUnLoginUrl(String unLoginUrl) {
-            this.unLoginUrl = unLoginUrl;
-        }
-
-        /**
-         * 为 "Spring Security" 配置匿名访问路径
-         * @return 匿名访问路径
-         */
-        public String springExcludeUrl() {
-            if (StringUtils.isNullOrEmpty(urls)) {
-                return String.join(
-                    ",",
-                    getUnauthUrl(),
-                    getExpiredUrl(),
-                    getUnLoginUrl(),
-                    getLogoutUrl()
-                );
-            } else {
-                return String.join(
-                    ",",
-                    getUrls().replace(";", ","),
-                    getUnauthUrl(),
-                    getExpiredUrl(),
-                    getUnLoginUrl(),
-                    getLogoutUrl()
-                );
-            }
-        }
-
-        /**
-         * 为 "Shiro" 配置授权路径, 即"filterChainDefinitions"
-         * @return 授权路径字符串
-         */
-        public String shiroUrls() {
-            StringBuilder urlStr = new StringBuilder();
-            String[] urls = getUrls().split(";");
-            for (String url : urls) {
-                urlStr.append(url).append("\n");
-            }
-
-            return urlStr.toString();
-        }
-    }
 
 
     public static final class Development {
@@ -286,6 +81,11 @@ public class ChaosProperties {
          */
         private String annotationPath;
 
+        /**
+         * 是否忽略 {@link GlobalHandlerExceptionResolver} 不能处理的异常
+         */
+        private Boolean ignoreUnknownException = false;
+
         public Boolean getLoggingEnabled() {
             return loggingEnabled;
         }
@@ -326,6 +126,14 @@ public class ChaosProperties {
             this.version = version;
         }
 
+        public Boolean getIgnoreUnknownException() {
+            return ignoreUnknownException;
+        }
+
+        public void setIgnoreUnknownException(Boolean ignoreUnknownException) {
+            this.ignoreUnknownException = ignoreUnknownException;
+        }
+
         /**
          * 定义扫描 {@link Scanned} 注解的路径
          *
@@ -345,11 +153,11 @@ public class ChaosProperties {
     /**
      * 授权相关配置
      */
-    public Auth getAuth() {
+    public AuthConfig getAuth() {
         return auth;
     }
 
-    public void setAuth(Auth auth) {
+    public void setAuth(AuthConfig auth) {
         this.auth = auth;
     }
 

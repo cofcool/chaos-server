@@ -16,11 +16,11 @@
 
 package net.cofcool.chaos.server.core.support;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.NoSuchElementException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.ConfigurationSupport;
 import net.cofcool.chaos.server.common.core.ExceptionCodeDescriptor;
 import net.cofcool.chaos.server.common.core.ExceptionLevel;
@@ -38,7 +38,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BindException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
@@ -80,12 +80,22 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
 
     private ConfigurationSupport configuration;
 
+    private boolean ignoreUnknownException = false;
+
     protected ConfigurationSupport getConfiguration() {
         return configuration;
     }
 
     public void setConfiguration(ConfigurationSupport configuration) {
         this.configuration = configuration;
+    }
+
+    public boolean isIgnoreUnknownException() {
+        return ignoreUnknownException;
+    }
+
+    public void setIgnoreUnknownException(boolean ignoreUnknownException) {
+        this.ignoreUnknownException = ignoreUnknownException;
     }
 
     public GlobalHandlerExceptionResolver() {
@@ -124,8 +134,8 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
             return handle4xxException(response, throwable);
         } else if (throwable instanceof UnsupportedOperationException) {
             return handle5xxException(response, throwable);
-        } else if (throwable instanceof MethodArgumentNotValidException) {
-            return resolveValidException(response, (MethodArgumentNotValidException) throwable);
+        } else if (throwable instanceof BindException) {
+            return resolveValidException(response, (BindException) throwable);
         } else if (springDataAccessException != null && springDataAccessException.isAssignableFrom(throwable.getClass())) {
             return handleSqlException(response, throwable);
         } else {
@@ -133,11 +143,11 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
         }
     }
 
-    private ModelAndView resolveValidException(HttpServletResponse response, MethodArgumentNotValidException ex) {
+    private ModelAndView resolveValidException(HttpServletResponse response, BindException ex) {
         writeMessage(
             response,
             configuration.getMessage(
-                ExceptionCodeDescriptor.PARAM_NULL,
+                ExceptionCodeDescriptor.PARAM_ERROR,
                 ValidateInterceptor.getFirstErrorString(ex.getBindingResult()),
                 null
             )
@@ -154,7 +164,7 @@ public class GlobalHandlerExceptionResolver extends AbstractHandlerExceptionReso
 
     protected ModelAndView resolveOthersException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         ModelAndView modelAndView = this.defaultExceptionResolver.resolveException(request, response, handler, ex);
-        if (modelAndView == null) {
+        if (!ignoreUnknownException && modelAndView == null) {
             writeMessage(
                 response,
                 configuration.getMessage(

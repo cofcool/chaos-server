@@ -16,8 +16,8 @@
 
 package net.cofcool.chaos.server.common.security;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
-import javax.servlet.http.HttpServletRequest;
 import net.cofcool.chaos.server.common.security.exception.CaptchaErrorException;
 import org.springframework.http.HttpHeaders;
 

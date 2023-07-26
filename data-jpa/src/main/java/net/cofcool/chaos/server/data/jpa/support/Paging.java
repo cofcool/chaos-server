@@ -16,6 +16,7 @@
 
 package net.cofcool.chaos.server.data.jpa.support;
 
+import jakarta.persistence.Transient;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nonnull;
-import javax.persistence.Transient;
 import net.cofcool.chaos.server.common.core.Page;
 import net.cofcool.chaos.server.common.core.PageProcessor;
 import net.cofcool.chaos.server.common.core.SimplePage;

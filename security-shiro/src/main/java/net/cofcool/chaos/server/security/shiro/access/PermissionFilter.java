@@ -16,7 +16,7 @@
 
 package net.cofcool.chaos.server.security.shiro.access;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import net.cofcool.chaos.server.common.security.UserAuthorizationService;
 import net.cofcool.chaos.server.common.util.WebUtils;
 import org.apache.shiro.web.filter.AccessControlFilter;
@@ -57,8 +57,8 @@ public class PermissionFilter extends AccessControlFilter {
     }
 
     @Override
-    protected boolean isAccessAllowed(javax.servlet.ServletRequest servletRequest,
-                                      javax.servlet.ServletResponse servletResponse, Object o) throws Exception {
+    protected boolean isAccessAllowed(jakarta.servlet.ServletRequest servletRequest,
+                                      jakarta.servlet.ServletResponse servletResponse, Object o) throws Exception {
         try {
             getAuthorizationService()
                 .checkPermission(
@@ -76,8 +76,8 @@ public class PermissionFilter extends AccessControlFilter {
     }
 
     @Override
-    protected boolean onAccessDenied(javax.servlet.ServletRequest servletRequest,
-                                     javax.servlet.ServletResponse servletResponse) {
+    protected boolean onAccessDenied(jakarta.servlet.ServletRequest servletRequest,
+                                     jakarta.servlet.ServletResponse servletResponse) {
         return false;
     }
 

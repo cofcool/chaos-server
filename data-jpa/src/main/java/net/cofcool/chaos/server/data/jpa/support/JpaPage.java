@@ -16,25 +16,22 @@
 
 package net.cofcool.chaos.server.data.jpa.support;
 
-import java.io.Serializable;
+import org.springframework.data.domain.AbstractPageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
- * JPA分页模型, 实现Pageable接口
+ * JPA分页模型, 实现 {@link Pageable} 接口
  *
  * @author CofCool
  *
- * @see Pageable
  * @see org.springframework.data.domain.PageRequest
  */
-public class JpaPage implements Pageable, Serializable {
+public class JpaPage extends AbstractPageRequest {
 
     private static final long serialVersionUID = -76703640096945681L;
-
-    private final Integer pageNumber;
-
-    private final Integer pageSize;
 
     private final Sort sort;
 
@@ -44,25 +41,12 @@ public class JpaPage implements Pageable, Serializable {
     }
 
     public JpaPage(Integer pageNumber, Integer pageSize, Sort sort) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
+        super(pageNumber, pageSize);
+
+        Assert.notNull(sort, "Sort must not be null!");
         this.sort = sort;
     }
 
-    @Override
-    public int getPageNumber() {
-        return pageNumber;
-    }
-
-    @Override
-    public int getPageSize() {
-        return pageSize;
-    }
-
-    @Override
-    public long getOffset() {
-        return (long) pageNumber * (long) pageSize;
-    }
 
     @Override
     public Sort getSort() {
@@ -75,8 +59,8 @@ public class JpaPage implements Pageable, Serializable {
     }
 
     @Override
-    public Pageable previousOrFirst() {
-        return hasPrevious() ? previous() : first();
+    public Pageable previous() {
+        return getPageNumber() == 0 ? this : new JpaPage(getPageNumber() - 1, getPageSize(), getSort());
     }
 
     @Override
@@ -85,11 +69,33 @@ public class JpaPage implements Pageable, Serializable {
     }
 
     @Override
-    public boolean hasPrevious() {
-        return pageNumber > 0;
+    public Pageable withPage(int pageNumber) {
+        return new JpaPage(pageNumber, getPageSize(), getSort());
     }
 
-    public JpaPage previous() {
-        return getPageNumber() == 0 ? this : new JpaPage(getPageNumber() - 1, getPageSize(), getSort());
+    @Override
+    public String toString() {
+        return String.format("Page request [number: %d, size %d, sort: %s]", getPageNumber(), getPageSize(), sort);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * super.hashCode() + sort.hashCode();
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof JpaPage)) {
+            return false;
+        }
+
+        JpaPage that = (JpaPage) obj;
+
+        return super.equals(that) && this.sort.equals(that.sort);
     }
 }

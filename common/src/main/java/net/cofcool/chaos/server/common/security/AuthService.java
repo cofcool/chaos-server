@@ -16,10 +16,10 @@
 
 package net.cofcool.chaos.server.common.security;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.Serializable;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import net.cofcool.chaos.server.common.core.Message;
 
 /**

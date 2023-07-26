@@ -39,7 +39,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
  * @see org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer
  */
 public final class JsonLoginConfigure<H extends HttpSecurityBuilder<H>> extends
-        AbstractAuthenticationFilterConfigurer<H, JsonLoginConfigure<H>, JsonAuthenticationFilter> {
+    AbstractAuthenticationFilterConfigurer<H, JsonLoginConfigure<H>, JsonAuthenticationFilter> {
 
     private ConfigurationSupport configuration;
     private HttpMessageConverters messageConverter;
