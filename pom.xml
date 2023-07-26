@@ -23,9 +23,17 @@
     <groupId>net.cofcool.chaos</groupId>
     <artifactId>chaos-server</artifactId>
     <packaging>pom</packaging>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.6.0</version>
     <description>Chaos Web Server</description>
     <url>https://github.com/cofcool/chaos-server</url>
+    <name>chaos-server</name>
+    <developers>
+        <developer>
+            <id>cofcool</id>
+            <name>CofCool</name>
+            <url>https://github.com/cofcool</url>
+        </developer>
+    </developers>
 
     <scm>
         <url>https://github.com/cofcool/chaos-server</url>
@@ -126,7 +134,7 @@
 
         <spring-boot.version>3.1.1</spring-boot.version>
 
-        <chaos.version>0.6.0-SNAPSHOT</chaos.version>
+        <chaos.version>0.6.0</chaos.version>
     </properties>
 
     <dependencies>
